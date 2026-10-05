@@ -46,6 +46,10 @@ class PgStore implements Store {
 
 export function createStore(url = process.env.DATABASE_URL): Store {
   if (!url) return new MemoryStore();
-  const ssl = /sslmode=require/.test(url) ? { rejectUnauthorized: false } : undefined;
-  return new PgStore(new pg.Pool({ connectionString: url, ssl, max: 5 }));
+  // Managed Postgres (Rumpty) serves a self-signed cert. pg lets the URL's sslmode override the ssl
+  // object and treats sslmode=require as full verification, so strip it and pass ssl explicitly.
+  const wantsSsl = /sslmode=(require|no-verify|prefer|verify-ca|verify-full)/.test(url);
+  const connectionString = url.replace(/([?&])sslmode=[^&]*&?/, '$1').replace(/[?&]$/, '');
+  const ssl = wantsSsl ? { rejectUnauthorized: false } : undefined;
+  return new PgStore(new pg.Pool({ connectionString, ssl, max: 5 }));
 }
