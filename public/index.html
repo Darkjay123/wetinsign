@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WetinSign: know what you are signing</title>
+<meta name="description" content="Paste a crypto signature request or transaction and get a plain English or Pidgin explanation, with wallet-drainer warnings.">
+<style>
+  :root { --bg:#0e1116; --card:#171b22; --line:#262c36; --text:#e8ecf2; --muted:#9aa4b2; --danger:#ff5d5d; --warn:#ffb547; --safe:#3ddc97; --info:#6ab0ff; --accent:#3ddc97; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:640px; margin:0 auto; padding:20px 16px 48px; }
+  h1 { font-size:26px; margin:8px 0 4px; letter-spacing:-.02em; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .tabs, .lang { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  button.chip { background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:8px 14px; font-size:14px; cursor:pointer; }
+  button.chip[aria-pressed="true"] { color:var(--bg); background:var(--accent); border-color:var(--accent); font-weight:600; }
+  label { display:block; font-size:14px; color:var(--muted); margin:10px 0 6px; }
+  textarea, input, select { width:100%; background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:12px; font:14px/1.4 ui-monospace,Menlo,monospace; }
+  textarea { min-height:150px; resize:vertical; }
+  .go { width:100%; margin-top:14px; padding:14px; border:0; border-radius:12px; background:var(--accent); color:var(--bg); font-size:16px; font-weight:700; cursor:pointer; }
+  .go:disabled { opacity:.6; }
+  .panel { display:none; } .panel.on { display:block; }
+  .result { margin-top:22px; border-radius:14px; border:1px solid var(--line); background:var(--card); overflow:hidden; }
+  .verdict { padding:12px 16px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; font-size:13px; }
+  .v-danger { background:var(--danger); color:#1a0000; } .v-warning { background:var(--warn); color:#1f1300; }
+  .v-safe { background:var(--safe); color:#00140b; } .v-info { background:var(--info); color:#00101f; }
+  .says { padding:16px; font-size:17px; }
+  .facts { border-top:1px solid var(--line); padding:12px 16px; font-size:13px; color:var(--muted); }
+  .facts div { display:flex; justify-content:space-between; gap:12px; padding:3px 0; }
+  .facts b { color:var(--text); font-weight:500; word-break:break-all; text-align:right; }
+  .src { padding:0 16px 12px; font-size:12px; color:var(--muted); }
+  .err { margin-top:16px; color:var(--danger); }
+  .sample { background:none; border:0; color:var(--info); padding:0; font-size:13px; cursor:pointer; text-decoration:underline; }
+  footer { margin-top:32px; color:var(--muted); font-size:12px; text-align:center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>WetinSign</h1>
+  <p class="sub">Before you sign, know wetin you dey sign. Paste what your wallet is asking you to approve.</p>
+
+  <div class="lang" role="group" aria-label="Language">
+    <button class="chip" data-lang="en" aria-pressed="true">English</button>
+    <button class="chip" data-lang="pcm" aria-pressed="false">Pidgin</button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="chip" data-tab="signature" aria-pressed="true">Signature request</button>
+    <button class="chip" data-tab="tx" aria-pressed="false">Transaction hash</button>
+    <button class="chip" data-tab="call" aria-pressed="false">Raw transaction</button>
+  </div>
+
+  <section class="panel on" id="p-signature">
+    <label for="typed">Signature request (the JSON your wallet shows under "Sign message") <button class="sample" data-sample="permit">try an example</button></label>
+    <textarea id="typed" spellcheck="false" placeholder='{"domain":{...},"primaryType":"Permit","message":{...}}'></textarea>
+  </section>
+
+  <section class="panel" id="p-tx">
+    <label for="chain">Network</label>
+    <select id="chain"></select>
+    <label for="hash">Transaction hash</label>
+    <input id="hash" spellcheck="false" placeholder="0x…">
+  </section>
+
+  <section class="panel" id="p-call">
+    <label for="cchain">Network</label>
+    <select id="cchain"></select>
+    <label for="to">To (contract address) <button class="sample" data-sample="approve">try an example</button></label>
+    <input id="to" spellcheck="false" placeholder="0x…">
+    <label for="data">Data</label>
+    <textarea id="data" spellcheck="false" placeholder="0x095ea7b3…" style="min-height:90px"></textarea>
+  </section>
+
+  <button class="go" id="go">Explain am</button>
+  <div class="err" id="err" role="alert"></div>
+  <div id="out"></div>
+
+  <footer>Runs on Rumpty Cloud in Lagos. Amounts come straight from the chain; the AI only explains them and is never allowed to invent a number.</footer>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+let tab = 'signature', lang = 'en';
+const press = (group, attr, val) => document.querySelectorAll(group).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] === val));
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+  tab = b.dataset.tab; press('[data-tab]', 'tab', tab);
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + tab));
+});
+document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang = b.dataset.lang; press('[data-lang]', 'lang', lang); });
+
+fetch('/api/chains').then(r => r.json()).then(cs => {
+  for (const sel of [$('#chain'), $('#cchain')]) sel.innerHTML = cs.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+});
+
+const SAMPLES = {
+  permit: { domain: { name: 'USD Coin', version: '2', chainId: 1, verifyingContract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
+    primaryType: 'Permit',
+    message: { owner: '0x1111111111111111111111111111111111111111', spender: '0x2222222222222222222222222222222222222222',
+      value: '115792089237316195423570985008687907853269984665640564039457584007913129639935', nonce: 0, deadline: '115792089237316195423570985008687907853269984665640564039457584007913129639935' } },
+  approve: { to: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    data: '0x095ea7b30000000000000000000000002222222222222222222222222222222222222222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
+};
+document.querySelectorAll('[data-sample]').forEach(b => b.onclick = (e) => {
+  e.preventDefault();
+  if (b.dataset.sample === 'permit') $('#typed').value = JSON.stringify(SAMPLES.permit, null, 2);
+  else { $('#to').value = SAMPLES.approve.to; $('#data').value = SAMPLES.approve.data; $('#cchain').value = '1'; }
+});
+
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const LABEL = { danger: lang => lang === 'pcm' ? 'Wahala dey' : 'Danger', warning: lang => lang === 'pcm' ? 'Shine your eye' : 'Be careful',
+  safe: lang => lang === 'pcm' ? 'E correct' : 'Looks fine', info: lang => lang === 'pcm' ? 'Make you know' : 'Good to know' };
+
+function render(r) {
+  const f = r.facts, e = r.explanation;
+  const rows = [['Network', f.chain], ['Token', f.token?.symbol || f.token?.address], ['Amount', f.amount?.display],
+    ['Who gets permission', f.spender], ['Sending to', f.recipient], ['Expires', f.deadline?.display], ['App says it is', f.appName]]
+    .filter(([, v]) => v).map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('');
+  $('#out').innerHTML = `<div class="result">
+    <div class="verdict v-${e.verdict}">${LABEL[e.verdict](lang)}</div>
+    <div class="says">${esc(e.text)}</div>
+    <div class="facts">${rows}</div>
+    <div class="src">${e.source === 'ai' ? 'Explained by an open model on Rumpty Cloud, checked against the decoded facts.' : 'Explained from the decoded facts.'}${r.cached ? ' (cached)' : ''}</div>
+  </div>`;
+}
+
+$('#go').onclick = async () => {
+  $('#err').textContent = ''; $('#out').innerHTML = '';
+  let url, body;
+  try {
+    if (tab === 'signature') { url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; }
+    else if (tab === 'tx') { url = '/api/explain/tx'; body = { chainId: Number($('#chain').value), hash: $('#hash').value.trim(), lang }; }
+    else { url = '/api/explain/call'; body = { chainId: Number($('#cchain').value), to: $('#to').value.trim(), data: $('#data').value.trim(), lang }; }
+  } catch { $('#err').textContent = 'That signature request is not valid JSON.'; return; }
+  $('#go').disabled = true; $('#go').textContent = 'Reading…';
+  try {
+    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await res.json();
+    if (!res.ok) $('#err').textContent = j.error || 'Something went wrong.'; else render(j);
+  } catch { $('#err').textContent = 'Could not reach the server.'; }
+  $('#go').disabled = false; $('#go').textContent = 'Explain am';
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "wetinsign",
+  "version": "0.1.0",
+  "description": "Know what you are signing. Plain English and Pidgin explanations of crypto approvals, signature requests and transactions, with wallet-drainer flags. Runs on Rumpty Cloud.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.3",
+    "hono": "^4.13.13",
+    "openai": "^7.28.0",
+    "pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "viem": "^2.57.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
