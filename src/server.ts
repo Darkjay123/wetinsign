@@ -7,7 +7,8 @@ import { CHAINS } from './chains.js';
 import { decodeCall, decodeTypedData, type TokenResolver } from './decode.js';
 import { explain, type Lang, type Llm } from './explain.js';
 import type { Facts } from './facts.js';
-import { rumptyLlm } from './inference.js';
+import { aiStatus, rumptyLlm } from './inference.js';
+import { drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 
@@ -19,7 +20,11 @@ export interface Deps {
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
 }
 
-const lang = (v: unknown): Lang => (v === 'pcm' ? 'pcm' : 'en');
+/** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
+export const lang = (v: unknown): Lang => {
+  const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
+  return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
+};
 const key = (parts: unknown) => createHash('sha256').update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -36,7 +41,18 @@ export function createApp(deps: Deps) {
   }
 
   app.get('/', (c) => c.html(html));
-  app.get('/healthz', async (c) => c.json({ ok: true, ai: !!deps.llm, cached: await deps.store.count().catch(() => null) }));
+  app.get('/healthz', async (c) =>
+    c.json({
+      ok: true,
+      ai: !!deps.llm,
+      aiLast: aiStatus.last,
+      aiLastAt: aiStatus.at,
+      cached: await deps.store.count().catch(() => null),
+      drainers: drainerStats().count,
+      drainersLoadedAt: drainerStats().loadedAt,
+    }),
+  );
+  app.get('/api/drainers', (c) => c.json(drainerStats()));
   app.get('/api/chains', (c) => c.json(Object.values(CHAINS).map(({ id, name }) => ({ id, name }))));
 
   app.post('/api/explain/signature', async (c) => {
@@ -102,6 +118,7 @@ if (isMain) {
     fetchTx: fetchTransaction,
     isContract,
   });
+  void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
   console.log(`WetinSign listening on :${port} (AI: ${process.env.RUMPTY_API_KEY ? 'Rumpty Cloud' : 'templates only'})`);

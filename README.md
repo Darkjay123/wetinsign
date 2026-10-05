@@ -96,3 +96,7 @@ test/             offline test suite
 ## Licence
 
 MIT
+
+## Credits
+
+Known-drainer addresses come from [Scam Sniffer's open scam database](https://github.com/scamsniffer/scam-database) (GPL-3.0), fetched live and refreshed every 12 hours. See `data/README.md`.

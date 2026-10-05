@@ -1,5 +1,4 @@
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { drainerSet } from './drainers.js';
 import type { Facts } from './facts.js';
 
 export type Severity = 'danger' | 'warning' | 'safe' | 'info';
@@ -19,20 +18,9 @@ export interface Flag {
   severity: Severity;
 }
 
-let drainers: Set<string> | undefined;
-
-/** Addresses reported as drainers. Seeded from data/drainers.json; see data/README.md for sourcing. */
+/** Addresses reported as drainers: our own list plus the Scam Sniffer feed. See src/drainers.ts. */
 export function drainerList(): Set<string> {
-  if (!drainers) {
-    try {
-      const file = fileURLToPath(new URL('../data/drainers.json', import.meta.url));
-      const list: string[] = JSON.parse(readFileSync(file, 'utf8'));
-      drainers = new Set(list.map((a) => a.toLowerCase()));
-    } catch {
-      drainers = new Set();
-    }
-  }
-  return drainers;
+  return drainerSet();
 }
 
 export interface RiskContext {
