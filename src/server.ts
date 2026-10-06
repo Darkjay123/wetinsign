@@ -25,7 +25,9 @@ export const lang = (v: unknown): Lang => {
   const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
-const key = (parts: unknown) => createHash('sha256').update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
+// Bump when decoding or wording changes, so answers cached by older code are never served again.
+const CACHE_VERSION = 'v2';
+const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
   const app = new Hono();
