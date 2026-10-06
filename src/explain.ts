@@ -69,8 +69,8 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           : `Danger: you are giving ${who} permission to move ALL of your ${tok}, with no limit. If that address is a scammer, they can empty this token from your wallet at any time without asking you again.`);
       } else {
         lines.push(pcm
-          ? `You dey allow ${who} make e spend reach ${amt} of your ${tok}. Na the maximum be that, but only approve am if you trust this app.`
-          : `You are allowing ${who} to spend up to ${amt} of your ${tok}. That is the most they can take, but only approve it if you trust this app.`);
+          ? `You dey allow ${who} make e fit carry reach ${amt} of your ${tok}, anytime, no be only now. Shine your eye: thieves dey ask for exact amount so wallet no go show "unlimited". Only approve am if you trust this site well well.`
+          : `Careful: you are allowing ${who} to take up to ${amt} of your ${tok}, at any time, not just now. Scammers often ask for an exact amount so your wallet does not warn "unlimited". Only approve it if you trust this site.`);
       }
       if (sig) {
         lines.push(f.deadline?.never
@@ -89,6 +89,21 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         ? `Wahala dey: this one go hand over full control of this contract give ${who}. If na this contract hold your money (like DSProxy vault), the new owner fit carry everything. No sign am unless na you dey deliberately give am to person wey you know.`
         : `Danger: this hands full control of this contract to ${who}. If the contract holds your money (like a DSProxy vault), the new owner can take everything. Only sign if you are deliberately handing it to an address you know.`);
       break;
+    case 'nft_approve': {
+      const id = f.tokenId ? `#${f.tokenId}` : '';
+      const col = f.token?.symbol ?? 'this collection';
+      lines.push(has('REVOKE')
+        ? (pcm ? `Correct: this one dey cancel the permission wey person get over your ${col} NFT ${id}.` : `Good: this cancels the permission someone had over your ${col} NFT ${id}.`)
+        : (pcm
+          ? `Shine your eye: this one go allow ${who} carry your ${col} NFT ${id} anytime. Only approve am if you dey sell am or use am for site wey you trust.`
+          : `Careful: this lets ${who} take your ${col} NFT ${id} at any time. Only approve it if you are selling or using it on a site you trust.`));
+      if (has('SPENDER_NOT_CONTRACT')) {
+        lines.push(pcm
+          ? 'The address wey you dey give permission na ordinary wallet, no be app contract. Real apps no dey do am like that.'
+          : 'The address getting this permission is a plain wallet, not an app contract. Real apps do not work that way.');
+      }
+      break;
+    }
     case 'nft_approve_all':
       lines.push(f.approved
         ? (pcm
@@ -97,6 +112,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         : (pcm
           ? `Correct: this one dey cancel the control wey ${who} get over your NFT for this collection.`
           : `Good: this removes ${who}'s control over your NFTs in this collection.`));
+      if (has('SPENDER_NOT_CONTRACT')) {
+        lines.push(pcm
+          ? 'The address wey you dey give control na ordinary wallet, no be marketplace contract. Real marketplaces no dey do am like that.'
+          : 'The address getting control is a plain wallet, not a marketplace contract. Real marketplaces do not work that way.');
+      }
       break;
     case 'seaport_order':
       lines.push(has('FREE_LISTING')
@@ -133,7 +153,7 @@ function numbersIn(s: string): string[] {
 
 /** Every number the explanation is allowed to say: only what was decoded. */
 export function allowedNumbers(f: Facts): Set<string> {
-  const pool = [f.amount?.display, f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
+  const pool = [f.amount?.display, f.tokenId, f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
     ...(f.offer ?? []).map((i) => i.amount.display), ...(f.consideration ?? []).map((i) => i.amount.display)];
   const out = new Set<string>();
   for (const s of pool) if (s) for (const n of numbersIn(s)) out.add(n);

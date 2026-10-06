@@ -24,7 +24,7 @@ const MULTICALL_ABI = parseAbi([
 ]);
 
 /** Inner actions worth surfacing, most dangerous first. */
-const BUNDLE_PRIORITY = ['nft_approve_all', 'erc20_approve', 'permit2', 'transfer_from', 'transfer'] as const;
+const BUNDLE_PRIORITY = ['nft_approve_all', 'nft_approve', 'erc20_approve', 'permit2', 'transfer_from', 'transfer'] as const;
 
 const PERMIT2_ABI = parseAbi([
   'function approve(address token, address spender, uint160 amount, uint48 expiration)',
@@ -69,6 +69,11 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
       case 'increaseAllowance':
       case 'increaseApproval': {
         const [spender, amount] = args as readonly [string, bigint];
+        // On an NFT collection, approve(spender, id) hands over ONE NFT. Reading the id as a token amount was a real bug
+        // (a drained PepeLand NFT #378 showed up as "378 tokens").
+        if (token.isNft && functionName === 'approve') {
+          return { ...base, kind: 'nft_approve', token, spender, tokenId: amount.toString(), nativeValue };
+        }
         return { ...base, kind: 'erc20_approve', token, spender, amount: formatAmount(amount, token), nativeValue };
       }
       case 'transfer': {

@@ -17,7 +17,9 @@ export interface Flag {
     | 'REVOKE'
     | 'IRREVERSIBLE'
     | 'OWNERSHIP_TRANSFER'
-    | 'TRUSTED_SPENDER';
+    | 'TRUSTED_SPENDER'
+    | 'SPENDER_UNKNOWN'
+    | 'NFT_APPROVE_ONE';
   severity: Severity;
 }
 
@@ -47,10 +49,20 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       if (f.amount?.raw === '0') flags.push({ code: 'REVOKE', severity: 'safe' });
       else if (f.amount?.unlimited) flags.push({ code: 'UNLIMITED_APPROVAL', severity: trusted ? 'warning' : 'danger' });
       if (trusted && f.amount?.raw !== '0') flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
+      // Drainers often ask for an exact amount (your whole balance) so wallets do not show an "unlimited" warning.
+      // 10 of 34 real victim approvals we pulled from chain were like that, so a limited approval is never just "info".
+      if (!trusted && f.amount?.raw !== '0' && !f.amount?.unlimited) flags.push({ code: 'SPENDER_UNKNOWN', severity: 'warning' });
       // Only signatures are off-chain. Permit2.approve() sent as a transaction is an ordinary on-chain call.
       if (f.primaryType) flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
       if (f.deadline?.never && f.amount?.raw !== '0') flags.push({ code: 'NEVER_EXPIRES', severity: 'warning' });
       if (ctx.spenderIsContract === false && f.amount?.raw !== '0') flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
+      break;
+    }
+    case 'nft_approve': {
+      const cleared = /^0x0{40}$/i.test(f.spender ?? '');
+      if (cleared) flags.push({ code: 'REVOKE', severity: 'safe' });
+      else flags.push({ code: 'NFT_APPROVE_ONE', severity: 'warning' });
+      if (!cleared && ctx.spenderIsContract === false) flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
       break;
     }
     case 'ownership_transfer':

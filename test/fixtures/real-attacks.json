@@ -20,7 +20,8 @@
       "flags": [
         "UNLIMITED_APPROVAL"
       ]
-    }
+    },
+    "loss": "$999,999 lost"
   },
   {
     "id": "vault-multicall-hidden-approve-2026-07",
@@ -44,7 +45,8 @@
       "flags": [
         "UNLIMITED_APPROVAL"
       ]
-    }
+    },
+    "loss": "$340,463 lost"
   },
   {
     "id": "pepe-permit2-batch-2024-10",
@@ -140,7 +142,8 @@
         "OFFCHAIN_SIGNATURE",
         "NEVER_EXPIRES"
       ]
-    }
+    },
+    "loss": "$1,390,000 lost"
   },
   {
     "id": "seaport-free-listing-2022-12",
@@ -1799,7 +1802,8 @@
         "FREE_LISTING",
         "OFFCHAIN_SIGNATURE"
       ]
-    }
+    },
+    "loss": "$134 NFTs sold for 0 ETH lost"
   },
   {
     "id": "wbtc-increaseapproval-2026-04",
@@ -1821,6 +1825,124 @@
       "kind": "erc20_approve",
       "flags": [
         "UNLIMITED_APPROVAL"
+      ]
+    },
+    "loss": "$221,000 (3 WBTC) lost"
+  },
+  {
+    "id": "steth-limited-eoa-2023-03",
+    "title": "Exact-amount stETH approval to a plain wallet",
+    "loss": "19.35 stETH drained",
+    "date": "2023-03-09",
+    "source": "Scam Sniffer open drainer list (github.com/scamsniffer/scam-database) + Ethereum records via Blockscout",
+    "victim": "0x646353Fd9FeC88609deeb9312D7385dcCc6a7ad2",
+    "tx": "0x7f35bc18b739ea7c250569074f914caacf865efdc4d6f4d1337696b6c1449b8e",
+    "drain_tx": "0x843d7d5bd81329af203855f08bd832c8e521bff6417b1b6d119297a81fb056e5",
+    "provenance": "exact calldata the victim sent; the same spender pulled the stETH the same day",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+      "data": "0x095ea7b30000000000000000000000001661f1b207629e4f385da89cff535c8e5eb23ee30000000000000000000000000000000000000000000000021928fb5cf1667c0a"
+    },
+    "ctx": {
+      "spenderIsContract": false
+    },
+    "ctx_source": "Blockscout: spender 0x1661F1B2... is not a contract",
+    "expect": {
+      "verdict": "danger",
+      "kind": "erc20_approve",
+      "flags": [
+        "SPENDER_UNKNOWN",
+        "SPENDER_NOT_CONTRACT"
+      ]
+    }
+  },
+  {
+    "id": "kudoe-limited-contract-2023-05",
+    "title": "Exact-amount token approval to a drainer contract",
+    "loss": "4,126 KDOE drained",
+    "date": "2023-05-03",
+    "source": "Scam Sniffer open drainer list (github.com/scamsniffer/scam-database) + Ethereum records via Blockscout",
+    "victim": "0x88347d7b27b85b21eE1C817b22EF64a13CAc397E",
+    "tx": "0xc9ae42da3305f66d622a4bed87911c115c664d264ab25465292e124405403cc7",
+    "drain_tx": "0x4a30088c69718453fa8a3250c56ddc2cc20631dac5fb02a06ce1e15246a7347d",
+    "provenance": "exact calldata the victim sent; the spender contract pulled the tokens within minutes",
+    "known_limit": "The spender is a verified contract and the amount is limited, so nothing on the request itself proves theft. We say careful, not danger. Only the drainer list (off in this test) would say danger.",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x5f190F9082878cA141F858c1c90B4C59fe2782C5",
+      "data": "0x095ea7b300000000000000000000000049dc14dd851b6eae8d685715e12a06cc1bfc5d8d0000000000000000000000000000000000000000000001bf57814707bb700000"
+    },
+    "expect": {
+      "verdict": "warning",
+      "kind": "erc20_approve",
+      "flags": [
+        "SPENDER_UNKNOWN"
+      ]
+    }
+  },
+  {
+    "id": "abbc-approveall-eoa-2022-07",
+    "title": "setApprovalForAll on an NFT collection to a plain wallet",
+    "loss": "AntiBearBearClub NFT #1500 drained",
+    "date": "2022-07-30",
+    "source": "Scam Sniffer open drainer list (github.com/scamsniffer/scam-database) + Ethereum records via Blockscout",
+    "victim": "0xd44dFEF4618dE76b1AAAb652C310d7a3c1497911",
+    "tx": "0x0e09bcac7af0667313ca0fdb2f980ca7cc0d1a5b4d46f18916a18c58bb92ca89",
+    "drain_tx": "0xb9e909d5fb320f7f05b29ddb04f487c53e556e0c844a4a7bc654d8479e59f220",
+    "provenance": "exact calldata the victim sent",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xBae671dEAf34138F46268457ebdeC4e4A671D0B0",
+      "data": "0xa22cb465000000000000000000000000e9564ed7e9b74c236856ffc7a1cb8ddea1a7e36d0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "ctx": {
+      "spenderIsContract": false
+    },
+    "ctx_source": "Blockscout: operator 0xe9564Ed7... is not a contract",
+    "expect": {
+      "verdict": "danger",
+      "kind": "nft_approve_all",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "SPENDER_NOT_CONTRACT"
+      ]
+    }
+  },
+  {
+    "id": "pepeland-nft-approve-2023-01",
+    "title": "approve() of a single NFT to a plain wallet",
+    "loss": "PepeLand NFT #378 drained",
+    "date": "2023-01-16",
+    "source": "Scam Sniffer open drainer list (github.com/scamsniffer/scam-database) + Ethereum records via Blockscout",
+    "victim": "0x5f943671B9dCE0aaa4Fd415040Aa17d4C9ba8C76",
+    "tx": "0x40adf830443987c3120c5e2c1d62d7efca01c0c03f69d58da340af822d039965",
+    "drain_tx": "0x046f5e8f06ff953a661a981d1917685324a1c026fa813283cd943429ff01689e",
+    "provenance": "exact calldata the victim sent",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x1BeEbB8f7e12a43201Ec8B5799B973d933936bC2",
+      "data": "0x095ea7b30000000000000000000000000b80ace6ba77fb95c61d4832286179ab5bf3fa09000000000000000000000000000000000000000000000000000000000000017a"
+    },
+    "token": {
+      "symbol": "PL",
+      "isNft": true
+    },
+    "token_source": "the contract answers supportsInterface(0x80ac58cd) = true (ERC-721), read from Ethereum on 6 Oct 2026",
+    "ctx": {
+      "spenderIsContract": false
+    },
+    "ctx_source": "Blockscout: spender 0x0b80aCe6... is not a contract",
+    "expect": {
+      "verdict": "danger",
+      "kind": "nft_approve",
+      "flags": [
+        "NFT_APPROVE_ONE",
+        "SPENDER_NOT_CONTRACT"
       ]
     }
   }

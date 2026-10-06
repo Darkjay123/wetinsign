@@ -2,6 +2,8 @@ export interface TokenRef {
   address: string;
   symbol?: string;
   decimals?: number;
+  /** True when the contract says it is an ERC-721 NFT collection. approve() on it hands over one NFT, not an amount. */
+  isNft?: boolean;
 }
 
 // A small offline table of the stablecoins Nigerians actually hold. Anything else is

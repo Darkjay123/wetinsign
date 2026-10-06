@@ -16,7 +16,8 @@ function client(chainId: number): PublicClient {
   return c;
 }
 
-const META_ABI = parseAbi(['function symbol() view returns (string)', 'function decimals() view returns (uint8)']);
+const META_ABI = parseAbi(['function symbol() view returns (string)', 'function decimals() view returns (uint8)', 'function supportsInterface(bytes4 id) view returns (bool)']);
+const ERC721_ID = '0x80ac58cd';
 
 /** Token symbol and decimals: offline table first, then the chain. Unknown fields stay unknown. */
 export const onchainResolver: TokenResolver = async (chainId, address): Promise<TokenRef> => {
@@ -27,7 +28,11 @@ export const onchainResolver: TokenResolver = async (chainId, address): Promise<
     c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'symbol' }).catch(() => undefined),
     c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'decimals' }).catch(() => undefined),
   ]);
-  return { address, symbol: symbol as string | undefined, decimals: decimals === undefined ? undefined : Number(decimals) };
+  let isNft: boolean | undefined;
+  if (decimals === undefined) {
+    isNft = (await c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'supportsInterface', args: [ERC721_ID] }).catch(() => false)) as boolean;
+  }
+  return { address, symbol: symbol as string | undefined, decimals: decimals === undefined ? undefined : Number(decimals), ...(isNft ? { isNft } : {}) };
 };
 
 export async function fetchTransaction(chainId: number, hash: string): Promise<CallInput> {

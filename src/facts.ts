@@ -4,6 +4,7 @@ import type { TokenRef } from './tokens.js';
 export type Kind =
   | 'erc20_approve'
   | 'nft_approve_all'
+  | 'nft_approve'
   | 'transfer'
   | 'transfer_from'
   | 'native_send'
@@ -37,6 +38,8 @@ export interface Facts {
   owner?: string;
   amount?: Amount;
   approved?: boolean;
+  /** For nft_approve: which NFT. */
+  tokenId?: string;
   deadline?: Deadline;
   selector?: string;
   /** Set when the real action was found hidden inside a bundle call such as multicall. */

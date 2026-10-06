@@ -29,7 +29,7 @@ describe('contract calls', () => {
     const data = encodeFunctionData({ abi, functionName: 'approve', args: [SPENDER, 25_500_000n] });
     const f = await decodeCall({ chainId: 1, to: USDT, data });
     expect(f.amount?.display).toBe('25.5');
-    expect(verdict(assessRisk(f, none))).toBe('info');
+    expect(verdict(assessRisk(f, none))).toBe('warning');
   });
 
   it('treats approve(0) as a revoke', async () => {
