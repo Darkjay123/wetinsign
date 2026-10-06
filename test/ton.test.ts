@@ -83,3 +83,12 @@ describe('TON', () => {
     expect(r2.explanation.text).toMatch(/3 USDT/);
   });
 });
+
+describe('TON request errors', () => {
+  it('a mistyped TON address gets a TON error, not a Tron one', async () => {
+    const app = createApp({ store: memStore() });
+    const res = await app.request('/api/explain/call', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ data: JSON.stringify({ messages: [{ address: 'UQAlrvhxyZ0RRiUATGRwd3S7ZdnvaWP1hVvAc0CqVuPYQ6lp', amount: '1' }] }) }) });
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toMatch(/not a valid TON address/);
+  });
+});

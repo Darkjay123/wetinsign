@@ -12,7 +12,7 @@ import { drainerSet, drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
-import { fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
+import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
 import { explainSolanaText, fetchSolanaTx, isSolSignature, looksLikeSolanaTx, SOLANA_ID, type Rpc } from './solana.js';
 
 export interface Deps {
@@ -34,7 +34,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v22';
+const CACHE_VERSION = 'v23';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -90,6 +90,8 @@ export function createApp(deps: Deps) {
     const tonReq = [body?.transaction, body, typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined].find(isTonRequest);
     if (tonReq) {
       const l = lang(body.lang);
+      const bad = badTonAddress(tonReq);
+      if (bad) return c.json({ error: `This TON request has an address that is not a valid TON address: ${bad}` }, 422);
       const k = key(['tonreq', tonReq, l]);
       const hit = await deps.store.get(k).catch(() => undefined);
       if (hit) return c.json({ ...(hit as object), cached: true });

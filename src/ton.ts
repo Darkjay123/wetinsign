@@ -36,9 +36,11 @@ export interface TonLookup {
 const raw = (a: Address) => `${a.workChain}:${a.hash.toString('hex')}`;
 const friendly = (a: Address) => a.toString({ urlSafe: true, bounceable: true });
 export const parseTonAddress = (s: string): Address | undefined => { try { return Address.parse(s.trim()); } catch { return undefined; } };
+// Shape only: a request with a mistyped address is still a TON request, and should get a TON error, not a Tron one.
 export const isTonRequest = (v: unknown): v is TonRequest =>
   !!v && typeof v === 'object' && Array.isArray((v as TonRequest).messages) && (v as TonRequest).messages.length > 0 &&
-  (v as TonRequest).messages.every((m) => typeof m?.address === 'string' && m.amount !== undefined && !!parseTonAddress(m.address));
+  (v as TonRequest).messages.every((m) => typeof m?.address === 'string' && m.amount !== undefined);
+export const badTonAddress = (r: TonRequest): string | undefined => r.messages.map((m) => m.address).find((a) => !parseTonAddress(a));
 
 interface Move {
   to: Address;
@@ -139,10 +141,19 @@ export async function tonFacts(req: TonRequest, look: TonLookup = {}): Promise<F
   return { ...base, kind: main.kind as 'transfer' | 'native_send', token: main.token, amount: main.amount, recipient: friendly(main.recipient), ...extra };
 }
 
+// toncenter and tonapi allow about one request a second without a key. Seen live: a second lookup straight after the
+// first got rate-limited and the USDT name went missing. Wait and retry on 429, and remember answers that never change.
+const cache = new Map<string, unknown>();
 async function getJson(url: string): Promise<any> {
-  const r = await fetch(url, { headers: process.env.TONCENTER_API_KEY && url.startsWith(TONCENTER) ? { 'X-API-Key': process.env.TONCENTER_API_KEY } : {}, signal: AbortSignal.timeout(12_000) });
-  if (!r.ok) throw new Error(`${r.status}`);
-  return r.json();
+  if (cache.has(url)) return cache.get(url);
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(url, { headers: process.env.TONCENTER_API_KEY && url.startsWith(TONCENTER) ? { 'X-API-Key': process.env.TONCENTER_API_KEY } : {}, signal: AbortSignal.timeout(12_000) });
+    if (r.status === 429 && attempt < 4) { await new Promise((res) => setTimeout(res, 1200 * (attempt + 1))); continue; }
+    if (!r.ok) throw new Error(`${r.status}`);
+    const j = await r.json();
+    if (/\/jetton\/wallets|\/jettons\//.test(url)) cache.set(url, j);
+    return j;
+  }
 }
 
 export const tonLookup: TonLookup = {
