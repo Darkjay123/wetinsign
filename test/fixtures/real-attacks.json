@@ -1,0 +1,145 @@
+[
+  {
+    "id": "usdt-unlimited-approve-2026-07",
+    "title": "Unlimited USDT approval",
+    "loss_usd": "999,999",
+    "date": "2026-07-08",
+    "source": "Scam Sniffer on X, reported 9 Jul 2026 (via bitcoinfoundation.org/news/crimes-and-fraud-news/loss-1mln-usdt/)",
+    "victim": "0x8C949361B49320C48a51F4B1C6f9f83862530F89",
+    "tx": "0x295549f3dabb8c02ed1910386bee51b6bcc6f2074887dba43d54806320b4bde2",
+    "provenance": "exact calldata the victim sent, read from Ethereum",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "data": "0x095ea7b30000000000000000000000001178a87db6dc5c010e39a325af1f73bec6470502ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "erc20_approve",
+      "flags": [
+        "UNLIMITED_APPROVAL"
+      ]
+    }
+  },
+  {
+    "id": "vault-multicall-hidden-approve-2026-07",
+    "title": "Approval hidden inside multicall()",
+    "loss_usd": "340,463",
+    "date": "2026-07-24",
+    "source": "https://x.com/realScamSniffer/status/2080559881128747506",
+    "victim": "0x3E1B8F98Ed69C6A97A8540E1D7AeD33FdF4509aA",
+    "tx": "0x5ee0b8d400d91f9a9ec8127cb3018a8d86019ade178f44e0d24f36723346e542",
+    "provenance": "exact calldata the victim sent, read from Ethereum",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x0bF0164D17469241B6E086dA4016DCc54FEAA334",
+      "data": "0xac9650d80000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000044095ea7b30000000000000000000000000012b7c5d4310915bb2d58c0b14c72546d320c05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000"
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "erc20_approve",
+      "via": "multicall",
+      "flags": [
+        "UNLIMITED_APPROVAL"
+      ]
+    }
+  },
+  {
+    "id": "pepe-permit2-batch-2024-10",
+    "title": "Permit2 batch signature on PEPE and APU",
+    "loss_usd": "1,390,000",
+    "date": "2024-10-13",
+    "source": "https://x.com/realScamSniffer/status/1845503748514492492",
+    "victim": "0xb0b866410a22501c0e6c2b2eb6a91b3322e440c7",
+    "tx": "0xd330ff045ba48d8f1b783542083f64736fd90af08b82a99eef9019afd677f0df",
+    "provenance": "rebuilt from the Permit2 Permit events in the drain transaction (tokens, spender, amounts, expiry, nonce are on-chain; sigDeadline is not, so it is set to a placeholder)",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "PermitBatch": [
+            {
+              "name": "details",
+              "type": "PermitDetails[]"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "sigDeadline",
+              "type": "uint256"
+            }
+          ],
+          "PermitDetails": [
+            {
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint160"
+            },
+            {
+              "name": "expiration",
+              "type": "uint48"
+            },
+            {
+              "name": "nonce",
+              "type": "uint48"
+            }
+          ]
+        },
+        "primaryType": "PermitBatch",
+        "domain": {
+          "name": "Permit2",
+          "chainId": 1,
+          "verifyingContract": "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+        },
+        "message": {
+          "details": [
+            {
+              "token": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+              "amount": "1461501637330902918203684832716283019655932542975",
+              "expiration": "281474976710655",
+              "nonce": "0"
+            },
+            {
+              "token": "0x594DaaD7D77592a2b97b725A7AD59D7E188b5bFa",
+              "amount": "1461501637330902918203684832716283019655932542975",
+              "expiration": "281474976710655",
+              "nonce": "0"
+            }
+          ],
+          "spender": "0xD8AEce4A8fff379b3085A9849577292201b467BC",
+          "sigDeadline": "1728835200"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit2",
+      "flags": [
+        "UNLIMITED_APPROVAL",
+        "OFFCHAIN_SIGNATURE",
+        "NEVER_EXPIRES"
+      ]
+    }
+  }
+]

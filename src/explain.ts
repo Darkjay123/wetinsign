@@ -35,6 +35,12 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       : 'STOP: this address has been reported as a wallet drainer. Do not sign.');
   }
 
+  if (f.via === 'multicall') {
+    lines.push(pcm
+      ? 'Shine your eye: dem hide this permission inside one bundle of actions (multicall). Na trick wey wallet drainers dey use make your wallet no warn you.'
+      : 'Careful: this permission is hidden inside a bundle of actions (multicall). Drainers use this trick so your wallet does not warn you.');
+  }
+
   switch (f.kind) {
     case 'erc20_approve':
     case 'permit':
@@ -152,6 +158,9 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   // The only model on Rumpty (llama3.2:3b) ignores the Pidgin instruction and answers in English,
   // and Rumpty has no larger model for now. Pidgin readers get our reviewed Pidgin wording instead.
   if (lang === 'pcm') return fallback;
+  // When we could not decode the action there are no facts for the model to restate, and the small model
+  // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature') return fallback;
   try {
     const text = (await llm(buildMessages(f, flags, lang))).trim();
     if (!text) return fallback;

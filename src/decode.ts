@@ -12,6 +12,14 @@ const ERC_ABI = parseAbi([
   'function setApprovalForAll(address operator, bool approved)',
 ]);
 
+const MULTICALL_ABI = parseAbi([
+  'function multicall(bytes[] data)',
+  'function multicall(uint256 deadline, bytes[] data)',
+]);
+
+/** Inner actions worth surfacing, most dangerous first. */
+const BUNDLE_PRIORITY = ['nft_approve_all', 'erc20_approve', 'permit2', 'transfer_from', 'transfer'] as const;
+
 const PERMIT2_ABI = parseAbi([
   'function approve(address token, address spender, uint160 amount, uint48 expiration)',
 ]);
@@ -88,6 +96,20 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     };
   } catch {
     // unknown
+  }
+
+  // Drainers hide an approve() inside multicall() so wallets show a harmless-looking top-level call.
+  try {
+    const { args } = decodeFunctionData({ abi: MULTICALL_ABI, data });
+    const calls = (args.length === 1 ? args[0] : args[1]) as readonly Hex[];
+    const inner: Facts[] = [];
+    for (const c of calls) inner.push(await decodeCall({ chainId, to: input.to, data: c }, resolveToken));
+    for (const kind of BUNDLE_PRIORITY) {
+      const hit = inner.find((f) => f.kind === kind);
+      if (hit) return { ...hit, via: 'multicall', nativeValue };
+    }
+  } catch {
+    // not a multicall either
   }
 
   return { ...base, kind: 'unknown_call', selector: data.slice(0, 10), nativeValue };

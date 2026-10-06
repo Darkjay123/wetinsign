@@ -38,6 +38,8 @@ export interface Facts {
   approved?: boolean;
   deadline?: Deadline;
   selector?: string;
+  /** Set when the real action was found hidden inside a bundle call such as multicall. */
+  via?: 'multicall';
   nativeValue?: Amount;
   offer?: SeaportItem[];
   consideration?: SeaportItem[];
