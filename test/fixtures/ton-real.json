@@ -27,5 +27,33 @@
    ]
   },
   "comment": "VC-0117CE3DB6"
+ },
+ "stonfi_lp": {
+  "note": "Real STON.fi v2 liquidity deposit (dex_deposit_liquidity), one jetton transfer to the router",
+  "tx_hash": "9PW59FCZVe1KPN3HyVLkZOccPnW6KO5KVEIcH97BxBI=",
+  "request": {
+   "from": "0:FE15A43FA5B061436D4C3BA4D8F10238A2BD6258023C5EEFC3FADA7D32C3DDC6",
+   "messages": [
+    {
+     "address": "0:C6C17B59E47C11F26A4B8C0F4396C693B2B2A30B8B9C7E64E7CB21C64193C6F8",
+     "amount": "300000000",
+     "payload": "te6cckEBAwEA+wABsg+KfqUAAAfpVvxGi1XRbdEnWAHA82IYB1lXER2kY++J1yGQqB7XmkjM+Mr/BlvlKRCXEwA/hWkP6WwYUNtTDuk2PECOKK9YlgCPF7vw/rafTLD3cYgcA6GBAQHhN8CW34AcC4lHT/vANXujw4wqapWheUIzTx4cK4kEV+pJXRY4ojAD+FaQ/pbBhQ21MO6TY8QI4or1iWAI8Xu/D+tp9MsPdxoAfwrSH9LYMKG2ph3SbHiBHFFesSwBHi934f1tPplh7uMAAAAANO0DzEACAFFiN4w4sM1oAfwrSH9LYMKG2ph3SbHiBHFFesSwBHi934f1tPplh7uNBNjtdtA="
+    }
+   ]
+  }
+ },
+ "stonfi_ton_swap": {
+  "note": "Real STON.fi v2 TON->jetton swap: TON sent through the pTON wallet (op 0x01f3835d)",
+  "tx_hash": "W2oLeLm6K1Wa84tFkx9p5/La3N46aTZAdO4coAtjclw=",
+  "request": {
+   "from": "0:54754FB0C7F2D4D5F167FDEF6312F80ADB08B3E0E4FFB663CD434DB956B974A4",
+   "messages": [
+    {
+     "address": "0:C0466F9EDF24459B101A6D3E4E7D72A3169DB73D2EA9EE15C1C30AE09AF91D6D",
+     "amount": "270000000",
+     "payload": "te6cckEBAwEA+AABZAHzg12haJ5la6K9mEAvrwgIAKjqn2GP5amr4s/73sYl8BW2EWfByf9sx5qGm3KtculJAQHhZmTeKoAYKdQPFoDUCMoJ/W4Agv8l91MbubWjEgWl2Jbt3qtoPjABUdU+wx/LU1fFn/e9jEvgK2wiz4OT/tmPNQ025Vrl0pIAKjqn2GP5amr4s/73sYl8BW2EWfByf9sx5qGm3KtculIAAAAAf////8ACAJliBvp51wM4AKjqn2GP5amr4s/73sYl8BW2EWfByf9sx5qGm3KtculIAAAjQAIkBz3IfREANhIm2aHM6qidG4JJvZubIsYBOzXSFw+0uMv/V3Y="
+    }
+   ]
+  }
  }
 }

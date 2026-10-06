@@ -349,6 +349,9 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         : 'We could not read what this does. Do not sign anything you cannot understand, especially from a link someone sent you.');
       break;
   }
+  if (f.chainId === 607 && f.protocol === 'STON.fi') lines.push(pcm
+    ? 'That address na official STON.fi router (from STON.fi own list), so na swap or liquidity deposit for STON.fi be this. Only sign am if na you start am for the real STON.fi site.'
+    : "That address is an official STON.fi router (from STON.fi's own list), so this is a swap or liquidity deposit on STON.fi. Only sign if you started it on the real STON.fi site.");
   if (f.memo) lines.push(pcm ? `The note wey dem write for am na: "${f.memo}". No trust note, na the address and amount matter.` : `The note on it says: "${f.memo}". Notes can say anything; the address and amount are what count.`);
   return lines.join(' ');
 }

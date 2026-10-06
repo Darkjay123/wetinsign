@@ -2,6 +2,7 @@ import { Address, Cell } from '@ton/core';
 import type { Facts } from './facts.js';
 import { formatAmount, type Amount } from './format.js';
 import type { TokenRef } from './tokens.js';
+import { STONFI_PTON_WALLETS, STONFI_ROUTERS } from './ton-trusted.js';
 
 /**
  * TON. Not EVM: wallets sign "messages" (TON Connect sendTransaction), each sending TON and optionally a payload.
@@ -12,6 +13,8 @@ const OP_COMMENT = 0;
 const OP_JETTON_TRANSFER = 0x0f8a7ea5;
 const OP_NFT_TRANSFER = 0x5fcc3d14;
 const OP_JETTON_BURN = 0x595f07bc;
+// STON.fi v2 pTON ton_transfer: how a swap or deposit from TON starts. Layout read off a real swap on 6 Oct 2026.
+const OP_PTON_TRANSFER = 0x01f3835d;
 const TONCENTER = process.env.TONCENTER_API ?? 'https://toncenter.com/api/v3';
 const TONAPI = process.env.TONAPI ?? 'https://tonapi.io/v2';
 
@@ -45,7 +48,7 @@ export const badTonAddress = (r: TonRequest): string | undefined => r.messages.m
 interface Move {
   to: Address;
   ton: bigint;
-  kind: 'ton' | 'jetton' | 'nft' | 'burn' | 'unknown';
+  kind: 'ton' | 'jetton' | 'nft' | 'burn' | 'pton' | 'unknown';
   recipient?: Address;
   jettonAmount?: bigint;
   comment?: string;
@@ -76,6 +79,10 @@ function readPayload(m: TonMessage): Move {
       } catch { /* note is optional */ }
       return { to, ton, kind: 'jetton', jettonAmount, recipient, comment, op };
     }
+    if (op === OP_PTON_TRANSFER) {
+      const router = STONFI_PTON_WALLETS[raw(to)];
+      if (router) { s.loadUintBig(64); return { to, ton, kind: 'pton', jettonAmount: s.loadCoins(), recipient: Address.parse(router), op }; }
+    }
     if (op === OP_NFT_TRANSFER) { s.loadUintBig(64); return { to, ton, kind: 'nft', recipient: s.loadAddress(), op }; }
     if (op === OP_JETTON_BURN) { s.loadUintBig(64); return { to, ton, kind: 'burn', jettonAmount: s.loadCoins(), op }; }
   } catch { /* fall through */ }
@@ -99,6 +106,7 @@ export async function tonFacts(req: TonRequest, look: TonLookup = {}): Promise<F
   };
 
   type Item = { kind: string; token: TokenRef; amount: Amount; recipient: Address; comment?: string };
+  const stonfi = (a: Address) => !!STONFI_ROUTERS[raw(a)];
   const items: Item[] = [];
   let unreadable: Move | undefined;
   for (const m of moves) {
@@ -107,6 +115,8 @@ export async function tonFacts(req: TonRequest, look: TonLookup = {}): Promise<F
       items.push({ kind: 'transfer', token, amount: formatAmount(m.jettonAmount ?? 0n, token), recipient: m.recipient, comment: m.comment });
     } else if (m.kind === 'nft' && m.recipient) {
       items.push({ kind: 'transfer', token: { address: friendly(m.to), symbol: 'NFT', isNft: true }, amount: { raw: '1', display: '1', unlimited: false }, recipient: m.recipient });
+    } else if (m.kind === 'pton' && m.recipient) {
+      items.push({ kind: 'native_send', token: TON_TOKEN, amount: formatAmount(m.jettonAmount ?? 0n, TON_TOKEN), recipient: m.recipient });
     } else if (m.kind === 'ton') {
       items.push({ kind: 'native_send', token: TON_TOKEN, amount: formatAmount(m.ton, TON_TOKEN), recipient: m.to, comment: m.comment });
     } else if (m.kind === 'unknown') unreadable ??= m;
@@ -119,7 +129,7 @@ export async function tonFacts(req: TonRequest, look: TonLookup = {}): Promise<F
   const byRecipient = new Map<string, Set<string>>();
   for (const i of items) {
     const r = raw(i.recipient);
-    if (from && r === raw(from)) continue;
+    if ((from && r === raw(from)) || stonfi(i.recipient)) continue;
     if (!byRecipient.has(r)) byRecipient.set(r, new Set());
     byRecipient.get(r)!.add(i.token.address);
   }
@@ -136,6 +146,7 @@ export async function tonFacts(req: TonRequest, look: TonLookup = {}): Promise<F
     ...(sweepTo ? { sweep: { recipient: friendly(Address.parse(sweepTo)), assets: items.filter((i) => raw(i.recipient) === sweepTo).map((i) => i.token.symbol ?? 'tokens') } } : {}),
     ...(scam ? { reportedScam: true } : {}),
     ...(main.comment ? { memo: main.comment } : {}),
+    ...(stonfi(main.recipient) ? { protocol: 'STON.fi' } : {}),
     ...(unreadable ? { selector: unreadable.op !== undefined ? `op 0x${unreadable.op.toString(16)}` : 'unreadable message' } : {}),
   };
   return { ...base, kind: main.kind as 'transfer' | 'native_send', token: main.token, amount: main.amount, recipient: friendly(main.recipient), ...extra };

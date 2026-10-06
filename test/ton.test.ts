@@ -92,3 +92,25 @@ describe('TON request errors', () => {
     expect((await res.json()).error).toMatch(/not a valid TON address/);
   });
 });
+
+describe('STON.fi (official router list)', () => {
+  it('a real liquidity deposit names STON.fi and is not danger', async () => {
+    const f = await tonFacts(fx.stonfi_lp.request);
+    expect(f.protocol).toBe('STON.fi');
+    const flags = assessRisk(f);
+    expect(verdict(flags)).not.toBe('danger');
+    expect((await explain(f, flags, 'en')).text).toMatch(/official STON.fi router/);
+  });
+  it('a real TON to jetton swap through pTON reads as TON going to STON.fi', async () => {
+    const f = await tonFacts(fx.stonfi_ton_swap.request);
+    expect(f.kind).toBe('native_send');
+    expect(f.amount?.display).toBe('0.05');
+    expect(f.protocol).toBe('STON.fi');
+    expect(verdict(assessRisk(f))).not.toBe('danger');
+  });
+  it('a pTON-looking message to an unknown address stays unreadable', async () => {
+    const msg = fx.stonfi_ton_swap.request.messages[0];
+    const f = await tonFacts({ messages: [{ ...msg, address: '0:' + '44'.repeat(32) }] });
+    expect(f.kind).toBe('unknown_call');
+  });
+});

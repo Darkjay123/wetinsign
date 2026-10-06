@@ -69,6 +69,8 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
   if (f.sweep) flags.push({ code: 'TON_SWEEP', severity: 'danger' });
   else if (f.chainId === 607 && f.via === 'batch') flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  // Only from STON.fi's own router list (src/ton-trusted.ts).
+  if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
   // Several approvals in one wallet batch: a normal app swap needs at most one.
   const batchApprovals = f.via === 'batch' ? (f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length : 0;
