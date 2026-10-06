@@ -134,9 +134,12 @@ export const solanaRpc: Rpc = async (method, params) => {
       const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: AbortSignal.timeout(12_000) });
       const j = (await r.json()) as { result?: unknown; error?: unknown };
       if (j.error) { last = j.error; continue; }
+      // Some public nodes keep only recent history and answer null for older transactions; ask the next one.
+      if (j.result === null || j.result === undefined) { last = 'null'; continue; }
       return j.result;
     } catch (e) { last = e; }
   }
+  if (last === 'null') return null;
   throw new Error(`Solana RPC failed: ${JSON.stringify(last)}`);
 };
 

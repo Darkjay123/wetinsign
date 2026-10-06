@@ -102,3 +102,14 @@ describe('explain', () => {
     expect(r.source).toBe('ai');
   });
 });
+
+import { aiProblems as _aiProblems } from '../src/explain.js';
+describe('AI guard on approvals', () => {
+  it('rejects the real bad answer seen live on a Tron USDT approval', () => {
+    const f = { kind: 'erc20_approve', chain: 'Tron', chainId: 728126428, spender: 'TJ4KeiGTvTX4wRUgLARiwr8rGLaurmVkdZ', token: { address: 'x', symbol: 'USDT', decimals: 6 }, amount: { raw: '23391920', display: '23.39192', unlimited: false } } as any;
+    const bad = "Warning: Be careful with your money.\n\nYou are giving away some USDT, a type of cryptocurrency, to this address. If you're not sure who sent it to you or why they did, be cautious and don't spend the USDT until you figure out what's going on.";
+    const p = _aiProblems(bad, f, [{ code: 'SPENDER_UNKNOWN', severity: 'warning' }], 'warning');
+    expect(p).toContain('describes an approval as a payment');
+    expect(p).toContain('leaves out the amount');
+  });
+});

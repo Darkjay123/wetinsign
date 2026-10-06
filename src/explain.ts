@@ -405,6 +405,15 @@ export function aiProblems(text: string, f: Facts, flags: Flag[], v: Severity): 
   if (f.via === 'batch' && !/batch|at once|in one go|bundle/i.test(text)) out.push('leaves out the batch');
   if (has('KNOWN_DRAINER') && !/drainer|reported|scam/i.test(text)) out.push('leaves out the drainer report');
   if (/\b(make a mistake|by accident|accidentally|wallet settings)\b/i.test(text)) out.push('blames the reader instead of the request');
+  // Seen live on 6 Oct 2026 on a real Tron USDT approval: the small model wrote "You are giving away some USDT ...
+  // If you're not sure who sent it to you". An approval must be described as a permission, with its amount.
+  if (/approve|permit/.test(f.kind) && f.amount?.raw !== '0') {
+    if (!/allow|permission|approv|spend|take|move/i.test(text)) out.push('does not say it is a permission');
+    if (/giving away|sent (it )?to you|who sent/i.test(text)) out.push('describes an approval as a payment');
+    const n = f.amount?.display?.split(' ')[0];
+    if (f.amount && !f.amount.unlimited && n && !text.includes(n)) out.push('leaves out the amount');
+    if (f.amount?.unlimited && !/unlimited|all of|all your|no limit|any amount/i.test(text)) out.push('leaves out that it is unlimited');
+  }
   if (text.length > 420) out.push('too long');
   return out;
 }
