@@ -54,6 +54,8 @@
   <section class="panel on" id="p-signature">
     <label for="typed">Signature request (the JSON your wallet shows under "Sign message") <button class="sample" data-sample="permit">try an example</button></label>
     <textarea id="typed" spellcheck="false" placeholder='{"domain":{...},"primaryType":"Permit","message":{...}}'></textarea>
+    <label for="from">Your wallet address (optional, lets us check where swap money goes)</label>
+    <input id="from" spellcheck="false" placeholder="0x…">
   </section>
 
   <section class="panel" id="p-tx">
@@ -127,7 +129,7 @@ $('#go').onclick = async () => {
   $('#err').textContent = ''; $('#out').innerHTML = '';
   let url, body;
   try {
-    if (tab === 'signature') { url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; }
+    if (tab === 'signature') { url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; const fr = $('#from').value.trim(); if (/^0x[0-9a-fA-F]{40}$/.test(fr)) body.from = fr; }
     else if (tab === 'tx') { url = '/api/explain/tx'; body = { chainId: Number($('#chain').value), hash: $('#hash').value.trim(), lang }; }
     else { url = '/api/explain/call'; body = { chainId: Number($('#cchain').value), to: $('#to').value.trim(), data: $('#data').value.trim(), lang }; }
   } catch { $('#err').textContent = 'That signature request is not valid JSON.'; return; }
