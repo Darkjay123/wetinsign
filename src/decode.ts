@@ -204,6 +204,8 @@ export async function decodeTypedData(
   raw: TypedData | string,
   resolveToken: TokenResolver = offlineResolver,
   nowSec?: number,
+  /** The wallet that is being asked to sign, when the caller knows it (wallets always do). */
+  signer?: string,
 ): Promise<Facts> {
   const td: TypedData = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const chainId = td.domain?.chainId !== undefined ? Number(td.domain.chainId) : undefined;
@@ -273,6 +275,48 @@ export async function decodeTypedData(
     };
   }
 
+  // CoW Swap order (GPv2Order). The owner is not inside the message: it is whoever signs. The danger is the
+  // receiver: a fake swap site sets it to its own address, so you sell your tokens and the proceeds go to them.
+  if (td.primaryType === 'Order' && msg.sellToken && msg.buyToken && msg.kind !== undefined) {
+    const sellToken = await swapToken(chainId, msg.sellToken, resolveToken);
+    const buyToken = await swapToken(chainId, msg.buyToken, resolveToken);
+    return {
+      ...base,
+      kind: 'swap_order',
+      protocol: 'CoW Swap',
+      spender: td.domain?.verifyingContract,
+      owner: signer,
+      recipient: zeroToUndef(msg.receiver),
+      token: sellToken,
+      amount: formatAmount(big(msg.sellAmount) + big(msg.feeAmount ?? 0), sellToken),
+      buyToken,
+      buyAmount: formatAmount(big(msg.buyAmount), buyToken),
+      swapKind: String(msg.kind) === 'buy' ? 'buy' : 'sell',
+      deadline: msg.validTo !== undefined ? formatDeadline(big(msg.validTo), nowSec) : undefined,
+    };
+  }
+
+  // 1inch Limit Order Protocol v4. Expiry sits in makerTraits bits 80..119; 0 means it never expires.
+  if (td.primaryType === 'Order' && msg.maker && msg.makerAsset && msg.takerAsset) {
+    const sellToken = await swapToken(chainId, asAddr(msg.makerAsset), resolveToken);
+    const buyToken = await swapToken(chainId, asAddr(msg.takerAsset), resolveToken);
+    const expiry = (big(msg.makerTraits ?? 0) >> 80n) & ((1n << 40n) - 1n);
+    return {
+      ...base,
+      kind: 'swap_order',
+      protocol: '1inch',
+      spender: td.domain?.verifyingContract,
+      owner: asAddr(msg.maker),
+      recipient: zeroToUndef(asAddr(msg.receiver ?? '0x0')),
+      token: sellToken,
+      amount: formatAmount(big(msg.makingAmount), sellToken),
+      buyToken,
+      buyAmount: formatAmount(big(msg.takingAmount), buyToken),
+      swapKind: 'sell',
+      deadline: expiry === 0n ? { unix: '0', display: 'never expires', never: true } : formatDeadline(expiry, nowSec),
+    };
+  }
+
   // Blur marketplace. A sell Order for (almost) nothing is how Blur listings get drained;
   // a Root signs a whole batch of listings at once and does not show which ones.
   if (/blur/i.test(td.domain?.name ?? '')) {
@@ -296,6 +340,21 @@ export async function decodeTypedData(
   }
 
   return { ...base, kind: 'unknown_signature' };
+}
+
+const NATIVE = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+async function swapToken(chainId: number | undefined, a: string, resolveToken: TokenResolver): Promise<TokenRef> {
+  if (String(a).toLowerCase() === NATIVE) return { address: a, symbol: chainId === 56 ? 'BNB' : chainId === 137 ? 'POL' : 'ETH', decimals: 18 };
+  return resolveToken(chainId, a);
+}
+/** 1inch encodes addresses as uint256 ("Address" type); the address is the low 160 bits. */
+function asAddr(v: unknown): string {
+  const s = String(v);
+  if (/^0x[0-9a-fA-F]{40}$/.test(s)) return s;
+  return '0x' + (big(s) & ((1n << 160n) - 1n)).toString(16).padStart(40, '0');
+}
+function zeroToUndef(a?: string): string | undefined {
+  return !a || /^0x0{40}$/i.test(a) ? undefined : a;
 }
 
 const BLUR_POOL = '0x0000000000a39bb272e79075ade125fd351887ac';

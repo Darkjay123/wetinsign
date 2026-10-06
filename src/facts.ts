@@ -15,6 +15,7 @@ export type Kind =
   | 'permit2_transfer'
   | 'blur_order'
   | 'blur_bulk'
+  | 'swap_order'
   | 'unknown_call'
   | 'unknown_signature';
 
@@ -58,6 +59,11 @@ export interface Facts {
   nativeValue?: Amount;
   offer?: SeaportItem[];
   consideration?: SeaportItem[];
+  /** For swap_order (CoW Swap, 1inch limit orders): what you get back. */
+  buyToken?: TokenRef;
+  buyAmount?: Amount;
+  swapKind?: 'sell' | 'buy';
+  protocol?: string;
   primaryType?: string;
   appName?: string;
 }

@@ -26,7 +26,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -61,11 +61,12 @@ export function createApp(deps: Deps) {
     const body = await c.req.json().catch(() => null);
     if (!body?.typedData) return c.json({ error: 'Paste the signature request (the JSON your wallet shows).' }, 400);
     const l = lang(body.lang);
-    const k = key(['sig', body.typedData, l]);
+    const signer = typeof body.from === 'string' && /^0x[0-9a-fA-F]{40}$/.test(body.from) ? body.from : undefined;
+    const k = key(['sig', body.typedData, l, signer ?? '']);
     const hit = await deps.store.get(k).catch(() => undefined);
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
-      const facts = await decodeTypedData(body.typedData, deps.resolveToken);
+      const facts = await decodeTypedData(body.typedData, deps.resolveToken, undefined, signer);
       return c.json(await respond(facts, l, k));
     } catch {
       return c.json({ error: 'That does not look like a signature request we can read.' }, 422);

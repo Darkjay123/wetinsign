@@ -193,6 +193,46 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           ? 'This signature dey create marketplace listing for your item. Check say the price na wetin you want.'
           : 'This signature creates a marketplace listing for your item. Check the price is what you expect.'));
       break;
+    case 'swap_order': {
+      const p = f.protocol ?? f.appName ?? 'this exchange';
+      const give = `${amt} ${tok}`;
+      const bsym = f.buyToken?.symbol ?? 'tokens';
+      const get = `${f.buyAmount?.display ?? 'an unknown amount'} ${bsym}`;
+      const when = f.deadline?.never ? (pcm ? 'and e no get expiry date' : 'and it never expires') : (pcm ? `e go dey valid till ${until}` : `valid until ${until}`);
+      if (has('FREE_SWAP')) {
+        lines.push(pcm
+          ? `Wahala dey: this order go give away ${give} and you no go collect anything back. No sign am.`
+          : `Danger: this order gives away ${give} for nothing in return. Do not sign it.`);
+      } else if (f.swapKind === 'buy') {
+        lines.push(pcm
+          ? `Na swap order for ${p}: you go collect ${get} and pay at most ${give}, ${when}.`
+          : `This is a swap order on ${p}: you get ${get} and pay at most ${give}, ${when}.`);
+      } else {
+        lines.push(pcm
+          ? `Na swap order for ${p}: you go sell ${give} and collect at least ${get}, ${when}.`
+          : `This is a swap order on ${p}: you sell ${give} and get at least ${get}, ${when}.`);
+      }
+      if (has('RECEIVER_NOT_YOU')) {
+        lines.push(pcm
+          ? `Shine your eye: the ${bsym} no go enter your wallet, e go go ${shortAddr(f.recipient)}. Na so fake swap site dey steal. Only sign if na you choose to send am to that address.`
+          : `Careful: the ${bsym} will not come to your wallet, it goes to ${shortAddr(f.recipient)}. Fake swap sites steal this way. Only sign if you chose to send it to that address.`);
+      } else if (has('RECEIVER_CHECK')) {
+        lines.push(pcm
+          ? `The ${bsym} go enter ${shortAddr(f.recipient)}. Check say na your own wallet address before you sign.`
+          : `The ${bsym} goes to ${shortAddr(f.recipient)}. Check that this is your own wallet address before you sign.`);
+      }
+      const sti = has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+      if (sti) {
+        lines.push(pcm
+          ? `${sti.name} na the official ${sti.protocol} contract. Only sign am if na you start this trade for the real ${sti.protocol} site.`
+          : `${sti.name} is the official ${sti.protocol} contract. Only sign if you started this trade on the real ${sti.protocol} site.`);
+      } else if (has('UNKNOWN_CONTRACT')) {
+        lines.push(pcm
+          ? `The contract for this order no be the official ${p} contract wey we sabi. If no be the real site you dey, no sign am.`
+          : `The contract this order is for is not the official ${p} contract we know. If you are not on the real site, do not sign.`);
+      }
+      break;
+    }
     case 'transfer':
     case 'transfer_from':
     case 'native_send':
@@ -219,7 +259,7 @@ function numbersIn(s: string): string[] {
 
 /** Every number the explanation is allowed to say: only what was decoded. */
 export function allowedNumbers(f: Facts): Set<string> {
-  const pool = [f.amount?.display, String(f.bundle?.length ?? ''), String((f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length), f.tokenId, f.price?.display, ...(f.batch ?? []).map((b) => b.amount.display), f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
+  const pool = [f.amount?.display, String(f.bundle?.length ?? ''), String((f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length), f.tokenId, f.price?.display, ...(f.batch ?? []).map((b) => b.amount.display), f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol, f.buyAmount?.display, f.buyToken?.symbol,
     ...(f.offer ?? []).map((i) => i.amount.display), ...(f.consideration ?? []).map((i) => i.amount.display)];
   const out = new Set<string>();
   for (const s of pool) if (s) for (const n of numbersIn(s)) out.add(n);
@@ -286,7 +326,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.
-  if (flags.some((x) => x.code === 'KNOWN_DRAINER')) return fallback;
+  if (flags.some((x) => x.code === 'KNOWN_DRAINER' || x.code === 'RECEIVER_NOT_YOU' || x.code === 'FREE_SWAP')) return fallback;
   try {
     const text = (await llm(buildMessages(f, flags, lang))).trim();
     if (!text) return fallback;

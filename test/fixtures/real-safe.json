@@ -1224,5 +1224,735 @@
         "TRUSTED_SPENDER"
       ]
     }
+  },
+  {
+    "id": "cow-order-cbc20598",
+    "title": "CoW Swap sell order CRV -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0xcbc20598e6686aa1c8c0d677b8ac6f8ce2ce49ca631e4988c9c502839fe7bace440888714a6afed60ff44e9975a96e6a36f7fac46ca63429",
+    "signer": "0x440888714a6afed60ff44e9975a96e6a36f7fac4",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0xd533a949740bb3306d119cc777fa900ba034cd52": {
+        "symbol": "CRV",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0xd533a949740bb3306d119cc777fa900ba034cd52",
+          "buyToken": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "receiver": "0x440888714a6afed60ff44e9975a96e6a36f7fac4",
+          "sellAmount": "5000000000000000000000",
+          "buyAmount": "1821000000",
+          "validTo": 1822831657,
+          "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0x440888714a6afed60ff44e9975a96e6a36f7fac4"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-order-d9080994",
+    "title": "CoW Swap sell order WILC -> USDT (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0xd9080994f03a338178d74e69dd32918beb297df45afc796fdb72ea549eba056cf6689301eb8c5d5082fb54156f8c96fae0213dd96ac507d4",
+    "signer": "0xf6689301eb8c5d5082fb54156f8c96fae0213dd9",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0xc98a910ede52e7d5308525845f19e17470dbccf7": {
+        "symbol": "WILC",
+        "decimals": 8
+      },
+      "0xdac17f958d2ee523a2206206994597c13d831ec7": {
+        "symbol": "USDT",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0xc98a910ede52e7d5308525845f19e17470dbccf7",
+          "buyToken": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "receiver": "0xf6689301eb8c5d5082fb54156f8c96fae0213dd9",
+          "sellAmount": "5000000000000",
+          "buyAmount": "55861487",
+          "validTo": 1791297492,
+          "appData": "0xbd9a3ab47c8261e3b4a057d082f1b05bacc908385bff1ee232530cba1c1c8fc4",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0xf6689301eb8c5d5082fb54156f8c96fae0213dd9"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-order-a0a2abd7",
+    "title": "CoW Swap sell order ALCX -> WETH (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0xa0a2abd7cb647954c226a3519625cf4db2ccb1276d85ef940cd81edae0ea3299bb3e876e061aeef6e0ece626564cf644bf490d916ac5071c",
+    "signer": "0xbb3e876e061aeef6e0ece626564cf644bf490d91",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0xdbdb4d16eda451d0503b854cf79d55697f90c8df": {
+        "symbol": "ALCX",
+        "decimals": 18
+      },
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0xdbdb4d16eda451d0503b854cf79d55697f90c8df",
+          "buyToken": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "receiver": "0xbb3e876e061aeef6e0ece626564cf644bf490d91",
+          "sellAmount": "1521833007736269203837",
+          "buyAmount": "1495008911330837435",
+          "validTo": 1791297308,
+          "appData": "0x23331657f50ec6de117cb78381ddac6f786fbc940a20a22f540a6cf2c182339e",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0xbb3e876e061aeef6e0ece626564cf644bf490d91"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-order-34e383e0",
+    "title": "CoW Swap sell order USDC -> NVDAON (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0x34e383e0498f45fd7046b824104ce33775b7cca1ed0c2bc9c5c20a7875db4fb0061cecb3619971a384b226a367d4ac78c912de5c6ac506f9",
+    "signer": "0x061cecb3619971a384b226a367d4ac78c912de5c",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      },
+      "0x2d1f7226bd1f780af6b9a49dcc0ae00e8df4bdee": {
+        "symbol": "NVDAON",
+        "decimals": 18
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "buyToken": "0x2d1f7226bd1f780af6b9a49dcc0ae00e8df4bdee",
+          "receiver": "0x061cecb3619971a384b226a367d4ac78c912de5c",
+          "sellAmount": "236092020977",
+          "buyAmount": "965676822859121598216",
+          "validTo": 1791297273,
+          "appData": "0x6584bdce4093f7eafc37d3703cef8514d0ab515ae4a5063782920977a74ddc83",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0x061cecb3619971a384b226a367d4ac78c912de5c"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-order-d4ccb9e4",
+    "title": "CoW Swap sell order EURC -> EURE (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0xd4ccb9e440be9e2c9c5dc559e005d6f3d9d2d9807a94d3c71fee86b0becfc24b89f3e6dc9def3c020172d36da2058afd20fbfa006ac506b2",
+    "signer": "0x89f3e6dc9def3c020172d36da2058afd20fbfa00",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0x1abaea1f7c830bd89acc67ec4af516284b1bc33c": {
+        "symbol": "EURC",
+        "decimals": 6
+      },
+      "0x39b8b6385416f4ca36a20319f70d28621895279d": {
+        "symbol": "EURE",
+        "decimals": 18
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0x1abaea1f7c830bd89acc67ec4af516284b1bc33c",
+          "buyToken": "0x39b8b6385416f4ca36a20319f70d28621895279d",
+          "receiver": "0x89f3e6dc9def3c020172d36da2058afd20fbfa00",
+          "sellAmount": "22985283653",
+          "buyAmount": "22937450418954530441572",
+          "validTo": 1791297202,
+          "appData": "0xd49e339d18ceaae777c714ea8867f3a4afbfaf53a563cdf38942cbf603db9f61",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0x89f3e6dc9def3c020172d36da2058afd20fbfa00"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-order-4ca2c865",
+    "title": "CoW Swap sell order USDT -> ETH (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "CoW Protocol order book (api.cow.fi), settled on Ethereum",
+    "uid": "0x4ca2c865dd69ca1a1085619783cfa22dd9342ceeb97529209db418c1e8c25a633b13f7c441bbf7715012bd7dbbdf98f2f248922d6ac50661",
+    "signer": "0x3b13f7c441bbf7715012bd7dbbdf98f2f248922d",
+    "provenance": "order fields from the CoW API; EIP-712 signature recovered to the owner",
+    "tokens": {
+      "0xdac17f958d2ee523a2206206994597c13d831ec7": {
+        "symbol": "USDT",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "Gnosis Protocol",
+          "version": "v2",
+          "chainId": 1,
+          "verifyingContract": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "sellToken",
+              "type": "address"
+            },
+            {
+              "name": "buyToken",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "sellAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "buyAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "validTo",
+              "type": "uint32"
+            },
+            {
+              "name": "appData",
+              "type": "bytes32"
+            },
+            {
+              "name": "feeAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "partiallyFillable",
+              "type": "bool"
+            },
+            {
+              "name": "sellTokenBalance",
+              "type": "string"
+            },
+            {
+              "name": "buyTokenBalance",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "sellToken": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "buyToken": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "receiver": "0xa93e0c90af32d145335569ac92034a5323be31e8",
+          "sellAmount": "53874746",
+          "buyAmount": "19335085959699335",
+          "validTo": 1791297121,
+          "appData": "0x32bc420b879b0ea1a4187cebe40be5e966dd56a437b59c926484c9f49194a21f",
+          "feeAmount": "0",
+          "kind": "sell",
+          "partiallyFillable": false,
+          "sellTokenBalance": "erc20",
+          "buyTokenBalance": "erc20"
+        }
+      },
+      "from": "0x3b13f7c441bbf7715012bd7dbbdf98f2f248922d"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "RECEIVER_NOT_YOU",
+        "TRUSTED_SPENDER"
+      ]
+    },
+    "note": "Made in the CoW Swap app (appCode 'CoW Swap', market order) with the proceeds sent to another wallet on purpose. Shows a receiver change alone cannot be called danger."
   }
 ]

@@ -12,10 +12,11 @@ const safe = JSON.parse(readFileSync(new URL('./fixtures/real-safe.json', import
 
 // A fixture may carry what the chain says about the token or spender, recorded with its source in the fixture.
 function resolverFor(c: any) {
+  if (c.tokens) return async (_chainId: number | undefined, address: string) => ({ address, ...(c.tokens[address.toLowerCase()] ?? c.token ?? {}) });
   return c.token ? async (_chainId: number | undefined, address: string) => ({ address, ...c.token }) : undefined;
 }
 async function factsFor(c: any) {
-  return c.endpoint === 'call' ? decodeCall(c.input, resolverFor(c)) : decodeTypedData(c.input.typedData, resolverFor(c));
+  return c.endpoint === 'call' ? decodeCall(c.input, resolverFor(c)) : decodeTypedData(c.input.typedData, resolverFor(c), undefined, c.input.from);
 }
 
 describe('real attacks', () => {

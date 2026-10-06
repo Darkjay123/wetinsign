@@ -22,7 +22,11 @@ export interface Flag {
     | 'NFT_APPROVE_ONE'
     | 'TAKES_NOW'
     | 'UNREADABLE_BATCH'
-    | 'BATCH_APPROVALS';
+    | 'BATCH_APPROVALS'
+    | 'FREE_SWAP'
+    | 'RECEIVER_NOT_YOU'
+    | 'RECEIVER_CHECK'
+    | 'UNKNOWN_CONTRACT';
   severity: Severity;
 }
 
@@ -92,6 +96,19 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     case 'blur_bulk':
       flags.push({ code: 'UNREADABLE_BATCH', severity: 'warning' }, { code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
       break;
+    case 'swap_order': {
+      const trusted = !flags.some((x) => x.code === 'KNOWN_DRAINER') && trustedSpender(f.chainId, f.spender);
+      if (f.buyAmount?.raw === '0' && f.amount?.raw !== '0') flags.push({ code: 'FREE_SWAP', severity: 'danger' });
+      const rec = f.recipient?.toLowerCase();
+      // A warning, not danger: 1 of the first 6 real CoW Swap orders we pulled (USDT -> ETH, 6 Oct 2026, made in the
+      // CoW Swap app) legitimately sent the proceeds to a different wallet. Fake swap sites do the same thing, so we say it loudly.
+      if (rec && f.owner && rec !== f.owner.toLowerCase()) flags.push({ code: 'RECEIVER_NOT_YOU', severity: 'warning' });
+      else if (rec && !f.owner) flags.push({ code: 'RECEIVER_CHECK', severity: 'warning' });
+      if (trusted) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
+      else flags.push({ code: 'UNKNOWN_CONTRACT', severity: 'warning' }, { code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
+      if (f.deadline?.never) flags.push({ code: 'NEVER_EXPIRES', severity: 'warning' });
+      break;
+    }
     case 'ownership_transfer':
       flags.push({ code: 'OWNERSHIP_TRANSFER', severity: 'danger' });
       break;
