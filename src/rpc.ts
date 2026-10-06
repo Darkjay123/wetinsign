@@ -1,6 +1,6 @@
-import { createPublicClient, http, parseAbi, type Hex, type PublicClient } from 'viem';
+import { createPublicClient, fallback, http, parseAbi, type Hex, type PublicClient } from 'viem';
 import { keccak256 } from 'viem';
-import { rpcUrl } from './chains.js';
+import { rpcUrls } from './chains.js';
 import { knownToken, type TokenRef } from './tokens.js';
 import type { CallInput, TokenResolver } from './decode.js';
 
@@ -9,9 +9,10 @@ const clients = new Map<number, PublicClient>();
 function client(chainId: number): PublicClient {
   let c = clients.get(chainId);
   if (!c) {
-    const url = rpcUrl(chainId);
-    if (!url) throw new Error(`No RPC configured for chain ${chainId}`);
-    c = createPublicClient({ transport: http(url, { timeout: 10_000 }) }) as PublicClient;
+    const urls = rpcUrls(chainId);
+    if (!urls.length) throw new Error(`No RPC configured for chain ${chainId}`);
+    // Public RPCs drop out; try the next one instead of failing the user.
+    c = createPublicClient({ transport: fallback(urls.map((u) => http(u, { timeout: 10_000, retryCount: 0 }))) }) as PublicClient;
     clients.set(chainId, c);
   }
   return c;

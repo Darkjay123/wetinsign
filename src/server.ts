@@ -27,7 +27,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v17';
+const CACHE_VERSION = 'v18';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -57,7 +57,7 @@ export function createApp(deps: Deps) {
     }),
   );
   app.get('/api/drainers', (c) => c.json(drainerStats()));
-  app.get('/api/chains', (c) => c.json(Object.values(CHAINS).map(({ id, name }) => ({ id, name }))));
+  app.get('/api/chains', (c) => c.json(Object.values(CHAINS).map(({ id, name, nativeSymbol }) => ({ id, name, nativeSymbol }))));
 
   app.post('/api/explain/signature', async (c) => {
     const body = await c.req.json().catch(() => null);
@@ -105,16 +105,38 @@ export function createApp(deps: Deps) {
 
   app.post('/api/explain/tx', async (c) => {
     const body = await c.req.json().catch(() => null);
-    const chainId = Number(body?.chainId);
-    if (!CHAINS[chainId]) return c.json({ error: 'Pick a supported network.' }, 400);
+    const auto = body?.chainId === undefined || body?.chainId === null || body?.chainId === '' || body?.chainId === 'auto' || body?.chainId === 0;
+    let chainId = auto ? undefined : Number(body?.chainId);
+    if (!auto && !CHAINS[chainId!]) return c.json({ error: 'Pick a supported network.' }, 400);
     if (!/^0x[0-9a-fA-F]{64}$/.test(body?.hash ?? '')) return c.json({ error: 'A transaction hash is 0x followed by 64 characters.' }, 400);
     if (!deps.fetchTx) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
     const l = lang(body.lang);
-    const k = key(['tx', chainId, body.hash.toLowerCase(), l]);
+    const hash = body.hash.toLowerCase();
+    if (auto) {
+      const hitAuto = await deps.store.get(key(['txauto', hash])).catch(() => undefined) as { chainId?: number } | undefined;
+      if (hitAuto?.chainId && CHAINS[hitAuto.chainId]) chainId = hitAuto.chainId;
+    }
+    let input: Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
+    try {
+      if (chainId === undefined) {
+        // Paste a hash, we find the network: ask every network at once and take the one that has it.
+        const ids = Object.keys(CHAINS).map(Number);
+        const found = await Promise.any(ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))));
+        chainId = found.id;
+        input = found.r;
+        await deps.store.put(key(['txauto', hash]), { chainId }).catch(() => undefined);
+      } else {
+        input = await deps.fetchTx(chainId, hash);
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg.includes('created a contract')) return c.json({ error: msg }, 404);
+      return c.json({ error: auto ? `We could not find that transaction on any of the ${Object.keys(CHAINS).length} networks we check.` : 'We could not find that transaction on this network.' }, 404);
+    }
+    const k = key(['tx', chainId, hash, l]);
     const hit = await deps.store.get(k).catch(() => undefined);
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
-      const input = await deps.fetchTx(chainId, body.hash);
       // A type-4 transaction can upgrade accounts as well as make a call. An unrecognised upgrade outranks whatever the call does.
       for (const a of input.authorizations ?? []) {
         const df = decodeDelegation({ chainId, address: a.address });
@@ -122,10 +144,10 @@ export function createApp(deps: Deps) {
         const fl = assessRisk(df, { drainers: drainerSet(), delegateCode });
         if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
       }
-      const facts = await decodeCall(input, deps.resolveToken);
+      const facts = await decodeCall({ ...input, chainId }, deps.resolveToken);
       return c.json(await respond(facts, l, k));
-    } catch (e) {
-      return c.json({ error: e instanceof Error && e.message.includes('created a contract') ? e.message : 'We could not find that transaction on this network.' }, 404);
+    } catch {
+      return c.json({ error: 'We found the transaction but could not read it.' }, 422);
     }
   });
 

@@ -1,5 +1,5 @@
 import { decodeAbiParameters, decodeFunctionData, parseAbi, type Hex } from 'viem';
-import { chainName, CHAINS } from './chains.js';
+import { chainName, CHAINS, nativeSymbol } from './chains.js';
 import type { Facts, SeaportItem } from './facts.js';
 import { formatAmount, formatDeadline } from './format.js';
 import { knownToken, type TokenRef } from './tokens.js';
@@ -346,7 +346,7 @@ export async function decodeTypedData(
 
 const NATIVE = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 async function swapToken(chainId: number | undefined, a: string, resolveToken: TokenResolver): Promise<TokenRef> {
-  if (String(a).toLowerCase() === NATIVE) return { address: a, symbol: chainId === 56 ? 'BNB' : chainId === 137 ? 'POL' : 'ETH', decimals: 18 };
+  if (String(a).toLowerCase() === NATIVE) return { address: a, symbol: nativeSymbol(chainId), decimals: 18 };
   return resolveToken(chainId, a);
 }
 /** 1inch encodes addresses as uint256 ("Address" type); the address is the low 160 bits. */

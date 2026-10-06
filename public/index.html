@@ -38,7 +38,7 @@
 <body>
 <main>
   <h1>WetinSign</h1>
-  <p class="sub">Before you sign, know wetin you dey sign. Paste what your wallet is asking you to approve.</p>
+  <p class="sub">Before you sign, know wetin you dey sign. Paste what your wallet is asking you to approve. Works on <span id="netcount">47</span> networks.</p>
 
   <div class="lang" role="group" aria-label="Language">
     <button class="chip" data-lang="en" aria-pressed="true">English</button>
@@ -61,7 +61,7 @@
 
   <section class="panel" id="p-tx">
     <label for="chain">Network</label>
-    <select id="chain"></select>
+    <select id="chain"><option value="auto">Find the network for me</option></select>
     <label for="hash">Transaction hash</label>
     <input id="hash" spellcheck="false" placeholder="0x…">
   </section>
@@ -98,8 +98,16 @@ document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
 });
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang = b.dataset.lang; press('[data-lang]', 'lang', lang); });
 
+// Networks most Nigerians use first, then everything else A to Z.
+const POPULAR = [56, 1, 8453, 137, 42161, 10, 43114];
 fetch('/api/chains').then(r => r.json()).then(cs => {
-  for (const sel of [$('#chain'), $('#cchain'), $('#dchain')]) sel.innerHTML = cs.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  const opt = (c) => `<option value="${c.id}">${esc(c.name)}</option>`;
+  const top = POPULAR.map(id => cs.find(c => c.id === id)).filter(Boolean);
+  const rest = cs.filter(c => !POPULAR.includes(c.id)).sort((a, b) => a.name.localeCompare(b.name));
+  const list = `<optgroup label="Popular">${top.map(opt).join('')}</optgroup><optgroup label="All ${cs.length} networks">${rest.map(opt).join('')}</optgroup>`;
+  $('#chain').innerHTML = '<option value="auto">Find the network for me</option>' + list;
+  for (const sel of [$('#cchain'), $('#dchain')]) sel.innerHTML = list;
+  $('#netcount').textContent = cs.length;
 });
 
 const SAMPLES = {
@@ -138,7 +146,7 @@ $('#go').onclick = async () => {
   let url, body;
   try {
     if (tab === 'signature') { url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; const fr = $('#from').value.trim(); if (/^0x[0-9a-fA-F]{40}$/.test(fr)) body.from = fr; }
-    else if (tab === 'tx') { url = '/api/explain/tx'; body = { chainId: Number($('#chain').value), hash: $('#hash').value.trim(), lang }; }
+    else if (tab === 'tx') { url = '/api/explain/tx'; const cv = $('#chain').value; body = { chainId: cv === 'auto' ? 'auto' : Number(cv), hash: $('#hash').value.trim(), lang }; }
     else if (tab === 'deleg') { url = '/api/explain/delegation'; body = { chainId: Number($('#dchain').value), address: $('#daddr').value.trim(), lang }; }
     else { url = '/api/explain/call'; body = { chainId: Number($('#cchain').value), to: $('#to').value.trim(), data: $('#data').value.trim(), lang }; }
   } catch { $('#err').textContent = 'That signature request is not valid JSON.'; return; }
