@@ -68,6 +68,8 @@ export const CHAINS: Record<number, Chain> = {
   // Sui, Aptos and the XRP Ledger are not EVM; src/sui.ts, src/aptos.ts and src/xrpl.ts read them. IDs are SLIP-44 coin types.
   784: { id: 784, name: "Sui", nativeSymbol: "SUI", nativeDecimals: 9, rpcs: ["https://graphql.mainnet.sui.io/graphql"], explorer: "https://suiscan.xyz/mainnet" },
   637: { id: 637, name: "Aptos", nativeSymbol: "APT", nativeDecimals: 8, rpcs: ["https://api.mainnet.aptoslabs.com/v1"], explorer: "https://explorer.aptoslabs.com" },
+  // NEAR is not EVM; src/near.ts reads it. 397 is its SLIP-44 coin type.
+  397: { id: 397, name: "NEAR", nativeSymbol: "NEAR", nativeDecimals: 24, rpcs: ["https://archival-rpc.mainnet.fastnear.com", "https://rpc.mainnet.near.org"], explorer: "https://nearblocks.io" },
   144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };
 

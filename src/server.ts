@@ -17,6 +17,7 @@ import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
 import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
 import { aptosFacts, asAptosPayload, APTOS_ID, fetchAptosTx, type AptosLookup } from './aptos.js';
 import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
+import { fetchNearTx, isNearRequest, NEAR_ID, nearFacts, nearFromJson, parseNearText, type NearLookup } from './near.js';
 import { fetchXrplTx, isXrplTx, parseXrplText, XRPL_ID, xrplFacts, type XrplLookup } from './xrpl.js';
 import { explainSolanaText, fetchSolanaTx, isSolSignature, looksLikeSolanaTx, SOLANA_ID, type Rpc } from './solana.js';
 
@@ -35,6 +36,7 @@ export interface Deps {
   suiLookup?: SuiLookup;
   aptosLookup?: AptosLookup;
   xrplLookup?: XrplLookup;
+  nearLookup?: NearLookup;
 }
 
 /** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
@@ -43,7 +45,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v26';
+const CACHE_VERSION = 'v27';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -166,6 +168,12 @@ export function createApp(deps: Deps) {
       const sender = [body?.from, pastedJson?.sender].find((v) => typeof v === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(v)) as string | undefined;
       return cached(key(['aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, deps.aptosLookup, sender), l, 'We could not read that Aptos transaction.');
     }
+    // NEAR: wallet-selector or near-api-js JSON, base64 borsh bytes, or a wallet link with ?transactions=.
+    const nearTxs = pastedJson && isNearRequest(pastedJson) ? nearFromJson(pastedJson) : isNearRequest(body?.transaction ?? body) ? nearFromJson(body?.transaction ?? body) : pastedText ? parseNearText(pastedText) : undefined;
+    if (nearTxs?.length) {
+      const l = lang(body.lang);
+      return cached(key(['near', nearTxs, l]), () => nearFacts(nearTxs, deps.nearLookup), l, 'We could not read that NEAR transaction.');
+    }
     // Sui: base64 transaction bytes (or the SDK's JSON) a site asks Slush/Suiet to sign. A Sui node dry-runs it.
     if (pastedText && (Number(body?.chainId) === SUI_ID || (looksLikeSuiTx(pastedText) && !looksLikeSolanaTx(pastedText)))) {
       const l = lang(body.lang);
@@ -268,6 +276,20 @@ export function createApp(deps: Deps) {
       try { facts = await fetchSolanaTx(rawHash, deps.solanaRpc); } catch { return c.json({ error: 'We could not find that transaction on Solana.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    // NEAR hashes look exactly like Sui digests (32 bytes, base58). Pick NEAR, or let us ask both.
+    if (chainId === NEAR_ID || (auto && isSuiDigest(rawHash) && deps.nearLookup)) {
+      if (!isSuiDigest(rawHash)) return c.json({ error: 'A NEAR transaction hash is 43 or 44 letters and numbers (copy it from NearBlocks or your wallet).' }, 400);
+      if (!deps.nearLookup) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
+      const l = lang(body.lang);
+      const kn = key(['neartx', rawHash, l]);
+      const hitN = await fromCache(kn);
+      if (hitN) return c.json({ ...(hitN as object), cached: true });
+      let facts: Facts;
+      try {
+        facts = chainId === NEAR_ID || !deps.suiLookup ? await fetchNearTx(rawHash, deps.nearLookup) : await Promise.any([fetchNearTx(rawHash, deps.nearLookup), fetchSuiTx(rawHash, deps.suiLookup)]);
+      } catch { return c.json({ error: chainId === NEAR_ID ? 'We could not find that transaction on NEAR.' : 'We could not find that transaction on NEAR or Sui.' }, 404); }
+      return c.json(await respond(facts, l, kn));
+    }
     // Sui: a 32-byte base58 digest (43 or 44 characters), from Suiscan or your wallet.
     if (isSuiDigest(rawHash) || chainId === SUI_ID) {
       if (!isSuiDigest(rawHash)) return c.json({ error: 'A Sui transaction digest is 43 or 44 letters and numbers (copy it from Suiscan or your wallet).' }, 400);
@@ -313,7 +335,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
@@ -362,6 +384,7 @@ if (isMain) {
   const { suiLookup } = await import('./sui.js');
   const { aptosLookup } = await import('./aptos.js');
   const { xrplLookup } = await import('./xrpl.js');
+  const { nearLookup } = await import('./near.js');
   const app = createApp({
     llm: rumptyLlm(),
     store: createStore(),
@@ -374,6 +397,7 @@ if (isMain) {
     suiLookup,
     aptosLookup,
     xrplLookup,
+    nearLookup,
   });
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);

@@ -73,7 +73,7 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
   if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
-  else if ([607, 784, 637, 144].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  else if ([607, 784, 637, 144, 397].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 

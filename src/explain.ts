@@ -347,8 +347,14 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'account_control': {
       const c = f.control, ch = f.chain;
-      const coin = f.chainId === 144 ? 'XRP' : f.chainId === 637 ? 'APT' : 'coins';
-      if (c === 'regular_key') lines.push(pcm
+      const coin = f.chainId === 144 ? 'XRP' : f.chainId === 637 ? 'APT' : f.chainId === 397 ? 'NEAR' : 'coins';
+      if (c === 'full_access_key') lines.push(pcm
+        ? `Wahala dey: this one go add new FULL ACCESS key for your ${ch} account. Whoever get that key fit do anything wey you fit do: carry all your ${coin} and tokens, add their own keys, remove your own. Na the main way ${ch} wallets dey get drained. Only OK if na your own wallet app dey add its own backup key, never because website or person tell you.`
+        : `Danger: this adds a new FULL ACCESS key to your ${ch} account. Whoever holds that key can do anything you can: move all your ${coin} and tokens, add their own keys and remove yours. This is the main way ${ch} wallets get drained. It is only fine if your own wallet app is adding its own backup key, never because a website or a person asked.`);
+      else if (c === 'deploy_code') lines.push(pcm
+        ? `Wahala dey: this one go put new program code ON your ${ch} account itself. That code fit move everything wey dey the account and e no need your key again. No sign am unless na you write the code.`
+        : `Danger: this puts new program code on your ${ch} account itself. That code can move everything in the account without your key. Do not sign unless you wrote that code.`);
+      else if (c === 'regular_key') lines.push(pcm
         ? `Wahala dey: this one go give ${who} key wey fit sign for your ${ch} account. After you sign, dem fit carry all your ${coin} and tokens anytime, without you. Na the fake "support" or "wallet validation" scam be this. Only sign am if ${who} na key wey you yourself create.`
         : `Danger: this gives ${who} a key that can sign for your ${ch} account. Once signed they can move all your ${coin} and tokens whenever they like, without you. This is the fake "support" or "wallet validation" scam. Only sign if ${who} is a key you made yourself.`);
       else if (c === 'signer_capability' || c === 'rotation_capability') lines.push(pcm
@@ -368,8 +374,8 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           : `Careful: this adds ${list} as co-signers on your ${ch} account. They cannot act alone, and your own key still works unless you turn it off. Only do this for a shared wallet with people you trust.`);
         else lines.push(pcm ? `This one dey change the signer settings for your ${ch} account, but na only you still get control.` : `This changes your ${ch} account's signer settings, but only you keep control.`);
       } else if (c === 'account_delete') lines.push(pcm
-        ? `Wahala dey: this one go delete your ${ch} account and send ALL the XRP wey remain go ${who}. E no dey reverse. Only sign am if ${who} na your own wallet or exchange address.`
-        : `Danger: this deletes your ${ch} account and sends ALL your remaining XRP to ${who}. It cannot be undone. Only sign if ${who} is your own wallet or exchange address.`);
+        ? `Wahala dey: this one go delete your ${ch} account and send ALL the ${coin} wey remain go ${who}. E no dey reverse. Only sign am if ${who} na your own wallet or exchange address.`
+        : `Danger: this deletes your ${ch} account and sends ALL your remaining ${coin} to ${who}. It cannot be undone. Only sign if ${who} is your own wallet or exchange address.`);
       else if (c === 'disable_master') lines.push(pcm
         ? `Shine your eye: this one go off your main key for ${ch}. After am, only the regular key or co-signers fit control the account. If dem no be your own, you don lose the account. Only do am if you sure say you control them.`
         : `Careful: this turns off your main key on ${ch}. Afterwards only the regular key or co-signers can control the account. If those are not yours, the account is gone. Only do this if you are sure you control them.`);
@@ -385,7 +391,8 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         trustline_remove: `This removes your trust line for ${tok}. It does not move your money.`,
         dex_order: `This places an order on the ${ch} exchange: you give up to ${amt} ${tok} for ${buy}.`,
         swap: `This trades ${amt} ${tok} for ${buy}, and you get it back in this same transaction.`,
-        app_deposit: `This puts ${amt} ${tok} into an app on ${ch} that we cannot name, and you get nothing back in this transaction. Only sign if you started it on a site you trust.`,
+        app_key: `This is an app sign-in key: it lets ${shortAddr(f.contract)} spend ${f.amount ? `up to ${amt} NEAR` : 'NEAR'} on network fees for actions in that app. It cannot send your NEAR or tokens anywhere.`,
+        app_deposit: f.chainId === 397 && f.appName ? `This sends ${amt} ${tok} into the app at ${f.appName} with instructions (usually a swap, deposit or bridge). Check that is the app you meant to use; once it is in, only that app can send it back.` : `This puts ${amt} ${tok} into an app on ${ch} that we cannot name, and you get nothing back in this transaction. Only sign if you started it on a site you trust.`,
         nft_sell_free: `Danger: this offers your NFT for sale for nothing${f.recipient ? ` to ${who}` : ' to anyone'}. Whoever accepts takes it free. This is the free-listing NFT scam. Do not sign.`,
         nft_sell: `This offers your NFT for sale for ${price}${f.recipient ? ` to ${who}` : ''}.`,
         nft_buy: `This offers ${price} to buy an NFT. You only pay if the owner accepts.`,
@@ -403,7 +410,8 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         trustline_remove: `This one dey remove your trust line for ${tok}. E no dey move your money.`,
         dex_order: `This one dey put order for the ${ch} exchange: you go give reach ${amt} ${tok} for ${buy}.`,
         swap: `This one dey change ${amt} ${tok} to ${buy}, and you go collect am for this same transaction.`,
-        app_deposit: `This one go put ${amt} ${tok} inside app for ${ch} wey we no fit name, and you no go collect anything back for this transaction. Only sign am if na you start am for site wey you trust.`,
+        app_key: `Na app sign-in key be this: e go allow ${shortAddr(f.contract)} use ${f.amount ? `reach ${amt} NEAR` : 'NEAR'} pay network fee for things for that app. E no fit send your NEAR or tokens go anywhere.`,
+        app_deposit: f.chainId === 397 && f.appName ? `This one go send ${amt} ${tok} enter the app for ${f.appName} with instruction (normally swap, deposit or bridge). Check say na the app wey you mean; once e enter, na only that app fit send am back.` : `This one go put ${amt} ${tok} inside app for ${ch} wey we no fit name, and you no go collect anything back for this transaction. Only sign am if na you start am for site wey you trust.`,
         nft_sell_free: `Wahala dey: this one dey put your NFT for sale for free${f.recipient ? ` give ${who}` : ' give anybody'}. Who accept am go carry am free. Na the free-listing NFT scam be this. No sign am.`,
         nft_sell: `This one dey put your NFT for sale for ${price}${f.recipient ? ` give ${who}` : ''}.`,
         nft_buy: `This one dey offer ${price} to buy NFT. You go pay only if the owner accept.`,
@@ -421,7 +429,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'unknown_call':
     case 'unknown_signature':
-      if (f.chainId === 637 && f.appName) lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
+      if ((f.chainId === 637 || f.chainId === 397) && f.appName) lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
       if (f.chainId === 501 && f.nativeValue) lines.push(pcm
         ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
         : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
@@ -534,7 +542,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.
