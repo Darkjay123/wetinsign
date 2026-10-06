@@ -65,6 +65,10 @@ export const CHAINS: Record<number, Chain> = {
   501: { id: 501, name: "Solana", nativeSymbol: "SOL", nativeDecimals: 9, rpcs: ["https://solana-rpc.publicnode.com", "https://api.mainnet-beta.solana.com"], explorer: "https://solscan.io" },
   // TON is not EVM; src/ton.ts reads it. 607 is its SLIP-44 coin type.
   607: { id: 607, name: "TON", nativeSymbol: "TON", nativeDecimals: 9, rpcs: ["https://toncenter.com/api/v3"], explorer: "https://tonviewer.com" },
+  // Sui, Aptos and the XRP Ledger are not EVM; src/sui.ts, src/aptos.ts and src/xrpl.ts read them. IDs are SLIP-44 coin types.
+  784: { id: 784, name: "Sui", nativeSymbol: "SUI", nativeDecimals: 9, rpcs: ["https://graphql.mainnet.sui.io/graphql"], explorer: "https://suiscan.xyz/mainnet" },
+  637: { id: 637, name: "Aptos", nativeSymbol: "APT", nativeDecimals: 8, rpcs: ["https://api.mainnet.aptoslabs.com/v1"], explorer: "https://explorer.aptoslabs.com" },
+  144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };
 
 export function chainName(id?: number): string {

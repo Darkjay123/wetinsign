@@ -13,6 +13,9 @@ import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
 import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
+import { aptosFacts, asAptosPayload, APTOS_ID, fetchAptosTx, type AptosLookup } from './aptos.js';
+import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
+import { fetchXrplTx, isXrplTx, parseXrplText, XRPL_ID, xrplFacts, type XrplLookup } from './xrpl.js';
 import { explainSolanaText, fetchSolanaTx, isSolSignature, looksLikeSolanaTx, SOLANA_ID, type Rpc } from './solana.js';
 
 export interface Deps {
@@ -26,6 +29,10 @@ export interface Deps {
   solanaRpc?: Rpc;
   /** TON lookups (jetton names, Tonkeeper scam labels, transactions). Without it TON requests are read offline. */
   tonLookup?: TonLookup;
+  /** Sui node (dry-runs and lookups), Aptos REST and XRP Ledger JSON-RPC. Without them those networks are read offline where possible. */
+  suiLookup?: SuiLookup;
+  aptosLookup?: AptosLookup;
+  xrplLookup?: XrplLookup;
 }
 
 /** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
@@ -34,7 +41,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v24';
+const CACHE_VERSION = 'v25';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -86,6 +93,32 @@ export function createApp(deps: Deps) {
 
   app.post('/api/explain/call', async (c) => {
     const body = await c.req.json().catch(() => null);
+    const pastedText = typeof body?.transaction === 'string' ? body.transaction : typeof body?.data === 'string' ? body.data : undefined;
+    const pastedJson = (() => { if (typeof body?.transaction === 'object' && body.transaction) return body.transaction; if (pastedText?.trim().startsWith('{')) { try { return JSON.parse(pastedText); } catch { return undefined; } } return undefined; })();
+    const cached = async (k: string, make: () => Promise<Facts>, l: Lang, err: string) => {
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      try { return c.json(await respond(await make(), l, k)); } catch { return c.json({ error: err }, 422); }
+    };
+    // XRP Ledger: the transaction JSON (or signed hex blob) Xaman, Crossmark or a Ledger is asked to sign.
+    const xrplTx = [pastedJson, body].find(isXrplTx) ?? (pastedText ? parseXrplText(pastedText) : undefined);
+    if (xrplTx) {
+      const l = lang(body.lang);
+      return cached(key(['xrpl', xrplTx, l]), () => xrplFacts(xrplTx, deps.xrplLookup), l, 'We could not read that XRP Ledger transaction.');
+    }
+    // Aptos: the entry-function payload Petra or another wallet is asked to sign.
+    const aptosP = asAptosPayload(pastedJson) ?? asAptosPayload(body);
+    if (aptosP) {
+      const l = lang(body.lang);
+      const sender = typeof body?.from === 'string' ? body.from : typeof pastedJson?.sender === 'string' ? pastedJson.sender : undefined;
+      return cached(key(['aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, deps.aptosLookup, sender), l, 'We could not read that Aptos transaction.');
+    }
+    // Sui: base64 transaction bytes (or the SDK's JSON) a site asks Slush/Suiet to sign. A Sui node dry-runs it.
+    if (pastedText && (Number(body?.chainId) === SUI_ID || (looksLikeSuiTx(pastedText) && !looksLikeSolanaTx(pastedText)))) {
+      const l = lang(body.lang);
+      if (!deps.suiLookup) return c.json({ error: 'Sui checks are not configured.' }, 503);
+      return cached(key(['sui', pastedText.trim(), l]), () => explainSuiText(pastedText, deps.suiLookup), l, 'We could not read that Sui transaction. Paste the base64 text the site asks your wallet to sign.');
+    }
     // TON: the TON Connect sendTransaction request ({ messages: [...] }), pasted whole.
     const tonReq = [body?.transaction, body, typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined].find(isTonRequest);
     if (tonReq) {
@@ -175,6 +208,28 @@ export function createApp(deps: Deps) {
       try { facts = await fetchSolanaTx(rawHash, deps.solanaRpc); } catch { return c.json({ error: 'We could not find that transaction on Solana.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    // Sui: a 32-byte base58 digest (43 or 44 characters), from Suiscan or your wallet.
+    if (isSuiDigest(rawHash) || chainId === SUI_ID) {
+      if (!isSuiDigest(rawHash)) return c.json({ error: 'A Sui transaction digest is 43 or 44 letters and numbers (copy it from Suiscan or your wallet).' }, 400);
+      if (!deps.suiLookup) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
+      const l = lang(body.lang);
+      const k = key(['suitx', rawHash, l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchSuiTx(rawHash, deps.suiLookup); } catch { return c.json({ error: 'We could not find that transaction on Sui.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
+    if ((chainId === APTOS_ID && deps.aptosLookup) || (chainId === XRPL_ID && deps.xrplLookup)) {
+      if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
+      const l = lang(body.lang);
+      const k = key(['nonevm', chainId, rawHash.toLowerCase(), l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = chainId === APTOS_ID ? await fetchAptosTx(rawHash, deps.aptosLookup) : await fetchXrplTx(rawHash, deps.xrplLookup); } catch { return c.json({ error: `We could not find that transaction on ${CHAINS[chainId!].name}.` }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     // TON: tonviewer shows a 64-character hash, toncenter a 44-character base64 one. Either works.
     const tonB64 = /^[A-Za-z0-9+/_-]{43}=$/.test(rawHash);
     if ((tonB64 || chainId === TON_ID) && deps.tonLookup) {
@@ -198,9 +253,15 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => id !== SOLANA_ID && id !== TON_ID);
-        const tonTry = deps.tonLookup ? [fetchTonTx(hash, deps.tonLookup).then((f) => ({ id: TON_ID, r: { to: '', facts: f } as Awaited<ReturnType<NonNullable<Deps['fetchTx']>>> }))] : [];
-        const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...tonTry]);
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID].includes(id));
+        type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
+        const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
+        const others = [
+          ...(deps.tonLookup ? [wrap(TON_ID, fetchTonTx(hash, deps.tonLookup))] : []),
+          ...(deps.aptosLookup ? [wrap(APTOS_ID, fetchAptosTx(hash, deps.aptosLookup))] : []),
+          ...(deps.xrplLookup ? [wrap(XRPL_ID, fetchXrplTx(hash, deps.xrplLookup))] : []),
+        ];
+        const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...others]);
         chainId = found.id;
         input = found.r;
         await deps.store.put(key(['txauto', hash]), { chainId }).catch(() => undefined);
@@ -238,6 +299,9 @@ if (isMain) {
   const { onchainResolver, fetchTransaction, isContract, codeInfo } = await import('./rpc.js');
   const { solanaRpc } = await import('./solana.js');
   const { tonLookup } = await import('./ton.js');
+  const { suiLookup } = await import('./sui.js');
+  const { aptosLookup } = await import('./aptos.js');
+  const { xrplLookup } = await import('./xrpl.js');
   const app = createApp({
     llm: rumptyLlm(),
     store: createStore(),
@@ -247,6 +311,9 @@ if (isMain) {
     codeInfo,
     solanaRpc,
     tonLookup,
+    suiLookup,
+    aptosLookup,
+    xrplLookup,
   });
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);

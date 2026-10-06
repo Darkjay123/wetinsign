@@ -37,12 +37,12 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       : 'STOP: this address has been reported as a wallet drainer. Do not sign.');
   }
 
-  if (has('TON_SWEEP') && f.sweep) {
+  if (has('ASSET_SWEEP') && f.sweep) {
     const list = f.sweep.assets.join(', ');
     const to = shortAddr(f.sweep.recipient);
     lines.push(pcm
-      ? `Wahala dey: this one request go send ${list} go the same address ${to} at once. Real app no dey pack many coins go one address like this; na so TON drainers dey clear wallet with one click. No sign am.`
-      : `Danger: this one request sends ${list} to the same address ${to} at once. Real apps do not move several coins into one address like this; TON drainers empty wallets exactly this way. Do not sign.`);
+      ? `Wahala dey: this one request go send ${list} go the same address ${to} at once. Real app no dey pack many coins go one address like this; na so ${f.chain} drainers dey clear wallet with one click. No sign am.`
+      : `Danger: this one request sends ${list} to the same address ${to} at once. Real apps do not move several coins into one address like this; ${f.chain} drainers empty wallets exactly this way. Do not sign.`);
   } else if (f.via === 'batch' && f.bundle?.length) {
     const approvals = f.bundle.filter((b) => /approve|permit2/.test(b.kind));
     const names = [...new Set(approvals.map((b) => b.token?.symbol).filter(Boolean))] as string[];
@@ -339,8 +339,83 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         : `This changes who can create or freeze the ${tok} token itself. It only matters if you made this token; it does not move your money.`);
       break;
     }
+    case 'account_control': {
+      const c = f.control, ch = f.chain;
+      const coin = f.chainId === 144 ? 'XRP' : f.chainId === 637 ? 'APT' : 'coins';
+      if (c === 'regular_key') lines.push(pcm
+        ? `Wahala dey: this one go give ${who} key wey fit sign for your ${ch} account. After you sign, dem fit carry all your ${coin} and tokens anytime, without you. Na the fake "support" or "wallet validation" scam be this. Only sign am if ${who} na key wey you yourself create.`
+        : `Danger: this gives ${who} a key that can sign for your ${ch} account. Once signed they can move all your ${coin} and tokens whenever they like, without you. This is the fake "support" or "wallet validation" scam. Only sign if ${who} is a key you made yourself.`);
+      else if (c === 'signer_capability' || c === 'rotation_capability') lines.push(pcm
+        ? `Wahala dey: this one go give ${who} power to ${c === 'signer_capability' ? 'sign anything as you' : 'change the key wey control your account'} for ${ch}. After that, dem fit carry all your ${coin} and tokens and lock you out. No sign am unless ${who} na your own other account.`
+        : `Danger: this gives ${who} the power to ${c === 'signer_capability' ? 'sign anything as you' : 'replace the key that controls your account'} on ${ch}. After that they can take all your ${coin} and tokens and lock you out. Do not sign unless ${who} is another account you own.`);
+      else if (c === 'rotate_key') lines.push(pcm
+        ? `Wahala dey: this one go change the key wey control your ${ch} account. If na site or person give you this, the new key na their own, and your account go become their own. Only sign am if you dey change to new key wey you yourself create.`
+        : `Danger: this replaces the key that controls your ${ch} account. If a site or a person gave you this, the new key is theirs and so is your account. Only sign if you are switching to a new key you made yourself.`);
+      else if (c === 'signer_list') {
+        const others = [...new Set((f.permission ?? []).flatMap((p) => p.others))];
+        const list = others.slice(0, 3).map((o) => shortAddr(o)).join(', ') + (others.length > 3 ? ' and more' : '');
+        if (has('ACCOUNT_TAKEOVER')) lines.push(pcm
+          ? `Wahala dey: this one go allow ${list} sign for your ${ch} account without you. Dem fit carry all your ${coin} and tokens. No sign am.`
+          : `Danger: this lets ${list} sign for your ${ch} account without you. They can move all your ${coin} and tokens. Do not sign.`);
+        else if (has('PERMISSION_SHARED')) lines.push(pcm
+          ? `Shine your eye: this one go add ${list} as co-signers for your ${ch} account. Dem no fit act alone, and your own key still dey work unless you off am. Only do am for shared wallet with people wey you trust.`
+          : `Careful: this adds ${list} as co-signers on your ${ch} account. They cannot act alone, and your own key still works unless you turn it off. Only do this for a shared wallet with people you trust.`);
+        else lines.push(pcm ? `This one dey change the signer settings for your ${ch} account, but na only you still get control.` : `This changes your ${ch} account's signer settings, but only you keep control.`);
+      } else if (c === 'account_delete') lines.push(pcm
+        ? `Wahala dey: this one go delete your ${ch} account and send ALL the XRP wey remain go ${who}. E no dey reverse. Only sign am if ${who} na your own wallet or exchange address.`
+        : `Danger: this deletes your ${ch} account and sends ALL your remaining XRP to ${who}. It cannot be undone. Only sign if ${who} is your own wallet or exchange address.`);
+      else if (c === 'disable_master') lines.push(pcm
+        ? `Shine your eye: this one go off your main key for ${ch}. After am, only the regular key or co-signers fit control the account. If dem no be your own, you don lose the account. Only do am if you sure say you control them.`
+        : `Careful: this turns off your main key on ${ch}. Afterwards only the regular key or co-signers can control the account. If those are not yours, the account is gone. Only do this if you are sure you control them.`);
+      else lines.push(pcm ? `This one dey remove extra key or permission from your ${ch} account. E no dey move your money.` : `This removes an extra key or permission from your ${ch} account. It does not move your money.`);
+      break;
+    }
+    case 'ledger_action': {
+      const a = f.ledgerAction, ch = f.chain;
+      const buy = f.buyAmount ? `${f.buyAmount.display} ${f.buyToken?.symbol ?? 'tokens'}` : (pcm ? 'another token' : 'another token');
+      const price = f.price ? `${f.price.display} ${tok}` : '';
+      const en: Record<string, string> = {
+        trustline: `This lets your ${ch} account hold ${tok} issued by ${shortAddr(f.contract)}, up to ${amt}. It does not move your money, but only trust tokens from issuers you know: scam tokens use famous names.`,
+        trustline_remove: `This removes your trust line for ${tok}. It does not move your money.`,
+        dex_order: `This places an order on the ${ch} exchange: you give up to ${amt} ${tok} for ${buy}.`,
+        swap: `This trades ${amt} ${tok} for ${buy}, and you get it back in this same transaction.`,
+        app_deposit: `This puts ${amt} ${tok} into an app on ${ch} that we cannot name, and you get nothing back in this transaction. Only sign if you started it on a site you trust.`,
+        nft_sell_free: `Danger: this offers your NFT for sale for nothing${f.recipient ? ` to ${who}` : ' to anyone'}. Whoever accepts takes it free. This is the free-listing NFT scam. Do not sign.`,
+        nft_sell: `This offers your NFT for sale for ${price}${f.recipient ? ` to ${who}` : ''}.`,
+        nft_buy: `This offers ${price} to buy an NFT. You only pay if the owner accepts.`,
+        nft_accept: price && f.side === 'sell' ? `This accepts an offer to buy your NFT: you hand it over${f.recipient ? ` to ${who}` : ''} and get ${price}.` : price ? `This accepts an NFT offer: you pay ${price}${f.recipient ? ` to ${who}` : ''}. Check that is the price you expected.` : 'Careful: this accepts an NFT offer and we could not read its price. Accepting a sell offer pays whatever price it was set at. Check the offer first.',
+        check: `Careful: this writes a cheque that lets ${who} pull up to ${amt} ${tok} from your account whenever they want, until you cancel it. Only sign if you mean to pay them.`,
+        escrow: `This locks ${amt} ${tok} in escrow for ${who}. Check the address.`,
+        amm: `This adds to, takes from or votes in a ${ch} liquidity pool.`,
+        stake: `This stakes APT with a ${ch} validator pool. Your APT stays yours.`,
+        cancel: 'This cancels an earlier offer, cheque or escrow. It does not move your money.',
+        setup: 'This is a setup step. It does not move your coins or give anyone control.',
+        settings: `This changes your ${ch} account settings. It does not move your money or give anyone control.`,
+      };
+      const pc: Record<string, string> = {
+        trustline: `This one dey allow your ${ch} account hold ${tok} wey ${shortAddr(f.contract)} issue, reach ${amt}. E no dey move your money, but only trust token from issuer wey you know: scam tokens dey use big names.`,
+        trustline_remove: `This one dey remove your trust line for ${tok}. E no dey move your money.`,
+        dex_order: `This one dey put order for the ${ch} exchange: you go give reach ${amt} ${tok} for ${buy}.`,
+        swap: `This one dey change ${amt} ${tok} to ${buy}, and you go collect am for this same transaction.`,
+        app_deposit: `This one go put ${amt} ${tok} inside app for ${ch} wey we no fit name, and you no go collect anything back for this transaction. Only sign am if na you start am for site wey you trust.`,
+        nft_sell_free: `Wahala dey: this one dey put your NFT for sale for free${f.recipient ? ` give ${who}` : ' give anybody'}. Who accept am go carry am free. Na the free-listing NFT scam be this. No sign am.`,
+        nft_sell: `This one dey put your NFT for sale for ${price}${f.recipient ? ` give ${who}` : ''}.`,
+        nft_buy: `This one dey offer ${price} to buy NFT. You go pay only if the owner accept.`,
+        nft_accept: price && f.side === 'sell' ? `This one dey accept offer to buy your NFT: you go give am${f.recipient ? ` to ${who}` : ''} and collect ${price}.` : price ? `This one dey accept NFT offer: you go pay ${price}${f.recipient ? ` give ${who}` : ''}. Check say na the price you expect.` : 'Shine your eye: this one dey accept NFT offer and we no fit read the price. If na sell offer, you go pay any price wey dem set. Check the offer first.',
+        check: `Shine your eye: this one dey write cheque wey go allow ${who} collect reach ${amt} ${tok} from your account anytime, until you cancel am. Only sign am if you wan pay them.`,
+        escrow: `This one go lock ${amt} ${tok} for escrow for ${who}. Check the address well.`,
+        amm: `This one dey add, comot or vote for ${ch} liquidity pool.`,
+        stake: `This one dey stake APT with ${ch} validator pool. Your APT still be your own.`,
+        cancel: 'This one dey cancel offer, cheque or escrow wey you do before. E no dey move your money.',
+        setup: 'This one na only setup. E no dey move your coins or give anybody control.',
+        settings: `This one dey change your ${ch} account settings. E no dey move your money or give anybody control.`,
+      };
+      lines.push((pcm ? pc : en)[a ?? 'setup']);
+      break;
+    }
     case 'unknown_call':
     case 'unknown_signature':
+      if (f.chainId === 637 && f.appName) lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
       if (f.chainId === 501 && f.nativeValue) lines.push(pcm
         ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
         : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
@@ -352,6 +427,9 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
   if (f.chainId === 607 && f.protocol === 'STON.fi') lines.push(pcm
     ? 'That address na official STON.fi router (from STON.fi own list), so na swap or liquidity deposit for STON.fi be this. Only sign am if na you start am for the real STON.fi site.'
     : "That address is an official STON.fi router (from STON.fi's own list), so this is a swap or liquidity deposit on STON.fi. Only sign if you started it on the real STON.fi site.");
+  if (f.destinationTag) lines.push(pcm
+    ? `Destination tag na ${f.destinationTag}. Exchange dey use am know whose account to credit, so make sure e correct.`
+    : `Destination tag: ${f.destinationTag}. Exchanges use it to know whose account to credit, so make sure it is right.`);
   if (f.memo) lines.push(pcm ? `The note wey dem write for am na: "${f.memo}". No trust note, na the address and amount matter.` : `The note on it says: "${f.memo}". Notes can say anything; the address and amount are what count.`);
   return lines.join(' ');
 }
@@ -437,7 +515,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

@@ -99,7 +99,7 @@ document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang = b.dataset.lang; press('[data-lang]', 'lang', lang); });
 
 // Networks most Nigerians use first, then everything else A to Z.
-const POPULAR = [56, 728126428, 501, 607, 1, 8453, 137, 42161, 10, 43114];
+const POPULAR = [56, 728126428, 501, 607, 784, 144, 637, 1, 8453, 137, 42161, 10, 43114];
 fetch('/api/chains').then(r => r.json()).then(cs => {
   const opt = (c) => `<option value="${c.id}">${esc(c.name)}</option>`;
   const top = POPULAR.map(id => cs.find(c => c.id === id)).filter(Boolean);

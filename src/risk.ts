@@ -41,8 +41,13 @@ export interface Flag {
     | 'SOL_OWNER_CHANGE'
     | 'TOKEN_OWNER_CHANGE'
     | 'CLOSE_AUTHORITY'
-    | 'TON_SWEEP'
-    | 'MULTI_SEND';
+    | 'ASSET_SWEEP'
+    | 'MULTI_SEND'
+    | 'ACCOUNT_DELETE'
+    | 'MASTER_DISABLED'
+    | 'PULL_PERMISSION'
+    | 'PRICE_UNKNOWN'
+    | 'LEDGER_ACTION';
   severity: Severity;
 }
 
@@ -67,8 +72,8 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   const parties = [f.spender, f.recipient, f.contract].filter(Boolean).map((a) => a!.toLowerCase());
   if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
-  if (f.sweep) flags.push({ code: 'TON_SWEEP', severity: 'danger' });
-  else if (f.chainId === 607 && f.via === 'batch') flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
+  else if ([607, 784, 637, 144].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
@@ -193,6 +198,31 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       else if (f.authority === 'close') flags.push({ code: 'CLOSE_AUTHORITY', severity: 'warning' });
       else flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
       break;
+    case 'account_control': {
+      // XRPL SetRegularKey / SignerListSet, Aptos offer_signer_capability / offer_rotation_capability / key rotation:
+      // each lets someone else sign for the whole account. The classic fake "support" and "wallet validation" scams.
+      const c = f.control;
+      if (c === 'signer_list') {
+        const ps = f.permission ?? [];
+        if (ps.some((p) => p.others.length && p.othersCanActAlone)) flags.push({ code: 'ACCOUNT_TAKEOVER', severity: 'danger' });
+        else if (ps.some((p) => p.others.length)) flags.push({ code: 'PERMISSION_SHARED', severity: 'warning' });
+        else flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
+      } else if (c === 'remove_key') flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
+      else if (c === 'account_delete') flags.push({ code: 'ACCOUNT_DELETE', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
+      else if (c === 'disable_master') flags.push({ code: 'MASTER_DISABLED', severity: 'warning' });
+      else flags.push({ code: 'ACCOUNT_TAKEOVER', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
+      break;
+    }
+    case 'ledger_action': {
+      const a = f.ledgerAction;
+      if (a === 'nft_sell_free') flags.push({ code: 'FREE_LISTING', severity: 'danger' });
+      else if (a === 'check') flags.push({ code: 'PULL_PERMISSION', severity: 'warning' });
+      else if (a === 'app_deposit') flags.push({ code: 'UNKNOWN_CONTRACT', severity: 'warning' });
+      else if (a === 'nft_accept' && !f.price) flags.push({ code: 'PRICE_UNKNOWN', severity: 'warning' });
+      else if (a === 'nft_accept' || a === 'escrow') flags.push({ code: 'IRREVERSIBLE', severity: 'info' });
+      else flags.push({ code: 'LEDGER_ACTION', severity: 'info' });
+      break;
+    }
     case 'unknown_call':
     case 'unknown_signature':
       flags.push({ code: 'UNREADABLE', severity: 'warning' });
