@@ -7,9 +7,15 @@ import { knownToken, type TokenRef } from './tokens.js';
 const ERC_ABI = parseAbi([
   'function approve(address spender, uint256 amount)',
   'function increaseAllowance(address spender, uint256 addedValue)',
+  'function increaseApproval(address spender, uint256 addedValue)',
   'function transfer(address to, uint256 amount)',
   'function transferFrom(address from, address to, uint256 amount)',
   'function setApprovalForAll(address operator, bool approved)',
+]);
+
+const OWNER_ABI = parseAbi([
+  'function setOwner(address owner)',
+  'function transferOwnership(address newOwner)',
 ]);
 
 const MULTICALL_ABI = parseAbi([
@@ -60,7 +66,8 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     const token = await resolveToken(chainId, input.to);
     switch (functionName) {
       case 'approve':
-      case 'increaseAllowance': {
+      case 'increaseAllowance':
+      case 'increaseApproval': {
         const [spender, amount] = args as readonly [string, bigint];
         return { ...base, kind: 'erc20_approve', token, spender, amount: formatAmount(amount, token), nativeValue };
       }
@@ -79,6 +86,14 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     }
   } catch {
     // not a standard token call; fall through
+  }
+
+  // Handing over a contract you own (e.g. the DSProxy that holds a Maker vault). This alone cost one victim $55M in Aug 2024.
+  try {
+    const { args } = decodeFunctionData({ abi: OWNER_ABI, data });
+    return { ...base, kind: 'ownership_transfer', recipient: args[0] as string, nativeValue };
+  } catch {
+    // not an ownership change
   }
 
   try {

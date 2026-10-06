@@ -1,0 +1,59 @@
+[
+  {
+    "id": "usdc-approve-permit2-2024-04",
+    "title": "Normal Uniswap step: approve USDC to Permit2",
+    "date": "2024-04-22",
+    "tx": "0x17608c608775210073d4ac32b8dc09024e8074c83b83f1c2db058cd5cbdb65b3",
+    "provenance": "exact calldata a real user sent",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "data": "0x095ea7b3000000000000000000000000000000000022d473030f116ddee9f6b43ac78ba3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "permit2-revoke-2024-10",
+    "title": "Revoking a drainer's Permit2 allowance",
+    "date": "2024-10-14",
+    "tx": "0x7ae778c9f8ac4c86f39d460c1177ab62bff6e230211d4628421ba723839ec173",
+    "provenance": "exact calldata a real user sent",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "data": "0x87517c450000000000000000000000006982508145454ce325ddbe47a25d4ec3d2311933000000000000000000000000d8aece4a8fff379b3085a9849577292201b467bc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffff"
+    },
+    "expect": {
+      "verdict": "safe",
+      "flags": [
+        "REVOKE"
+      ]
+    }
+  },
+  {
+    "id": "pepe-revoke-2024-10",
+    "title": "Revoking a token approval (set to 0)",
+    "date": "2024-10-14",
+    "tx": "0x5ba3938ddcb2aaf765faaeb8cca9782d271d532f67df495f84cbb2d4bfab5d8a",
+    "provenance": "exact calldata a real user sent",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+      "data": "0x095ea7b3000000000000000000000000000000000022d473030f116ddee9f6b43ac78ba30000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "expect": {
+      "verdict": "safe",
+      "flags": [
+        "REVOKE"
+      ]
+    }
+  }
+]

@@ -141,5 +141,1687 @@
         "NEVER_EXPIRES"
       ]
     }
+  },
+  {
+    "id": "seaport-free-listing-2022-12",
+    "title": "Seaport listing that pays the owner nothing (NFT airdrop phishing)",
+    "loss_usd": "134 NFTs sold for 0 ETH",
+    "date": "2022-12-08",
+    "source": "https://drops.scamsniffer.io/nft-airdrop-phishing-case-study-how-the-victims-are-targeted-and-scam-is-conducted/",
+    "victim": "0xabeaa3375534d2931b2149067af3e7b8458d2f0c",
+    "tx": "0xbf2542540ce22abe7a1822e15d67a50b73a7ba18e036bb305103e51606122b69",
+    "provenance": "order rebuilt from the Seaport matchOrders call that executed it (offer, consideration, times, salt, conduit are on-chain; counter is not, so it is set to 0). This order lists 100 of the NFTs.",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "OrderComponents": [
+            {
+              "name": "offerer",
+              "type": "address"
+            },
+            {
+              "name": "zone",
+              "type": "address"
+            },
+            {
+              "name": "offer",
+              "type": "OfferItem[]"
+            },
+            {
+              "name": "consideration",
+              "type": "ConsiderationItem[]"
+            },
+            {
+              "name": "orderType",
+              "type": "uint8"
+            },
+            {
+              "name": "startTime",
+              "type": "uint256"
+            },
+            {
+              "name": "endTime",
+              "type": "uint256"
+            },
+            {
+              "name": "zoneHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "conduitKey",
+              "type": "bytes32"
+            },
+            {
+              "name": "counter",
+              "type": "uint256"
+            }
+          ],
+          "OfferItem": [
+            {
+              "name": "itemType",
+              "type": "uint8"
+            },
+            {
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "name": "identifierOrCriteria",
+              "type": "uint256"
+            },
+            {
+              "name": "startAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "endAmount",
+              "type": "uint256"
+            }
+          ],
+          "ConsiderationItem": [
+            {
+              "name": "itemType",
+              "type": "uint8"
+            },
+            {
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "name": "identifierOrCriteria",
+              "type": "uint256"
+            },
+            {
+              "name": "startAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "endAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "recipient",
+              "type": "address"
+            }
+          ]
+        },
+        "primaryType": "OrderComponents",
+        "domain": {
+          "name": "Seaport",
+          "version": "1.1",
+          "chainId": 1,
+          "verifyingContract": "0x00000000006c3852cbEf3e08E8dF289169EdE581"
+        },
+        "message": {
+          "offerer": "0xaBeaA3375534d2931B2149067aF3E7b8458d2F0c",
+          "zone": "0x004C00500000aD104D7DBd00e3ae0A5C00560C00",
+          "offer": [
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "8715",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "7152",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6247",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6156",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6080",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6005",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "5964",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4425",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4301",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4295",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4261",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4227",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4064",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3910",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3769",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3478",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3261",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3068",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2852",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2734",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2530",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2172",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "13146",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "12792",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "10160",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x6d4bbC0387dD4759EEe30f6A482AC6dC2Df3Facf",
+              "identifierOrCriteria": "1",
+              "startAmount": "35",
+              "endAmount": "35"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030273",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030195",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030109",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030079",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100020186",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100020089",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100010066",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x7D8820FA92EB1584636f4F5b8515B5476B75171a",
+              "identifierOrCriteria": "1830",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0x7D8820FA92EB1584636f4F5b8515B5476B75171a",
+              "identifierOrCriteria": "1814",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8144",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8143",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8142",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8140",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8139",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8138",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8137",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8136",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8135",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8134",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8133",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8131",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8130",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8129",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8125",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8124",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8027",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8026",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8025",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8021",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8018",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8017",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8015",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8014",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8013",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8010",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8000",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7999",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7998",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7559",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7558",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7556",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7549",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7544",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8146",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8145",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8144",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8142",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8140",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8139",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8138",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8137",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8136",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8135",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8134",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8133",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8131",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8130",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8129",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8125",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8124",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8027",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8026",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8025",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8021",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8018",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8017",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8015",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8014",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8013",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8010",
+              "startAmount": "1",
+              "endAmount": "1"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8000",
+              "startAmount": "1",
+              "endAmount": "1"
+            }
+          ],
+          "consideration": [
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "8715",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "7152",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6247",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6156",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6080",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "6005",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "5964",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4425",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4301",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4295",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4261",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4227",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "4064",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3910",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3769",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3478",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3261",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "3068",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2852",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2734",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2530",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "2172",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "13146",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "12792",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B",
+              "identifierOrCriteria": "10160",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x6d4bbC0387dD4759EEe30f6A482AC6dC2Df3Facf",
+              "identifierOrCriteria": "1",
+              "startAmount": "35",
+              "endAmount": "35",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030273",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030195",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030109",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100030079",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100020186",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100020089",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x2250D7c238392f4B575Bb26c672aFe45F0ADcb75",
+              "identifierOrCriteria": "12100010066",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x7D8820FA92EB1584636f4F5b8515B5476B75171a",
+              "identifierOrCriteria": "1830",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0x7D8820FA92EB1584636f4F5b8515B5476B75171a",
+              "identifierOrCriteria": "1814",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8144",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8143",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8142",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8140",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8139",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8138",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8137",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8136",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8135",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8134",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8133",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8131",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8130",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8129",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8125",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8124",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8027",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8026",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8025",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8021",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8018",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8017",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8015",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8014",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8013",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8010",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "8000",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7999",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7998",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7559",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7558",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7556",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7549",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 2,
+              "token": "0xF661D58cfE893993b11D53d11148c4650590C692",
+              "identifierOrCriteria": "7544",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8146",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8145",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8144",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8142",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8140",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8139",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8138",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8137",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8136",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8135",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8134",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8133",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8131",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8130",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8129",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8127",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8125",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8124",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8027",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8026",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8025",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8021",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8018",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8017",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8015",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8014",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8013",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8010",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            },
+            {
+              "itemType": 3,
+              "token": "0x9A06Ef3a841316a9e2c1C93B9c21a7342abE484F",
+              "identifierOrCriteria": "8000",
+              "startAmount": "1",
+              "endAmount": "1",
+              "recipient": "0xC0fdF4fA92f88b82CcBeBFC80fbE4EB7E5a8e0ca"
+            }
+          ],
+          "orderType": 2,
+          "startTime": "1654697296",
+          "endTime": "1988064000",
+          "zoneHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "salt": "8315012258040683018849769648695116565291170761396404313112017769921111",
+          "conduitKey": "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000",
+          "counter": "0"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "seaport_order",
+      "flags": [
+        "FREE_LISTING",
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "wbtc-increaseapproval-2026-04",
+    "title": "Unlimited WBTC increaseApproval",
+    "loss_usd": "221,000 (3 WBTC)",
+    "date": "2026-04-19",
+    "source": "Scam Sniffer on X (@realScamSniffer). On-chain check: 3 WBTC left the wallet 8 minutes later in tx 0x5f7a7c8173750dbe849ad4bec101d08f02c24e2f8be35733c4166f34ea83345e",
+    "victim": "0x5d908c88bE270889C0953E7dfF1C8E1D699cEeA3",
+    "tx": "0x0fec93f1e0225af230ca72875f097fbcffd43c920d1152a94dfe5f11ac69b395",
+    "provenance": "exact calldata the victim sent, read from Ethereum",
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "data": "0xd73dd623000000000000000000000000559657c3e8acd2c8cfb73fdb3c43923b91ce9b6bffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "erc20_approve",
+      "flags": [
+        "UNLIMITED_APPROVAL"
+      ]
+    }
   }
 ]

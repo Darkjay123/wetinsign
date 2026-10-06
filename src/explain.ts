@@ -1,6 +1,7 @@
 import type { Facts } from './facts.js';
 import { shortAddr } from './format.js';
 import { verdict, type Flag, type Severity } from './risk.js';
+import { trustedSpender } from './trusted.js';
 
 export type Lang = 'en' | 'pcm';
 
@@ -57,7 +58,12 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           ? 'Shine your eye: na signature be this, no be transaction. E no go collect gas, and nothing go show for blockchain until dem use am. Scammers like this kind one.'
           : 'Careful: this is a signature, not a transaction. It costs no gas and nothing shows on-chain until it is used, which is why scammers love it.');
       }
-      if (f.amount?.unlimited) {
+      const trusted = has('TRUSTED_SPENDER') ? trustedSpender(f.chainId, f.spender) : undefined;
+      if (trusted) {
+        lines.push(pcm
+          ? `${trusted} na official Uniswap contract. To approve am na normal step if you wan swap for Uniswap, but e go fit move ${f.amount?.unlimited ? 'ALL' : amt} your ${tok}. The real wahala na after: if any site come ask you to sign "Permit" for address wey you no know, stop.`
+          : `${trusted} is an official Uniswap contract. Approving it is a normal step for swapping on Uniswap, but it lets it move ${f.amount?.unlimited ? 'ALL of' : amt + ' of'} your ${tok}. The real risk comes after: if any site then asks you to sign a "Permit" for an address you do not know, stop.`);
+      } else if (f.amount?.unlimited) {
         lines.push(pcm
           ? `Wahala dey: you dey give ${who} permission to carry ALL your ${tok}, no limit at all. If na thief get that address, dem fit clear this token comot from your wallet anytime, dem no go ask you again.`
           : `Danger: you are giving ${who} permission to move ALL of your ${tok}, with no limit. If that address is a scammer, they can empty this token from your wallet at any time without asking you again.`);
@@ -78,6 +84,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       }
       break;
     }
+    case 'ownership_transfer':
+      lines.push(pcm
+        ? `Wahala dey: this one go hand over full control of this contract give ${who}. If na this contract hold your money (like DSProxy vault), the new owner fit carry everything. No sign am unless na you dey deliberately give am to person wey you know.`
+        : `Danger: this hands full control of this contract to ${who}. If the contract holds your money (like a DSProxy vault), the new owner can take everything. Only sign if you are deliberately handing it to an address you know.`);
+      break;
     case 'nft_approve_all':
       lines.push(f.approved
         ? (pcm

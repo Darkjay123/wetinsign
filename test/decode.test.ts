@@ -120,3 +120,14 @@ describe('signature requests', () => {
     expect(assessRisk(f, none).map((x) => x.code)).toContain('FREE_LISTING');
   });
 });
+
+describe('ownership handover', () => {
+  it('flags setOwner as danger (the call behind the $55M DSProxy theft, Aug 2024)', async () => {
+    const { encodeFunctionData, parseAbi } = await import('viem');
+    const { assessRisk, verdict } = await import('../src/risk.js');
+    const data = encodeFunctionData({ abi: parseAbi(['function setOwner(address owner)']), functionName: 'setOwner', args: ['0x0000db5c8B030ae20308ac975898E09741e70000'] });
+    const f = await decodeCall({ chainId: 1, to: '0x1111111111111111111111111111111111111111', data });
+    expect(f.kind).toBe('ownership_transfer');
+    expect(verdict(assessRisk(f, { drainers: new Set() }))).toBe('danger');
+  });
+});

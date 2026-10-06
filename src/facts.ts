@@ -10,6 +10,7 @@ export type Kind =
   | 'permit'
   | 'permit2'
   | 'seaport_order'
+  | 'ownership_transfer'
   | 'unknown_call'
   | 'unknown_signature';
 

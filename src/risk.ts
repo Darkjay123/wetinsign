@@ -1,5 +1,6 @@
 import { drainerSet } from './drainers.js';
 import type { Facts } from './facts.js';
+import { trustedSpender } from './trusted.js';
 
 export type Severity = 'danger' | 'warning' | 'safe' | 'info';
 
@@ -14,7 +15,9 @@ export interface Flag {
     | 'SPENDER_NOT_CONTRACT'
     | 'UNREADABLE'
     | 'REVOKE'
-    | 'IRREVERSIBLE';
+    | 'IRREVERSIBLE'
+    | 'OWNERSHIP_TRANSFER'
+    | 'TRUSTED_SPENDER';
   severity: Severity;
 }
 
@@ -39,11 +42,19 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     case 'erc20_approve':
     case 'permit':
     case 'permit2':
+    {
+      const trusted = !flags.some((x) => x.code === 'KNOWN_DRAINER') && trustedSpender(f.chainId, f.spender);
       if (f.amount?.raw === '0') flags.push({ code: 'REVOKE', severity: 'safe' });
-      else if (f.amount?.unlimited) flags.push({ code: 'UNLIMITED_APPROVAL', severity: 'danger' });
-      if (f.kind !== 'erc20_approve') flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
+      else if (f.amount?.unlimited) flags.push({ code: 'UNLIMITED_APPROVAL', severity: trusted ? 'warning' : 'danger' });
+      if (trusted && f.amount?.raw !== '0') flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
+      // Only signatures are off-chain. Permit2.approve() sent as a transaction is an ordinary on-chain call.
+      if (f.primaryType) flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
       if (f.deadline?.never && f.amount?.raw !== '0') flags.push({ code: 'NEVER_EXPIRES', severity: 'warning' });
       if (ctx.spenderIsContract === false && f.amount?.raw !== '0') flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
+      break;
+    }
+    case 'ownership_transfer':
+      flags.push({ code: 'OWNERSHIP_TRANSFER', severity: 'danger' });
       break;
     case 'nft_approve_all':
       if (f.approved) flags.push({ code: 'NFT_APPROVE_ALL', severity: 'danger' });
