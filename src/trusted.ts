@@ -64,6 +64,18 @@ const ROWS: Array<[number, string, string]> = [
   [8453, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
   [137, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
   [42161, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
+  // EIP-7702 account code. MetaMask EIP7702StatelessDeleGatorImpl, deterministic deployment, from
+  // github.com/MetaMask/delegation-framework documents/Deployments.md (read 2026-10-06).
+  [1, '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', 'MetaMask Smart Account'],
+  [56, '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', 'MetaMask Smart Account'],
+  [8453, '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', 'MetaMask Smart Account'],
+  [137, '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', 'MetaMask Smart Account'],
+  [42161, '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', 'MetaMask Smart Account'],
+  // Uniswap Calibur v1.1.0, from the deployments table in github.com/Uniswap/calibur README (read 2026-10-06; Polygon not listed).
+  [1, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
+  [56, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
+  [8453, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
+  [42161, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
 ];
 
 const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${address.toLowerCase()}`, name]));
@@ -84,6 +96,8 @@ export function trustedInfo(chainId: number | undefined, address: string | undef
   const name = trustedSpender(chainId, address);
   if (!name) return undefined;
   if (name.startsWith('Aave')) return { name, protocol: 'Aave', use: 'depositing or repaying a loan on Aave', usePcm: 'if you wan deposit or pay back loan for Aave' };
+  if (name.startsWith('MetaMask')) return { name, protocol: 'MetaMask', use: 'turning on MetaMask smart account features', usePcm: 'if you wan on MetaMask smart account' };
+  if (name.startsWith('Uniswap Wallet')) return { name, protocol: 'Uniswap Wallet', use: 'turning on Uniswap Wallet smart account features', usePcm: 'if you wan on Uniswap Wallet smart account' };
   if (name.startsWith('CoW')) return { name, protocol: 'CoW Swap', use: 'trading on CoW Swap', usePcm: 'if you wan trade for CoW Swap' };
   if (name.startsWith('1inch')) return { name, protocol: '1inch', use: 'swapping on 1inch', usePcm: 'if you wan swap for 1inch' };
   if (name.startsWith('OpenSea')) return { name, protocol: 'OpenSea', use: 'listing NFTs for sale on OpenSea', usePcm: 'if you wan list NFT for sale for OpenSea' };

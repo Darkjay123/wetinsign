@@ -16,6 +16,7 @@ export type Kind =
   | 'blur_order'
   | 'blur_bulk'
   | 'swap_order'
+  | 'delegation'
   | 'unknown_call'
   | 'unknown_signature';
 

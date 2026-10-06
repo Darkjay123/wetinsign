@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { CHAINS } from './chains.js';
-import { decodeCall, decodeTypedData, type TokenResolver } from './decode.js';
+import { decodeCall, decodeDelegation, decodeTypedData, type TokenResolver } from './decode.js';
 import { explain, type Lang, type Llm } from './explain.js';
 import type { Facts } from './facts.js';
 import { aiStatus, rumptyLlm } from './inference.js';
@@ -26,7 +26,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v13';
+const CACHE_VERSION = 'v14';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -87,6 +87,18 @@ export function createApp(deps: Deps) {
     } catch {
       return c.json({ error: 'We could not read that transaction data.' }, 422);
     }
+  });
+
+  // EIP-7702: the contract address your wallet says it will "upgrade" your account to.
+  app.post('/api/explain/delegation', async (c) => {
+    const body = await c.req.json().catch(() => null);
+    if (!/^0x[0-9a-fA-F]{40}$/.test(body?.address ?? '')) return c.json({ error: 'Paste the contract address your wallet wants to upgrade your account to.' }, 400);
+    const chainId = body.chainId ? Number(body.chainId) : 1;
+    const l = lang(body.lang);
+    const k = key(['delegation', chainId, body.address.toLowerCase(), l]);
+    const hit = await deps.store.get(k).catch(() => undefined);
+    if (hit) return c.json({ ...(hit as object), cached: true });
+    return c.json(await respond(decodeDelegation({ chainId, address: body.address }), l, k));
   });
 
   app.post('/api/explain/tx', async (c) => {

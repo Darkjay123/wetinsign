@@ -193,6 +193,25 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           ? 'This signature dey create marketplace listing for your item. Check say the price na wetin you want.'
           : 'This signature creates a marketplace listing for your item. Check the price is what you expect.'));
       break;
+    case 'delegation': {
+      if (has('REVOKE')) {
+        lines.push(pcm
+          ? 'Correct: this one dey remove the smart account upgrade from your wallet, e go return to normal wallet.'
+          : 'Good: this removes the smart account upgrade from your wallet and makes it a normal wallet again.');
+        break;
+      }
+      const dti = has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+      if (dti) {
+        lines.push(pcm
+          ? `This one go upgrade your whole wallet to ${dti.name}, the official ${dti.protocol} code. E dey normal ${dti.usePcm}, but after am, any signature you sign fit move everything for the wallet. Only do am inside the real ${dti.protocol} app.`
+          : `This upgrades your whole wallet to ${dti.name}, official ${dti.protocol} code. That is normal for ${dti.use}, but afterwards any batch you sign can move everything in the wallet. Only do this inside the real ${dti.protocol} app.`);
+      } else {
+        lines.push(pcm
+          ? `Wahala dey: this one go hand your WHOLE wallet give the code for ${shortAddr(f.spender)}. We no sabi am as official wallet code. Most of these upgrades na "sweeper" wey dey empty wallet. No sign am.`
+          : `Danger: this hands your WHOLE wallet to the code at ${shortAddr(f.spender)}. We do not recognise it as official wallet code, and most upgrades like this are "sweepers" that empty the wallet. Do not sign.`);
+      }
+      break;
+    }
     case 'swap_order': {
       const p = f.protocol ?? f.appName ?? 'this exchange';
       const give = `${amt} ${tok}`;
@@ -322,7 +341,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature') return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation') return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

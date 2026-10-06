@@ -49,6 +49,7 @@
     <button class="chip" data-tab="signature" aria-pressed="true">Signature request</button>
     <button class="chip" data-tab="tx" aria-pressed="false">Transaction hash</button>
     <button class="chip" data-tab="call" aria-pressed="false">Raw transaction</button>
+    <button class="chip" data-tab="deleg" aria-pressed="false">Account upgrade</button>
   </div>
 
   <section class="panel on" id="p-signature">
@@ -74,6 +75,13 @@
     <textarea id="data" spellcheck="false" placeholder="0x095ea7b3…" style="min-height:90px"></textarea>
   </section>
 
+  <section class="panel" id="p-deleg">
+    <label for="dchain">Network</label>
+    <select id="dchain"></select>
+    <label for="daddr">Contract your wallet wants to upgrade your account to (EIP-7702 "smart account")</label>
+    <input id="daddr" spellcheck="false" placeholder="0x…">
+  </section>
+
   <button class="go" id="go">Explain am</button>
   <div class="err" id="err" role="alert"></div>
   <div id="out"></div>
@@ -91,7 +99,7 @@ document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang = b.dataset.lang; press('[data-lang]', 'lang', lang); });
 
 fetch('/api/chains').then(r => r.json()).then(cs => {
-  for (const sel of [$('#chain'), $('#cchain')]) sel.innerHTML = cs.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  for (const sel of [$('#chain'), $('#cchain'), $('#dchain')]) sel.innerHTML = cs.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 });
 
 const SAMPLES = {
@@ -131,6 +139,7 @@ $('#go').onclick = async () => {
   try {
     if (tab === 'signature') { url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; const fr = $('#from').value.trim(); if (/^0x[0-9a-fA-F]{40}$/.test(fr)) body.from = fr; }
     else if (tab === 'tx') { url = '/api/explain/tx'; body = { chainId: Number($('#chain').value), hash: $('#hash').value.trim(), lang }; }
+    else if (tab === 'deleg') { url = '/api/explain/delegation'; body = { chainId: Number($('#dchain').value), address: $('#daddr').value.trim(), lang }; }
     else { url = '/api/explain/call'; body = { chainId: Number($('#cchain').value), to: $('#to').value.trim(), data: $('#data').value.trim(), lang }; }
   } catch { $('#err').textContent = 'That signature request is not valid JSON.'; return; }
   $('#go').disabled = true; $('#go').textContent = 'Reading…';

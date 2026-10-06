@@ -358,3 +358,11 @@ function zeroToUndef(a?: string): string | undefined {
 }
 
 const BLUR_POOL = '0x0000000000a39bb272e79075ade125fd351887ac';
+
+/**
+ * EIP-7702 account upgrade: the wallet asks you to sign an authorization that points your whole account at a
+ * contract's code. Whoever wrote that contract can then move everything you own. Zero address undoes it.
+ */
+export function decodeDelegation(input: { chainId?: number; address: string }): Facts {
+  return { kind: 'delegation', chainId: input.chainId, chain: chainName(input.chainId), spender: input.address, contract: input.address };
+}

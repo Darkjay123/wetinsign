@@ -26,7 +26,9 @@ export interface Flag {
     | 'FREE_SWAP'
     | 'RECEIVER_NOT_YOU'
     | 'RECEIVER_CHECK'
-    | 'UNKNOWN_CONTRACT';
+    | 'UNKNOWN_CONTRACT'
+    | 'DELEGATION_UNKNOWN'
+    | 'DELEGATION';
   severity: Severity;
 }
 
@@ -107,6 +109,16 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       if (trusted) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
       else flags.push({ code: 'UNKNOWN_CONTRACT', severity: 'warning' }, { code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
       if (f.deadline?.never) flags.push({ code: 'NEVER_EXPIRES', severity: 'warning' });
+      break;
+    }
+    case 'delegation': {
+      // Wintermute found over 97% of EIP-7702 delegations in mid 2025 pointed at copy-paste "sweeper" contracts that empty
+      // the wallet. So any account code we do not recognise from an official wallet source is danger.
+      if (/^0x0{40}$/i.test(f.spender ?? '')) { flags.push({ code: 'REVOKE', severity: 'safe' }); break; }
+      const trusted = !flags.some((x) => x.code === 'KNOWN_DRAINER') && trustedSpender(f.chainId, f.spender);
+      if (trusted) flags.push({ code: 'DELEGATION', severity: 'warning' }, { code: 'TRUSTED_SPENDER', severity: 'info' });
+      else flags.push({ code: 'DELEGATION_UNKNOWN', severity: 'danger' });
+      if (ctx.spenderIsContract === false) flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
       break;
     }
     case 'ownership_transfer':
