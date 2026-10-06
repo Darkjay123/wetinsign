@@ -1954,5 +1954,611 @@
       ]
     },
     "note": "Made in the CoW Swap app (appCode 'CoW Swap', market order) with the proceeds sent to another wallet on purpose. Shows a receiver change alone cannot be called danger."
+  },
+  {
+    "id": "1inch-order-398d0c23",
+    "title": "1inch limit order WETH -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0x398d0c239f9c39eb35ddd0aa4de73a78e140e831803009eeed59b31621045f85",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "24594766973752091540523455712",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "232929897396005",
+          "takingAmount": "632427",
+          "makerTraits": "30360738475757302369344449931712310989542536"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-order-130f953f",
+    "title": "1inch limit order WETH -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0x130f953f96bf66da289c89a8022305e63696d7b7e54f055e3f92c98001c5feca",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "23450332394902438076554574178",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "698684736624230",
+          "takingAmount": "1897070",
+          "makerTraits": "30338355605536278445823478134548417961514120"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-order-bf6738d5",
+    "title": "1inch limit order WETH -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0xbf6738d5ad64cf09519fb8f5c662e75b8a6abc3dfb0c038291456955baea78d6",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "23292572091303134514986287844",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "466196371369343",
+          "takingAmount": "1265907",
+          "makerTraits": "30317228855771271676419327464801150909797512"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-order-6d891859",
+    "title": "1inch limit order WETH -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0x6d8918597b7c7a8c4732068a9b78756d2362fda6a477dcccd671eb4f73cccf8b",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "36603452617606608401904308873",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "698333479610531",
+          "takingAmount": "1897273",
+          "makerTraits": "30276577075976178704945601454512869583869064"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-order-3f4781b3",
+    "title": "1inch limit order WETH -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0x3f4781b3040ac77cb67c21cd27b98f5890fb4ba57020191df23ac9ed2ef7dbd7",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "36920699431045554279868394279",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "465597846113201",
+          "takingAmount": "1264557",
+          "makerTraits": "30247183857305384622526387462310287943128200"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-order-7ac76642",
+    "title": "1inch limit order WBTC -> USDC (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet fillOrderArgs on the 1inch Router v6",
+    "tx": "0x7ac766429ac8cff6b7a77798ddefa86db42ca5fbf02e5d04bd69183fc40a3cca",
+    "signer": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+    "provenance": "order and compact signature decoded from the fill transaction; EIP-712 signature recovered to the maker",
+    "tokens": {
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "symbol": "USDC",
+        "decimals": 6
+      },
+      "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": {
+        "symbol": "WBTC",
+        "decimals": 8
+      }
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "domain": {
+          "name": "1inch Aggregation Router",
+          "version": "6",
+          "chainId": 1,
+          "verifyingContract": "0x111111125421cA6dc452d289314280a0f8842A65"
+        },
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "maker",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "makerAsset",
+              "type": "address"
+            },
+            {
+              "name": "takerAsset",
+              "type": "address"
+            },
+            {
+              "name": "makingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "takingAmount",
+              "type": "uint256"
+            },
+            {
+              "name": "makerTraits",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "message": {
+          "salt": "28328063939790923666651697702",
+          "maker": "0x67336cec42645f55059eff241cb02ea5cc52ff86",
+          "receiver": "0x0000000000000000000000000000000000000000",
+          "makerAsset": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+          "takerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "makingAmount": "1835",
+          "takingAmount": "1580489",
+          "makerTraits": "30193634578267189405829907836716190077015176"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
   }
 ]
