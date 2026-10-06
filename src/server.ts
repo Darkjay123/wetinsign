@@ -12,6 +12,7 @@ import { drainerSet, drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
+import { fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
 import { explainSolanaText, fetchSolanaTx, isSolSignature, looksLikeSolanaTx, SOLANA_ID, type Rpc } from './solana.js';
 
 export interface Deps {
@@ -23,6 +24,8 @@ export interface Deps {
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
   /** Solana JSON-RPC. Without it, pasted Solana transactions are read offline and signatures cannot be looked up. */
   solanaRpc?: Rpc;
+  /** TON lookups (jetton names, Tonkeeper scam labels, transactions). Without it TON requests are read offline. */
+  tonLookup?: TonLookup;
 }
 
 /** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
@@ -31,7 +34,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v21';
+const CACHE_VERSION = 'v22';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -83,6 +86,19 @@ export function createApp(deps: Deps) {
 
   app.post('/api/explain/call', async (c) => {
     const body = await c.req.json().catch(() => null);
+    // TON: the TON Connect sendTransaction request ({ messages: [...] }), pasted whole.
+    const tonReq = [body?.transaction, body, typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined].find(isTonRequest);
+    if (tonReq) {
+      const l = lang(body.lang);
+      const k = key(['tonreq', tonReq, l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      try {
+        return c.json(await respond(await tonFacts(tonReq, deps.tonLookup), l, k));
+      } catch {
+        return c.json({ error: 'We could not read that TON request.' }, 422);
+      }
+    }
     // Solana: the base64 (or base58) transaction a site asks Phantom/Solflare to sign, pasted whole.
     const solText = typeof body?.transaction === 'string' ? body.transaction : typeof body?.data === 'string' ? body.data : undefined;
     if (solText && (Number(body?.chainId) === SOLANA_ID || looksLikeSolanaTx(solText))) {
@@ -97,7 +113,7 @@ export function createApp(deps: Deps) {
       }
     }
     // Tron: the transaction JSON a dApp asks TronLink to sign, pasted whole.
-    const tronJson = (typeof body?.transaction === 'object' ? body.transaction : undefined) ?? (typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined);
+    const tronJson = (typeof body?.transaction === 'object' && !isTonRequest(body.transaction) ? body.transaction : undefined) ?? (typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined);
     if (tronJson) {
       const l = lang(body.lang);
       const k = key(['trontx', tronJson, l]);
@@ -157,6 +173,17 @@ export function createApp(deps: Deps) {
       try { facts = await fetchSolanaTx(rawHash, deps.solanaRpc); } catch { return c.json({ error: 'We could not find that transaction on Solana.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    // TON: tonviewer shows a 64-character hash, toncenter a 44-character base64 one. Either works.
+    const tonB64 = /^[A-Za-z0-9+/_-]{43}=$/.test(rawHash);
+    if ((tonB64 || chainId === TON_ID) && deps.tonLookup) {
+      const l = lang(body.lang);
+      const k = key(['tontx', rawHash, l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchTonTx(rawHash, deps.tonLookup); } catch { return c.json({ error: 'We could not find that transaction on TON.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
     if (!deps.fetchTx) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
     const l = lang(body.lang);
@@ -169,8 +196,9 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => id !== SOLANA_ID);
-        const found = await Promise.any(ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => id !== SOLANA_ID && id !== TON_ID);
+        const tonTry = deps.tonLookup ? [fetchTonTx(hash, deps.tonLookup).then((f) => ({ id: TON_ID, r: { to: '', facts: f } as Awaited<ReturnType<NonNullable<Deps['fetchTx']>>> }))] : [];
+        const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...tonTry]);
         chainId = found.id;
         input = found.r;
         await deps.store.put(key(['txauto', hash]), { chainId }).catch(() => undefined);
@@ -207,6 +235,7 @@ const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.arg
 if (isMain) {
   const { onchainResolver, fetchTransaction, isContract, codeInfo } = await import('./rpc.js');
   const { solanaRpc } = await import('./solana.js');
+  const { tonLookup } = await import('./ton.js');
   const app = createApp({
     llm: rumptyLlm(),
     store: createStore(),
@@ -215,6 +244,7 @@ if (isMain) {
     isContract,
     codeInfo,
     solanaRpc,
+    tonLookup,
   });
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);

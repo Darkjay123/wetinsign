@@ -63,6 +63,8 @@ export const CHAINS: Record<number, Chain> = {
   728126428: { id: 728126428, name: "Tron", nativeSymbol: "TRX", nativeDecimals: 6, rpcs: ["https://api.trongrid.io/jsonrpc"], explorer: "https://tronscan.org" },
   // Solana is not EVM; src/solana.ts reads it. 501 is its SLIP-44 coin type.
   501: { id: 501, name: "Solana", nativeSymbol: "SOL", nativeDecimals: 9, rpcs: ["https://solana-rpc.publicnode.com", "https://api.mainnet-beta.solana.com"], explorer: "https://solscan.io" },
+  // TON is not EVM; src/ton.ts reads it. 607 is its SLIP-44 coin type.
+  607: { id: 607, name: "TON", nativeSymbol: "TON", nativeDecimals: 9, rpcs: ["https://toncenter.com/api/v3"], explorer: "https://tonviewer.com" },
 };
 
 export function chainName(id?: number): string {

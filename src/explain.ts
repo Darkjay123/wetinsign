@@ -37,7 +37,13 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       : 'STOP: this address has been reported as a wallet drainer. Do not sign.');
   }
 
-  if (f.via === 'batch' && f.bundle?.length) {
+  if (has('TON_SWEEP') && f.sweep) {
+    const list = f.sweep.assets.join(', ');
+    const to = shortAddr(f.sweep.recipient);
+    lines.push(pcm
+      ? `Wahala dey: this one request go send ${list} go the same address ${to} at once. Real app no dey pack many coins go one address like this; na so TON drainers dey clear wallet with one click. No sign am.`
+      : `Danger: this one request sends ${list} to the same address ${to} at once. Real apps do not move several coins into one address like this; TON drainers empty wallets exactly this way. Do not sign.`);
+  } else if (f.via === 'batch' && f.bundle?.length) {
     const approvals = f.bundle.filter((b) => /approve|permit2/.test(b.kind));
     const names = [...new Set(approvals.map((b) => b.token?.symbol).filter(Boolean))] as string[];
     const list = names.length ? ` (${names.slice(0, 6).join(', ')}${names.length > 6 ? ' and more' : ''})` : '';
@@ -343,6 +349,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         : 'We could not read what this does. Do not sign anything you cannot understand, especially from a link someone sent you.');
       break;
   }
+  if (f.memo) lines.push(pcm ? `The note wey dem write for am na: "${f.memo}". No trust note, na the address and amount matter.` : `The note on it says: "${f.memo}". Notes can say anything; the address and amount are what count.`);
   return lines.join(' ');
 }
 
@@ -427,7 +434,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

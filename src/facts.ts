@@ -76,5 +76,11 @@ export interface Facts {
   action?: 'delegate_resource' | 'undelegate_resource' | 'stake' | 'unstake' | 'vote' | 'claim_rewards';
   resource?: string;
   /** Solana: which control this hands over. wallet_owner is System Assign on your wallet; the rest are SPL Token SetAuthority. */
+  /** TON: several different assets going to the same address in one request. */
+  sweep?: { recipient: string; assets: string[] };
+  /** Flagged as a scam by a wallet's own database (Tonkeeper on TON). */
+  reportedScam?: boolean;
+  /** A text note attached to the transfer (TON comments). Shown verbatim, never trusted. */
+  memo?: string;
   authority?: 'wallet_owner' | 'token_owner' | 'close' | 'mint' | 'freeze' | 'remove' | 'other' | 'setup';
 }

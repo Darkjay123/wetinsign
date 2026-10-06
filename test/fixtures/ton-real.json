@@ -1,0 +1,31 @@
+{
+ "usdt_stars": {
+  "note": "Real wallet tx, 6 Oct 2026: 3 USDT to Fragment for 200 Telegram Stars. Root of trace keSVJOaoZcg8GXn176vbhy6kEcrSO2bNlenaruorIeU=",
+  "tx_hash": "keSVJOaoZcg8GXn176vbhy6kEcrSO2bNlenaruorIeU=",
+  "request": {
+   "from": "0:645FF8DC8880DDADBB4368B21D3A36CE5D656BE24E55861D9E4133A76A9C9AE4",
+   "messages": [
+    {
+     "address": "0:284CDC0E48138D3F356AF07CAF8821CDDE3D66E67AC8E6B340455EF545961FF9",
+     "amount": "60000000",
+     "payload": "te6cckEBAgEAgQABrA+KfqXagncYQfSLbDLcbAgBCkiH8LM/zUu0afyGCTWJwX1mDjdlf2rMa9UoQlD4UHUAGRf+NyIgN2tu0Nosh06Ns5dZWviTlWGHZ5BM6dqnJrkHMS0BAQBMAAAAADIwMCBUZWxlZ3JhbSBTdGFycyAKClJlZiN5Y2Y4Sm9kaGi7yFsD"
+    }
+   ]
+  }
+ },
+ "ton_comment": {
+  "note": "Real wallet tx: TON send with a text comment",
+  "tx_hash": "hVpI7mesVSvnmQ6g0C5P9x3ajABbAdbqr7rLYl/DU2A=",
+  "request": {
+   "from": "0:3FEC79601835F9801B57CAB985F570572D837F301EE63C85699B8C2C520EC6CA",
+   "messages": [
+    {
+     "address": "0:F8B77951060B4083B53F758953008623A883D7453EB31EA02FA0682A4EF6185A",
+     "amount": "50000000",
+     "payload": "te6cckEBAQEAEwAAIgAAAABWQy0wMTE3Q0UzREI2lOmeag=="
+    }
+   ]
+  },
+  "comment": "VC-0117CE3DB6"
+ }
+}

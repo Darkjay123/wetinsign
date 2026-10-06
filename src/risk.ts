@@ -40,7 +40,9 @@ export interface Flag {
     | 'TRON_ACTION'
     | 'SOL_OWNER_CHANGE'
     | 'TOKEN_OWNER_CHANGE'
-    | 'CLOSE_AUTHORITY';
+    | 'CLOSE_AUTHORITY'
+    | 'TON_SWEEP'
+    | 'MULTI_SEND';
   severity: Severity;
 }
 
@@ -63,7 +65,10 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   const flags: Flag[] = [];
   const bad = ctx.drainers ?? drainerList();
   const parties = [f.spender, f.recipient, f.contract].filter(Boolean).map((a) => a!.toLowerCase());
-  if (parties.some((a) => bad.has(a))) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
+  if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
+  // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
+  if (f.sweep) flags.push({ code: 'TON_SWEEP', severity: 'danger' });
+  else if (f.chainId === 607 && f.via === 'batch') flags.push({ code: 'MULTI_SEND', severity: 'warning' });
 
   // Several approvals in one wallet batch: a normal app swap needs at most one.
   const batchApprovals = f.via === 'batch' ? (f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length : 0;
