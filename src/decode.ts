@@ -180,6 +180,26 @@ function big(v: unknown): bigint {
 }
 
 /** Decode an EIP-712 signature request (what a wallet shows as "Sign message"). */
+const MAX_UINT256 = (1n << 256n) - 1n;
+/**
+ * DAI-style permits (Permit(holder, spender, nonce, expiry, allowed)) carry no
+ * amount: allowed=true is an UNLIMITED approval, allowed=false is a revoke.
+ * Reading them as EIP-2612 (msg.value) made a real DAI drain look like a revoke.
+ */
+function permitAmount(msg: Record<string, any>): bigint {
+  if (msg.allowed !== undefined && msg.value === undefined) {
+    const on = msg.allowed === true || String(msg.allowed).toLowerCase() === 'true' || String(msg.allowed) === '1';
+    return on ? MAX_UINT256 : 0n;
+  }
+  return big(msg.value);
+}
+/** DAI uses expiry, and expiry 0 means the permission never expires. */
+function permitDeadline(msg: Record<string, any>): bigint {
+  if (msg.deadline !== undefined) return big(msg.deadline);
+  if (msg.expiry !== undefined) return big(msg.expiry) === 0n ? MAX_UINT256 : big(msg.expiry);
+  return MAX_UINT256;
+}
+
 export async function decodeTypedData(
   raw: TypedData | string,
   resolveToken: TokenResolver = offlineResolver,
@@ -196,10 +216,10 @@ export async function decodeTypedData(
       ...base,
       kind: 'permit',
       token,
-      owner: msg.owner,
+      owner: msg.owner ?? msg.holder,
       spender: msg.spender,
-      amount: formatAmount(big(msg.value), token),
-      deadline: formatDeadline(big(msg.deadline), nowSec),
+      amount: formatAmount(permitAmount(msg), token),
+      deadline: formatDeadline(permitDeadline(msg), nowSec),
     };
   }
 

@@ -1971,5 +1971,169 @@
         "BATCH_APPROVALS"
       ]
     }
+  },
+  {
+    "id": "usdc-permit-drainer-2023-03",
+    "title": "USDC permit signature to a listed drainer",
+    "loss_usd": "4.56",
+    "date": "2023-03-12",
+    "source": "Scam Sniffer scam-database (drainer 0xdb2dfeddd270b1b2a5e817dfc51e30ba638199c3)",
+    "victim": "0x14c3C6E06cdCfC4C26d681152B0b8d7FF113148a",
+    "tx": "0xdcb4d224717c9fa44f8a91874c6b7c9c9175a247a96d974e9aa3abc7c1d0805e",
+    "drain_tx": "0x0d589f5477d970e98988054f13f275c4d19100380a4e0da9f35a3851b9d22a3c",
+    "provenance": "typed data rebuilt from the drainer's permit() call; domain checked against USDC's on-chain DOMAIN_SEPARATOR and signature recovers to the victim (nonce 0)",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "message": {
+          "owner": "0x14c3C6E06cdCfC4C26d681152B0b8d7FF113148a",
+          "spender": "0xdb2DFedDd270b1B2A5e817DfC51E30ba638199C3",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1709382421168"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "UNLIMITED_APPROVAL",
+        "OFFCHAIN_SIGNATURE",
+        "NEVER_EXPIRES"
+      ]
+    },
+    "loss": "4.56 USDC drained 36 seconds later"
+  },
+  {
+    "id": "dai-permit-allowed-2023-01",
+    "title": "DAI-style permit (allowed=true) to a listed drainer",
+    "loss_usd": "47.21",
+    "date": "2023-01-30",
+    "source": "Scam Sniffer scam-database (drainer 0xd05ad33117098b6250853b77d6e4ae07689e09cc)",
+    "victim": "0xE85E7C902846EE9542779F61Cc5a9BFc19Ee6145",
+    "tx": "0xadd7a7fa4711859aaaee2a0cdc8ebc2358258c44a5d5860e7e6f70bc7c11547e",
+    "drain_tx": "0x69634acb716299769bc5e06a7e40ca93cb040d967f1983c707f12cca2f9f03c8",
+    "provenance": "typed data rebuilt from the drainer's DAI permit() call; domain checked against DAI's on-chain DOMAIN_SEPARATOR and signature recovers to the victim (nonce 3)",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "expiry",
+              "type": "uint256"
+            },
+            {
+              "name": "allowed",
+              "type": "bool"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Dai Stablecoin",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+        },
+        "message": {
+          "holder": "0xE85E7C902846EE9542779F61Cc5a9BFc19Ee6145",
+          "spender": "0xD05aD33117098B6250853b77d6e4ae07689e09Cc",
+          "nonce": "3",
+          "expiry": "2791840717",
+          "allowed": true
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "UNLIMITED_APPROVAL",
+        "OFFCHAIN_SIGNATURE",
+        "NEVER_EXPIRES"
+      ]
+    },
+    "loss": "47.21 DAI drained"
   }
 ]

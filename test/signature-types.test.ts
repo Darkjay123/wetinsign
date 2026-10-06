@@ -121,3 +121,19 @@ describe('EIP-7702 wallet batches', () => {
     void maxUint256;
   });
 });
+
+import { decodeTypedData as _dtd } from '../src/decode.js';
+import { assessRisk as _ar, verdict as _v } from '../src/risk.js';
+describe('DAI-style permit', () => {
+  const base = { types: { Permit: [] as any[] }, primaryType: 'Permit', domain: { name: 'Dai Stablecoin', version: '1', chainId: 1, verifyingContract: '0x6B175474E89094C44Da98b954EedeAC495271d0F' } };
+  it('allowed=false is a revoke, not an approval', async () => {
+    const f: any = await _dtd({ ...base, message: { holder: '0x1111111111111111111111111111111111111111', spender: '0x2222222222222222222222222222222222222222', nonce: '0', expiry: '0', allowed: false } } as any);
+    expect(f.amount.raw).toBe('0');
+    expect(_ar(f, {}).map((x) => x.code)).toContain('REVOKE');
+  });
+  it('allowed=true with expiry 0 is unlimited and never expires', async () => {
+    const f: any = await _dtd({ ...base, message: { holder: '0x1111111111111111111111111111111111111111', spender: '0x2222222222222222222222222222222222222222', nonce: '0', expiry: '0', allowed: true } } as any);
+    expect(f.amount.unlimited).toBe(true);
+    expect(_v(_ar(f, {}))).toBe('danger');
+  });
+});
