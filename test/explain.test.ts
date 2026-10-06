@@ -63,4 +63,15 @@ describe('explain', () => {
     const f = await decodeCall({ chainId: 1, to: USDT, data });
     expect(templateText(f, assessRisk(f, none), 'pcm')).toContain('carry ALL your USDT');
   });
+
+  it('uses the reviewed Pidgin wording, not the model, for Pidgin readers', async () => {
+    const data = encodeFunctionData({ abi, functionName: 'approve', args: [SPENDER, maxUint256] });
+    const f = await decodeCall({ chainId: 1, to: USDT, data });
+    const flags = assessRisk(f, none);
+    let called = false;
+    const r = await explain(f, flags, 'pcm', async () => { called = true; return 'Danger! You are giving away unlimited permission.'; });
+    expect(called).toBe(false);
+    expect(r.source).toBe('template');
+    expect(r.text).toContain('carry ALL your USDT');
+  });
 });

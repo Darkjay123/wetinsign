@@ -149,6 +149,9 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   const v = verdict(flags);
   const fallback: Explanation = { verdict: v, text: templateText(f, flags, lang), source: 'template', rejected: [] };
   if (!llm) return fallback;
+  // The only model on Rumpty (llama3.2:3b) ignores the Pidgin instruction and answers in English,
+  // and Rumpty has no larger model for now. Pidgin readers get our reviewed Pidgin wording instead.
+  if (lang === 'pcm') return fallback;
   try {
     const text = (await llm(buildMessages(f, flags, lang))).trim();
     if (!text) return fallback;
