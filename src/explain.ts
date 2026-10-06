@@ -162,7 +162,14 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       }
       break;
     }
-    case 'nft_approve_all':
+    case 'nft_approve_all': {
+      const nti = f.approved && has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+      if (nti) {
+        lines.push(pcm
+          ? `${nti.name} na official ${nti.protocol} contract. To approve am na normal step ${nti.usePcm}, but e go fit move ANY NFT wey you get for this collection. Only do am if na you dey list for the real ${nti.protocol} site.`
+          : `${nti.name} is an official ${nti.protocol} contract. Approving it is a normal step for ${nti.use}, but it lets it move ANY NFT you own in this collection. Only do this if you are listing on the real ${nti.protocol} site.`);
+        break;
+      }
       lines.push(f.approved
         ? (pcm
           ? `Wahala dey: you dey hand over ALL your NFT for this collection give ${who}. Na so most NFT thief dey take steal.`
@@ -176,6 +183,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           : 'The address getting control is a plain wallet, not a marketplace contract. Real marketplaces do not work that way.');
       }
       break;
+    }
     case 'seaport_order':
       lines.push(has('FREE_LISTING')
         ? (pcm

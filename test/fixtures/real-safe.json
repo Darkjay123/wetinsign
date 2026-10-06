@@ -918,5 +918,311 @@
         "TRUSTED_SPENDER"
       ]
     }
+  },
+  {
+    "id": "cow-approve-0f344ec6",
+    "title": "WETH approval to CoW Protocol Vault Relayer (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x0f344ec6702bea60f6b6588223f619a962ff6a1a07d7c62b6b69e9761b256bb8",
+    "signer": "0x3B13f7c441bBF7715012bD7DbBdF98f2F248922D",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe011000000000000000000000000000000000000000000000000000470de4df820000"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-approve-4efda206",
+    "title": "WETH approval to CoW Protocol Vault Relayer (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x4efda206a8551a91fc9df13620600936b3ec934c0d8e2af7af7146b1acd389b3",
+    "signer": "0x3B13f7c441bBF7715012bD7DbBdF98f2F248922D",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110000000000000000000000000000000000000000000000000008e1bc9bf040000"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "cow-approve-566b922b",
+    "title": "WETH approval to CoW Protocol Vault Relayer (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x566b922b02aa53e3b5ad732cc3f7bdb7f01ca5545f622036ed661175a8e7798c",
+    "signer": "0xbC23850a42f8d1AdC7A6293249C63A91Cf7a6231",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110000000000000000000000000000000000000000000000000018efd601e6d2c00"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-approve-4699df02",
+    "title": "WETH approval to 1inch Router v6 (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x4699df023e99d18e5f3065925cf3269782be4b38ec4f8a58b76c131468ccfa61",
+    "signer": "0x0Be6dd8F1aa0C6F4c8D28cf852F53552C6e24c86",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000111111125421ca6dc452d289314280a0f8842a65000000000000000000000000000000000000000000000000002a8ed647c3b000"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-approve-4711e7d2",
+    "title": "WETH approval to 1inch Router v6 (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x4711e7d2ac53d001a0418e2839befedbeedbdc0427c0eff99012581184bcf618",
+    "signer": "0x31e62308b63764d97Ae9aB0FE562e2e2492D52d2",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000111111125421ca6dc452d289314280a0f8842a650000000000000000000000000000000000000000000000000000991165b73800"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-approve-05bccc7e",
+    "title": "WETH approval to 1inch Router v6 (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x05bccc7edaf930f6fca9fec1128dd8e374658216a6ce0695567b8ee509fd32cf",
+    "signer": "0x3a32042F25bE4078112376ce2c96224f8a080949",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000111111125421ca6dc452d289314280a0f8842a65000000000000000000000000000000000000000000000000012c344d63854000"
+    },
+    "expect": {
+      "verdict": "info",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "1inch-approve-91d2c2f4",
+    "title": "WETH approval to 1inch Router v6 (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x91d2c2f41ff519f1df591941f90672dabe1886815ae8221fdf8ff294bd98478b",
+    "signer": "0xca0731Cb367e47c399c5eCac1979E86B07Fc4F5d",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "WETH",
+      "decimals": 18
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "data": "0x095ea7b3000000000000000000000000111111125421ca6dc452d289314280a0f8842a65ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "UNLIMITED_APPROVAL",
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "opensea-approveall-864b7432",
+    "title": "PudgyPenguins setApprovalForAll to the OpenSea conduit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x864b74322d75ccbaf9894b9ae84c984b4a4b5e7c317b4b822546b74f6a7c45b2",
+    "signer": "0xdf9DC151180Cd585Bb34b6aE2D9CfabFd05be630",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "PudgyPenguins",
+      "isNft": true
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xBd3531dA5CF5857e7CfAA92426877b022e612cf8",
+      "data": "0xa22cb4650000000000000000000000001e0049783f008a0085193e00003d00cd54003c710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "opensea-approveall-922d9482",
+    "title": "Azuki setApprovalForAll to the OpenSea conduit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x922d94824bfd79bd370154baf44a4bd0e3accc40813a07302e6a6cbf561995d6",
+    "signer": "0x85C2EF9c0b108647b1413990beCe32d439f086e1",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "Azuki",
+      "isNft": true
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xED5AF388653567Af2F388E6224dC7C4b3241C544",
+      "data": "0xa22cb4650000000000000000000000001e0049783f008a0085193e00003d00cd54003c710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "opensea-approveall-c0bd9571",
+    "title": "Milady setApprovalForAll to the OpenSea conduit (2026-10-05)",
+    "date": "2026-10-05",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0xc0bd9571dd73a1fca8ec1bfe34f53bf6ec7dcd57494a5722b85d85844adbc1fe",
+    "signer": "0x3d99Ca827fa972810b531F501C36796F838754AC",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "Milady",
+      "isNft": true
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x5Af0D9827E0c53E4799BB226655A1de152A425a5",
+      "data": "0xa22cb4650000000000000000000000001e0049783f008a0085193e00003d00cd54003c710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "opensea-approveall-1e41d6b9",
+    "title": "BoredApeYachtClub setApprovalForAll to the OpenSea conduit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x1e41d6b9e7ffb5ee56b10150b36838f3a6928f929626db5df015d67cdb6cbd20",
+    "signer": "0xB678128A1BcA378496d0917b36a2919b4654F4b9",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "BoredApeYachtClub",
+      "isNft": true
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+      "data": "0xa22cb4650000000000000000000000001e0049783f008a0085193e00003d00cd54003c710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "opensea-approveall-24580e3d",
+    "title": "MutantApeYachtClub setApprovalForAll to the OpenSea conduit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet transaction",
+    "tx": "0x24580e3d6241033a3ccf5e3e578a2afc5fbabed5b3fe184e2661315fe148e5d7",
+    "signer": "0x08046e2349017615d53D3977c307d39AB4eEB3CF",
+    "provenance": "exact calldata the user sent, read from Ethereum",
+    "token": {
+      "symbol": "MutantApeYachtClub",
+      "isNft": true
+    },
+    "endpoint": "call",
+    "input": {
+      "chainId": 1,
+      "to": "0x60E4d786628Fea6478F785A6d7e704777c86a7c6",
+      "data": "0xa22cb4650000000000000000000000001e0049783f008a0085193e00003d00cd54003c710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "NFT_APPROVE_ALL",
+        "TRUSTED_SPENDER"
+      ]
+    }
   }
 ]

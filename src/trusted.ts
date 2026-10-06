@@ -39,6 +39,31 @@ const ROWS: Array<[number, string, string]> = [
   [8453, '0xA238Dd80C259a72e81d7e4664a9801593F98d1c5', 'Aave V3 Pool'],
   [137, '0x794a61358D6845594F94dc1DB02A252b5b4814aD', 'Aave V3 Pool'],
   [42161, '0x794a61358D6845594F94dc1DB02A252b5b4814aD', 'Aave V3 Pool'],
+  // CoW Protocol: GPv2VaultRelayer (what you approve to trade on CoW Swap) and GPv2Settlement.
+  // From github.com/cowprotocol/contracts networks.json (read 2026-10-06).
+  [1, '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110', 'CoW Protocol Vault Relayer'],
+  [1, '0x9008D19f58AAbD9eD0D60971565AA8510560ab41', 'CoW Protocol Settlement'],
+  [56, '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110', 'CoW Protocol Vault Relayer'],
+  [56, '0x9008D19f58AAbD9eD0D60971565AA8510560ab41', 'CoW Protocol Settlement'],
+  [8453, '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110', 'CoW Protocol Vault Relayer'],
+  [8453, '0x9008D19f58AAbD9eD0D60971565AA8510560ab41', 'CoW Protocol Settlement'],
+  [137, '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110', 'CoW Protocol Vault Relayer'],
+  [137, '0x9008D19f58AAbD9eD0D60971565AA8510560ab41', 'CoW Protocol Settlement'],
+  [42161, '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110', 'CoW Protocol Vault Relayer'],
+  [42161, '0x9008D19f58AAbD9eD0D60971565AA8510560ab41', 'CoW Protocol Settlement'],
+  // 1inch Aggregation Router v6 (also Limit Order Protocol v4). From github.com/1inch/limit-order-protocol README deployments table (read 2026-10-06).
+  [1, '0x111111125421cA6dc452d289314280a0f8842A65', '1inch Router v6'],
+  [56, '0x111111125421cA6dc452d289314280a0f8842A65', '1inch Router v6'],
+  [8453, '0x111111125421cA6dc452d289314280a0f8842A65', '1inch Router v6'],
+  [137, '0x111111125421cA6dc452d289314280a0f8842A65', '1inch Router v6'],
+  [42161, '0x111111125421cA6dc452d289314280a0f8842A65', '1inch Router v6'],
+  // OpenSea's Seaport conduit: what you approve once so OpenSea can transfer an NFT you list. From OPENSEA_CONDUIT_ADDRESS in
+  // github.com/ProjectOpenSea/seaport-js src/constants.ts (read 2026-10-06). Same address on every chain.
+  [1, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
+  [56, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
+  [8453, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
+  [137, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
+  [42161, '0x1E0049783F008A0085193E00003D00cd54003c71', 'OpenSea Conduit'],
 ];
 
 const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${address.toLowerCase()}`, name]));
@@ -59,5 +84,8 @@ export function trustedInfo(chainId: number | undefined, address: string | undef
   const name = trustedSpender(chainId, address);
   if (!name) return undefined;
   if (name.startsWith('Aave')) return { name, protocol: 'Aave', use: 'depositing or repaying a loan on Aave', usePcm: 'if you wan deposit or pay back loan for Aave' };
+  if (name.startsWith('CoW')) return { name, protocol: 'CoW Swap', use: 'trading on CoW Swap', usePcm: 'if you wan trade for CoW Swap' };
+  if (name.startsWith('1inch')) return { name, protocol: '1inch', use: 'swapping on 1inch', usePcm: 'if you wan swap for 1inch' };
+  if (name.startsWith('OpenSea')) return { name, protocol: 'OpenSea', use: 'listing NFTs for sale on OpenSea', usePcm: 'if you wan list NFT for sale for OpenSea' };
   return { name, protocol: 'Uniswap', use: 'swapping on Uniswap', usePcm: 'if you wan swap for Uniswap' };
 }

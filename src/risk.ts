@@ -95,11 +95,15 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     case 'ownership_transfer':
       flags.push({ code: 'OWNERSHIP_TRANSFER', severity: 'danger' });
       break;
-    case 'nft_approve_all':
-      if (f.approved) flags.push({ code: 'NFT_APPROVE_ALL', severity: 'danger' });
+    case 'nft_approve_all': {
+      // Approving OpenSea's conduit once per collection is how every OpenSea listing starts, so it is a warning, not a scream.
+      const trusted = !flags.some((x) => x.code === 'KNOWN_DRAINER') && trustedSpender(f.chainId, f.spender);
+      if (f.approved) flags.push({ code: 'NFT_APPROVE_ALL', severity: trusted ? 'warning' : 'danger' });
       else flags.push({ code: 'REVOKE', severity: 'safe' });
+      if (f.approved && trusted) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
       if (f.approved && ctx.spenderIsContract === false) flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
       break;
+    }
     case 'seaport_order': {
       const owner = f.owner?.toLowerCase();
       const backToOwner = (f.consideration ?? []).filter((c) => c.recipient?.toLowerCase() === owner && c.amount.raw !== '0');
