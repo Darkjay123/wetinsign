@@ -24,12 +24,20 @@ const V1_PAIR = ['destination()', 'initialize(address)'].map(sel);
 /** A wallet checks that the owner approved: ERC-1271 isValidSignature or ERC-4337 validateUserOp. */
 const SIG_CHECK = ['isValidSignature(bytes32,bytes)', 'validateUserOp((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes),bytes32,uint256)'].map(sel);
 
+/**
+ * A getter for a fixed address the money goes to. A real 7702 wallet sends where its owner signs for, so code that keeps
+ * its own recipient/destination and has no owner-signature check works for someone else. owner() alone is NOT used:
+ * real wallets (TokenPocket 0x7A956fD3) are Ownable without isValidSignature.
+ */
+const BENEFICIARY = ['recipient()', 'destination()'].map(sel);
+
 export function looksLikeSweeper(code: string, size: number): boolean {
   if (size === 0) return true;
   const s = codeSelectors(code);
   if (SWEEPER_ONLY.some((x) => s.has(x))) return true;
   const sigCheck = SIG_CHECK.some((x) => s.has(x));
   if (!sigCheck && V1_PAIR.every((x) => s.has(x))) return true;
+  if (!sigCheck && BENEFICIARY.some((x) => s.has(x))) return true;
   // Copy-paste sweepers are small; every real wallet we sampled under 2 KB is on a named list.
   return size < 2000 && !sigCheck;
 }
