@@ -137,3 +137,20 @@ describe('DAI-style permit', () => {
     expect(_v(_ar(f, {}))).toBe('danger');
   });
 });
+
+import { explain as _explain, aiProblems as _aip } from '../src/explain.js';
+describe('reported drainers never get model wording', () => {
+  it('uses the reviewed STOP wording even when a model is available', async () => {
+    const f: any = await _dtd({ types: { Permit: [] }, primaryType: 'Permit', domain: { name: 'USD Coin', version: '2', chainId: 1, verifyingContract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' }, message: { owner: '0x1111111111111111111111111111111111111111', spender: '0xdb2DFedDd270b1B2A5e817DfC51E30ba638199C3', value: '1000', nonce: '0', deadline: '0' } } as any);
+    const flags = _ar(f, { drainers: new Set(['0xdb2dfeddd270b1b2a5e817dfc51e30ba638199c3']) });
+    let called = false;
+    const out = await _explain(f, flags, 'en', async () => { called = true; return 'Danger. Be careful with your USDC.'; });
+    expect(called).toBe(false);
+    expect(out.source).toBe('template');
+    expect(out.text).toMatch(/^STOP/);
+  });
+  it('rejects model text that blames the reader for a mistake', () => {
+    const p = _aip('Danger. You could lose your USDC if you make a mistake with your wallet settings.', { kind: 'permit', token: { address: '0x', symbol: 'USDC' } } as any, [{ code: 'UNLIMITED_APPROVAL', severity: 'danger' }] as any, 'danger');
+    expect(p).toContain('blames the reader instead of the request');
+  });
+});

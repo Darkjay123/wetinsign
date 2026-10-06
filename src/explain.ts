@@ -257,6 +257,8 @@ export function aiProblems(text: string, f: Facts, flags: Flag[], v: Severity): 
   if (has('TRUSTED_SPENDER') && !/uniswap/i.test(text)) out.push('leaves out who the spender is');
   if (f.via === 'multicall' && !/bundle|hidden|multicall/i.test(text)) out.push('leaves out the hidden approval');
   if (f.via === 'batch' && !/batch|at once|in one go|bundle/i.test(text)) out.push('leaves out the batch');
+  if (has('KNOWN_DRAINER') && !/drainer|reported|scam/i.test(text)) out.push('leaves out the drainer report');
+  if (/\b(make a mistake|by accident|accidentally|wallet settings)\b/i.test(text)) out.push('blames the reader instead of the request');
   if (text.length > 420) out.push('too long');
   return out;
 }
@@ -271,6 +273,10 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
   if (f.kind === 'unknown_call' || f.kind === 'unknown_signature') return fallback;
+  // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
+  // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
+  // address was reported. Our reviewed wording leads with the report every time.
+  if (flags.some((x) => x.code === 'KNOWN_DRAINER')) return fallback;
   try {
     const text = (await llm(buildMessages(f, flags, lang))).trim();
     if (!text) return fallback;
