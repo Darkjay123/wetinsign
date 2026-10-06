@@ -167,7 +167,10 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     case 'seaport_order': {
       const owner = f.owner?.toLowerCase();
       const backToOwner = (f.consideration ?? []).filter((c) => c.recipient?.toLowerCase() === owner && c.amount.raw !== '0');
-      if ((f.offer?.length ?? 0) > 0 && backToOwner.length === 0) flags.push({ code: 'FREE_LISTING', severity: 'danger' });
+      // Paid back only dust in the network coin (under 0.001, same line as Blur) is a giveaway too: drainers add 1 wei
+      // so the listing does not read as "free". Token payments keep their price, since we cannot judge their decimals here.
+      const dustOnly = backToOwner.length > 0 && backToOwner.every((c) => c.itemType === 0) && backToOwner.reduce((s, c) => s + BigInt(c.amount.raw), 0n) < 1_000_000_000_000_000n;
+      if ((f.offer?.length ?? 0) > 0 && (backToOwner.length === 0 || dustOnly)) flags.push({ code: 'FREE_LISTING', severity: 'danger' });
       flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
       break;
     }

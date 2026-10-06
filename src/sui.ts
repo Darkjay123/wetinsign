@@ -147,6 +147,7 @@ export const suiLookup: SuiLookup = {
     if (coinCache.has(ct)) return coinCache.get(ct);
     const d = await gql(`query($c: String!) { coinMetadata(coinType: $c) { symbol decimals } }`, { c: ct }).catch(() => undefined);
     const v = d?.coinMetadata ? { symbol: d.coinMetadata.symbol, decimals: d.coinMetadata.decimals } : undefined;
+    if (coinCache.size > 2000) coinCache.clear();
     coinCache.set(ct, v);
     return v;
   },

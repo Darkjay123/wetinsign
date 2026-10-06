@@ -27,7 +27,11 @@ const MULTICALL_ABI = parseAbi([
 const EXECUTE_ABI = parseAbi(['function execute(bytes32 mode, bytes executionData)']);
 const EXECUTION_ARRAY = [{ type: 'tuple[]', components: [{ name: 'target', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'callData', type: 'bytes' }] }] as const;
 
-const BUNDLE_PRIORITY = ['nft_approve_all', 'nft_approve', 'erc20_approve', 'permit2', 'transfer_from', 'transfer'] as const;
+// Handing over a contract you own outranks everything: it gave one victim's $55M vault away. A plain coin send inside a
+// batch is last but still counted, so a batch that only empties your ETH is not called "unreadable".
+const BUNDLE_PRIORITY = ['ownership_transfer', 'nft_approve_all', 'nft_approve', 'erc20_approve', 'permit2', 'transfer_from', 'transfer', 'native_send'] as const;
+/** Bundles inside bundles: real wallets nest one or two deep. Deeper is someone trying to exhaust us. */
+const MAX_DEPTH = 4;
 
 const PERMIT2_ABI = parseAbi([
   'function approve(address token, address spender, uint160 amount, uint48 expiration)',
@@ -47,7 +51,7 @@ export type TokenResolver = (chainId: number | undefined, address: string) => Pr
 const offlineResolver: TokenResolver = (chainId, address) => knownToken(chainId, address);
 
 /** Decode a contract call or plain send into facts. Pure apart from the optional token lookup. */
-export async function decodeCall(input: CallInput, resolveToken: TokenResolver = offlineResolver): Promise<Facts> {
+export async function decodeCall(input: CallInput, resolveToken: TokenResolver = offlineResolver, depth = 0): Promise<Facts> {
   const chainId = input.chainId;
   const base = { chainId, chain: chainName(chainId), contract: input.to };
   const value = BigInt(input.value ?? 0);
@@ -123,14 +127,16 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     // unknown
   }
 
+  if (depth >= MAX_DEPTH) return { ...base, kind: 'unknown_call', selector: data.slice(0, 10), nativeValue };
+
   // Drainers hide an approve() inside multicall() so wallets show a harmless-looking top-level call.
   try {
     const { args } = decodeFunctionData({ abi: MULTICALL_ABI, data });
     const calls = (args.length === 1 ? args[0] : args[1]) as readonly Hex[];
     const inner: Facts[] = [];
-    for (const c of calls) inner.push(await decodeCall({ chainId, to: input.to, data: c }, resolveToken));
+    for (const c of calls) inner.push(await decodeCall({ chainId, to: input.to, data: c }, resolveToken, depth + 1));
     for (const kind of BUNDLE_PRIORITY) {
-      const hit = inner.find((f) => f.kind === kind);
+      const hit = inner.find((f) => f.kind === kind && !(kind === 'native_send' && f.amount?.raw === '0'));
       if (hit) return { ...hit, via: 'multicall', nativeValue };
     }
   } catch {
@@ -151,12 +157,12 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     }
     if (calls.length) {
       const inner: Facts[] = [];
-      for (const c of calls) inner.push(await decodeCall({ chainId, to: c.target, data: c.callData, value: c.value }, resolveToken));
+      for (const c of calls) inner.push(await decodeCall({ chainId, to: c.target, data: c.callData, value: c.value }, resolveToken, depth + 1));
       const bundle = inner
-        .filter((f) => (BUNDLE_PRIORITY as readonly string[]).includes(f.kind))
+        .filter((f) => (BUNDLE_PRIORITY as readonly string[]).includes(f.kind) && !(f.kind === 'native_send' && f.amount?.raw === '0'))
         .map((f) => ({ kind: f.kind, token: f.token, spender: f.spender ?? f.recipient, amount: f.amount }));
       for (const kind of BUNDLE_PRIORITY) {
-        const hit = inner.find((f) => f.kind === kind);
+        const hit = inner.find((f) => f.kind === kind && !(kind === 'native_send' && f.amount?.raw === '0'));
         if (hit) return { ...hit, via: 'batch', bundle, nativeValue };
       }
       return { ...base, kind: 'unknown_call', selector: data.slice(0, 10), via: 'batch', bundle, nativeValue };
@@ -228,15 +234,25 @@ export async function decodeTypedData(
   }
 
   if ((td.primaryType === 'PermitSingle' || td.primaryType === 'PermitBatch') && msg.details) {
-    const details = Array.isArray(msg.details) ? msg.details[0] : msg.details;
-    const token = await resolveToken(chainId, details.token);
+    // PermitBatch approves EVERY token in the list. Showing only the first hid the rest (a drainer asks for all of them).
+    const all = (Array.isArray(msg.details) ? msg.details : [msg.details]).filter((d: any) => d?.token);
+    const batch = [];
+    for (const d of all) {
+      const token = await resolveToken(chainId, d.token);
+      batch.push({ token, amount: formatAmount(big(d.amount), token), deadline: formatDeadline(big(d.expiration), nowSec) });
+    }
+    if (!batch.length) return { ...base, kind: 'unknown_signature' };
+    // Lead with the worst item: an unlimited one, else the first.
+    const lead = batch.find((b) => b.amount.unlimited) ?? batch[0];
+    const never = batch.find((b) => b.deadline.never);
     return {
       ...base,
       kind: 'permit2',
-      token,
+      token: lead.token,
       spender: msg.spender,
-      amount: formatAmount(big(details.amount), token),
-      deadline: formatDeadline(big(details.expiration), nowSec),
+      amount: lead.amount,
+      deadline: never ? never.deadline : lead.deadline,
+      ...(batch.length > 1 ? { batch: batch.map(({ token, amount }) => ({ token, amount })) } : {}),
     };
   }
 

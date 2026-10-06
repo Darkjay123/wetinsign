@@ -103,21 +103,25 @@ async function get(path: string): Promise<any> {
   }
 }
 const metaCache = new Map<string, { symbol?: string; decimals?: number } | undefined>();
+// Coin types and metadata addresses come from the pasted payload. Only well-formed ones ever reach the node's URL.
+const COIN_TYPE_RE = /^0x[0-9a-fA-F]{1,64}::[A-Za-z_][A-Za-z0-9_]*::[A-Za-z_][A-Za-z0-9_]*(<[A-Za-z0-9_:<>, ]{1,400}>)?$/;
+const ADDR_RE = /^0x[0-9a-fA-F]{1,64}$/;
+const remember = (k: string, v: { symbol?: string; decimals?: number } | undefined) => { if (metaCache.size > 2000) metaCache.clear(); metaCache.set(k, v); return v; };
 export const aptosLookup: AptosLookup = {
   coin: async (type) => {
+    if (!COIN_TYPE_RE.test(type)) return undefined;
     if (metaCache.has(type)) return metaCache.get(type);
     const addr = type.split('::')[0];
     const r = await get(`/accounts/${addr}/resource/${encodeURIComponent(`0x1::coin::CoinInfo<${type}>`)}`).catch(() => undefined);
     const v = r?.data ? { symbol: r.data.symbol, decimals: Number(r.data.decimals) } : undefined;
-    metaCache.set(type, v);
-    return v;
+    return remember(type, v);
   },
   fa: async (meta) => {
+    if (!ADDR_RE.test(meta)) return undefined;
     if (metaCache.has(meta)) return metaCache.get(meta);
     const r = await get(`/accounts/${meta}/resource/0x1::fungible_asset::Metadata`).catch(() => undefined);
     const v = r?.data ? { symbol: r.data.symbol, decimals: Number(r.data.decimals) } : undefined;
-    metaCache.set(meta, v);
-    return v;
+    return remember(meta, v);
   },
   tx: async (hash) => get(`/transactions/by_hash/${hash.startsWith('0x') ? hash : '0x' + hash}`),
 };

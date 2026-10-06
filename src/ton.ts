@@ -162,7 +162,7 @@ async function getJson(url: string): Promise<any> {
     if (r.status === 429 && attempt < 4) { await new Promise((res) => setTimeout(res, 1200 * (attempt + 1))); continue; }
     if (!r.ok) throw new Error(`${r.status}`);
     const j = await r.json();
-    if (/\/jetton\/wallets|\/jettons\//.test(url)) cache.set(url, j);
+    if (/\/jetton\/wallets|\/jettons\//.test(url)) { if (cache.size > 2000) cache.clear(); cache.set(url, j); }
     return j;
   }
 }

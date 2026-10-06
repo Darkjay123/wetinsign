@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
+import { secureHeaders } from 'hono/secure-headers';
 import { serve } from '@hono/node-server';
 import { CHAINS } from './chains.js';
 import { decodeCall, decodeDelegation, decodeTypedData, type TokenResolver } from './decode.js';
@@ -41,22 +43,73 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v25';
+const CACHE_VERSION = 'v26';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
+
+/** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
+const RATE_PER_MIN = Number(process.env.RATE_PER_MIN ?? 60);
+/** Largest request we read. A real signature request or transaction is a few KB; this stops memory abuse. */
+export const MAX_BODY = 256 * 1024;
+
+/** Every address in an answer that a drainer report could match. */
+function partiesOf(f: Facts | undefined): string[] {
+  if (!f) return [];
+  return [f.spender, f.recipient, f.contract, ...(f.bundle ?? []).map((b) => b.spender)].filter((a): a is string => typeof a === 'string').map((a) => a.toLowerCase());
+}
 
 export function createApp(deps: Deps) {
   const app = new Hono();
+  app.use('*', secureHeaders({
+    contentSecurityPolicy: { defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:'], connectSrc: ["'self'"], frameAncestors: ["'none'"], baseUri: ["'none'"], formAction: ["'self'"] },
+    xFrameOptions: 'DENY',
+    referrerPolicy: 'no-referrer',
+  }));
+  app.use('/api/*', bodyLimit({ maxSize: MAX_BODY, onError: (c) => c.json({ error: 'That is too big to be a real wallet request.' }, 413) }));
+  // A small per-client limit so nobody can turn us into a free 50-network RPC hammer.
+  const hits = new Map<string, { n: number; reset: number }>();
+  app.use('/api/explain/*', async (c, next) => {
+    const ip = (c.req.header('x-forwarded-for') ?? '').split(',')[0].trim() || c.req.header('x-real-ip') || 'local';
+    const now = Date.now();
+    const h = hits.get(ip);
+    if (!h || h.reset < now) {
+      if (hits.size > 10_000) hits.clear();
+      hits.set(ip, { n: 1, reset: now + 60_000 });
+    } else if (++h.n > RATE_PER_MIN) {
+      return c.json({ error: 'Too many checks in one minute. Wait a little and try again.' }, 429);
+    }
+    await next();
+  });
+
+  /**
+   * A cached answer stays valid only while the drainer list agrees with it. The Scam Sniffer feed refreshes every
+   * 12 hours: an address reported AFTER we cached an answer must not keep its old "careful" verdict.
+   */
+  const stillGood = (hit: unknown): boolean => {
+    const r = hit as { facts?: Facts; flags?: { code: string }[] } | undefined;
+    if (!r?.facts) return false;
+    if (r.flags?.some((x) => x.code === 'KNOWN_DRAINER')) return true;
+    const bad = drainerSet();
+    return !partiesOf(r.facts).some((a) => bad.has(a));
+  };
+  const fromCache = async (k: string): Promise<unknown> => {
+    const stored: unknown = await deps.store.get(k).catch(() => undefined);
+    return stored && stillGood(stored) ? stored : undefined;
+  };
   const html = readFileSync(fileURLToPath(new URL('../public/index.html', import.meta.url)), 'utf8');
 
   async function respond(facts: Facts, l: Lang, cacheKey: string) {
-    const spenderIsContract = deps.isContract ? await deps.isContract(facts.chainId, facts.spender) : undefined;
-    const delegateCode = facts.kind === 'delegation' && deps.codeInfo && facts.spender ? await deps.codeInfo(facts.chainId, facts.spender) : undefined;
+    // Optional on-chain checks. A flaky RPC must never turn into an error page: we answer without them.
+    const spenderIsContract = deps.isContract ? await deps.isContract(facts.chainId, facts.spender).catch(() => undefined) : undefined;
+    const delegateCode = facts.kind === 'delegation' && deps.codeInfo && facts.spender ? await deps.codeInfo(facts.chainId, facts.spender).catch(() => undefined) : undefined;
     const flags = assessRisk(facts, { spenderIsContract, delegateCode });
     // Risk is judged on 0x addresses; Tron users then see the T… addresses their wallet shows.
     const shown = tronDisplay(facts);
     const explanation = await explain(shown, flags, l, deps.llm);
     const result = { facts: shown, flags, explanation };
-    await deps.store.put(cacheKey, result).catch(() => undefined);
+    // Do not keep an answer that a temporary lookup failure left half-read (token name or decimals missing):
+    // the next person should get a fresh try, not the degraded answer forever.
+    const degraded = /raw units/.test(shown.amount?.display ?? '') || (!!shown.token && !shown.token.symbol && shown.token.address !== 'native');
+    if (!degraded) await deps.store.put(cacheKey, result).catch(() => undefined);
     return result;
   }
 
@@ -81,7 +134,7 @@ export function createApp(deps: Deps) {
     const l = lang(body.lang);
     const signer = typeof body.from === 'string' && /^0x[0-9a-fA-F]{40}$/.test(body.from) ? body.from : undefined;
     const k = key(['sig', body.typedData, l, signer ?? '']);
-    const hit = await deps.store.get(k).catch(() => undefined);
+    const hit = await fromCache(k);
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
       const facts = await decodeTypedData(body.typedData, deps.resolveToken, undefined, signer);
@@ -96,7 +149,7 @@ export function createApp(deps: Deps) {
     const pastedText = typeof body?.transaction === 'string' ? body.transaction : typeof body?.data === 'string' ? body.data : undefined;
     const pastedJson = (() => { if (typeof body?.transaction === 'object' && body.transaction) return body.transaction; if (pastedText?.trim().startsWith('{')) { try { return JSON.parse(pastedText); } catch { return undefined; } } return undefined; })();
     const cached = async (k: string, make: () => Promise<Facts>, l: Lang, err: string) => {
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       try { return c.json(await respond(await make(), l, k)); } catch { return c.json({ error: err }, 422); }
     };
@@ -110,7 +163,7 @@ export function createApp(deps: Deps) {
     const aptosP = asAptosPayload(pastedJson) ?? asAptosPayload(body);
     if (aptosP) {
       const l = lang(body.lang);
-      const sender = typeof body?.from === 'string' ? body.from : typeof pastedJson?.sender === 'string' ? pastedJson.sender : undefined;
+      const sender = [body?.from, pastedJson?.sender].find((v) => typeof v === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(v)) as string | undefined;
       return cached(key(['aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, deps.aptosLookup, sender), l, 'We could not read that Aptos transaction.');
     }
     // Sui: base64 transaction bytes (or the SDK's JSON) a site asks Slush/Suiet to sign. A Sui node dry-runs it.
@@ -126,7 +179,7 @@ export function createApp(deps: Deps) {
       const bad = badTonAddress(tonReq);
       if (bad) return c.json({ error: `This TON request has an address that is not a valid TON address: ${bad}` }, 422);
       const k = key(['tonreq', tonReq, l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       try {
         return c.json(await respond(await tonFacts(tonReq, deps.tonLookup), l, k));
@@ -139,7 +192,7 @@ export function createApp(deps: Deps) {
     if (solText && (Number(body?.chainId) === SOLANA_ID || looksLikeSolanaTx(solText))) {
       const l = lang(body.lang);
       const k = key(['soltext', solText.trim(), l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       try {
         return c.json(await respond(await explainSolanaText(solText, deps.solanaRpc), l, k));
@@ -152,7 +205,7 @@ export function createApp(deps: Deps) {
     if (tronJson) {
       const l = lang(body.lang);
       const k = key(['trontx', tronJson, l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       try {
         const t = await parseTronTx(tronJson);
@@ -164,10 +217,12 @@ export function createApp(deps: Deps) {
     }
     if (body && Number(body.chainId) === TRON_ID && body.to) body.to = tronToHex(body.to) ?? body.to;
     if (!body?.to || !/^0x[0-9a-fA-F]{40}$/.test(body.to)) return c.json({ error: 'A valid "to" address is required.' }, 400);
+    if (body.data !== undefined && body.data !== '' && (typeof body.data !== 'string' || !/^0x([0-9a-fA-F]{2})*$/.test(body.data.trim()))) return c.json({ error: 'The transaction data must be hex starting with 0x.' }, 400);
+    if (body.value !== undefined && body.value !== '' && !/^(0x[0-9a-fA-F]+|\d+)$/.test(String(body.value))) return c.json({ error: 'The value must be a whole number (in the smallest unit) or hex.' }, 400);
     const l = lang(body.lang);
-    const input = { chainId: body.chainId ? Number(body.chainId) : undefined, to: body.to, data: body.data, value: body.value };
+    const input = { chainId: body.chainId ? Number(body.chainId) : undefined, to: body.to, data: typeof body.data === 'string' && body.data.trim() ? body.data.trim() : undefined, value: body.value === '' ? undefined : body.value };
     const k = key(['call', input, l]);
-    const hit = await deps.store.get(k).catch(() => undefined);
+    const hit = await fromCache(k);
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
       const facts = await decodeCall(input, deps.resolveToken);
@@ -184,9 +239,14 @@ export function createApp(deps: Deps) {
     const chainId = body.chainId ? Number(body.chainId) : 1;
     const l = lang(body.lang);
     const k = key(['delegation', chainId, body.address.toLowerCase(), l]);
-    const hit = await deps.store.get(k).catch(() => undefined);
+    const hit = await fromCache(k);
     if (hit) return c.json({ ...(hit as object), cached: true });
-    return c.json(await respond(decodeDelegation({ chainId, address: body.address }), l, k));
+    if (!CHAINS[chainId]) return c.json({ error: 'Pick a supported network.' }, 400);
+    try {
+      return c.json(await respond(decodeDelegation({ chainId, address: body.address }), l, k));
+    } catch {
+      return c.json({ error: 'We could not check that address right now. Try again in a minute.' }, 503);
+    }
   });
 
   app.post('/api/explain/tx', async (c) => {
@@ -202,7 +262,7 @@ export function createApp(deps: Deps) {
       if (!deps.solanaRpc) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
       const l = lang(body.lang);
       const k = key(['soltx', rawHash, l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       let facts: Facts;
       try { facts = await fetchSolanaTx(rawHash, deps.solanaRpc); } catch { return c.json({ error: 'We could not find that transaction on Solana.' }, 404); }
@@ -214,7 +274,7 @@ export function createApp(deps: Deps) {
       if (!deps.suiLookup) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
       const l = lang(body.lang);
       const k = key(['suitx', rawHash, l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       let facts: Facts;
       try { facts = await fetchSuiTx(rawHash, deps.suiLookup); } catch { return c.json({ error: 'We could not find that transaction on Sui.' }, 404); }
@@ -224,7 +284,7 @@ export function createApp(deps: Deps) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
       const l = lang(body.lang);
       const k = key(['nonevm', chainId, rawHash.toLowerCase(), l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       let facts: Facts;
       try { facts = chainId === APTOS_ID ? await fetchAptosTx(rawHash, deps.aptosLookup) : await fetchXrplTx(rawHash, deps.xrplLookup); } catch { return c.json({ error: `We could not find that transaction on ${CHAINS[chainId!].name}.` }, 404); }
@@ -235,7 +295,7 @@ export function createApp(deps: Deps) {
     if ((tonB64 || chainId === TON_ID) && deps.tonLookup) {
       const l = lang(body.lang);
       const k = key(['tontx', rawHash, l]);
-      const hit = await deps.store.get(k).catch(() => undefined);
+      const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       let facts: Facts;
       try { facts = await fetchTonTx(rawHash, deps.tonLookup); } catch { return c.json({ error: 'We could not find that transaction on TON.' }, 404); }
@@ -274,13 +334,13 @@ export function createApp(deps: Deps) {
       return c.json({ error: auto ? `We could not find that transaction on any of the ${Object.keys(CHAINS).length} networks we check.` : 'We could not find that transaction on this network.' }, 404);
     }
     const k = key(['tx', chainId, hash, l]);
-    const hit = await deps.store.get(k).catch(() => undefined);
+    const hit = await fromCache(k);
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
       // A type-4 transaction can upgrade accounts as well as make a call. An unrecognised upgrade outranks whatever the call does.
       for (const a of input.authorizations ?? []) {
         const df = decodeDelegation({ chainId, address: a.address });
-        const delegateCode = deps.codeInfo ? await deps.codeInfo(chainId, a.address) : undefined;
+        const delegateCode = deps.codeInfo ? await deps.codeInfo(chainId, a.address).catch(() => undefined) : undefined;
         const fl = assessRisk(df, { drainers: drainerSet(), delegateCode });
         if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
       }
