@@ -33,6 +33,19 @@ describe('api', () => {
     expect((await r.json()).facts.kind).toBe('erc20_approve');
   });
 
+  it('a type-4 transaction that points an account at unknown sweeper code reads as danger', async () => {
+    const app = createApp({ store: createStore(''), fetchTx: async (chainId) => ({ chainId, to: USDT, data, value: 0n, authorizations: [{ address: '0x9EA61f15CdbaF5D2039771381FA2AdCFb1b76321', chainId: 1 }] }) });
+    const j = await (await post(app, '/api/explain/tx', { chainId: 1, hash: '0x' + 'cd'.repeat(32) })).json();
+    expect(j.facts.kind).toBe('delegation');
+    expect(j.explanation.verdict).toBe('danger');
+  });
+
+  it('a type-4 transaction upgrading to official MetaMask code is judged on its call', async () => {
+    const app = createApp({ store: createStore(''), fetchTx: async (chainId) => ({ chainId, to: USDT, data, value: 0n, authorizations: [{ address: '0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B', chainId: 1 }] }) });
+    const j = await (await post(app, '/api/explain/tx', { chainId: 1, hash: '0x' + 'ef'.repeat(32) })).json();
+    expect(j.facts.kind).toBe('erc20_approve');
+  });
+
   it('rejects bad input with a human message', async () => {
     const app = createApp({ store: createStore('') });
     const r = await post(app, '/api/explain/tx', { chainId: 1, hash: 'nope' });

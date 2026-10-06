@@ -8,7 +8,7 @@ import { decodeCall, decodeDelegation, decodeTypedData, type TokenResolver } fro
 import { explain, type Lang, type Llm } from './explain.js';
 import type { Facts } from './facts.js';
 import { aiStatus, rumptyLlm } from './inference.js';
-import { drainerStats, startDrainerRefresh } from './drainers.js';
+import { drainerSet, drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 
@@ -16,7 +16,7 @@ export interface Deps {
   llm?: Llm;
   store: Store;
   resolveToken?: TokenResolver;
-  fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint }>;
+  fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[] }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
 }
 
@@ -113,6 +113,12 @@ export function createApp(deps: Deps) {
     if (hit) return c.json({ ...(hit as object), cached: true });
     try {
       const input = await deps.fetchTx(chainId, body.hash);
+      // A type-4 transaction can upgrade accounts as well as make a call. An unrecognised upgrade outranks whatever the call does.
+      for (const a of input.authorizations ?? []) {
+        const df = decodeDelegation({ chainId, address: a.address });
+        const fl = assessRisk(df, { drainers: drainerSet() });
+        if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
+      }
       const facts = await decodeCall(input, deps.resolveToken);
       return c.json(await respond(facts, l, k));
     } catch (e) {

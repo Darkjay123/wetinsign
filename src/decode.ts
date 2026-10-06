@@ -38,6 +38,8 @@ export interface CallInput {
   to: string;
   data?: string;
   value?: string | bigint;
+  /** EIP-7702 (type 4) transactions: the contracts the sender's account, or other signers' accounts, get pointed at. */
+  authorizations?: { address: string; chainId?: number }[];
 }
 
 export type TokenResolver = (chainId: number | undefined, address: string) => Promise<TokenRef> | TokenRef;

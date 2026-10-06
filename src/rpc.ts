@@ -44,7 +44,8 @@ export const onchainResolver: TokenResolver = async (chainId, address): Promise<
 export async function fetchTransaction(chainId: number, hash: string): Promise<CallInput> {
   const tx = await client(chainId).getTransaction({ hash: hash as Hex });
   if (!tx.to) throw new Error('This transaction created a contract; there is nothing to approve or send.');
-  return { chainId, to: tx.to, data: tx.input, value: tx.value };
+  const auth = (tx as { authorizationList?: { address: string; chainId: number }[] }).authorizationList;
+  return { chainId, to: tx.to, data: tx.input, value: tx.value, ...(auth?.length ? { authorizations: auth.map((a) => ({ address: a.address, chainId: Number(a.chainId) })) } : {}) };
 }
 
 export async function isContract(chainId: number | undefined, address?: string): Promise<boolean | undefined> {
