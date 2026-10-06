@@ -162,6 +162,27 @@ export function buildMessages(f: Facts, flags: Flag[], lang: Lang): ChatMessage[
   ];
 }
 
+/**
+ * Reasons to throw the model's wording away. Each one is a failure we saw live from the small model:
+ * calling a Uniswap approval "Danger!" when our verdict was only careful, talking as if the person had already signed,
+ * describing "this person" instead of speaking to the reader, and dropping the one fact that matters.
+ */
+export function aiProblems(text: string, f: Facts, flags: Flag[], v: Severity): string[] {
+  const out: string[] = [];
+  const has = (c: Flag['code']) => flags.some((x) => x.code === c);
+  if (v === 'danger' && /\b(safe|fine|normal|nothing to worry)\b/i.test(text)) out.push('softens danger');
+  if (v === 'danger' && !/danger|stop|do not sign|don't sign/i.test(text)) out.push('danger not stated');
+  if (v !== 'danger' && /\bdanger(ous)?\b/i.test(text)) out.push('says danger when verdict is ' + v);
+  if (/\byou (have )?(already )?(gave|given|approved|signed)\b/i.test(text)) out.push('talks as if already signed');
+  if (/\b(this person|the user|this user)\b/i.test(text)) out.push('not speaking to the reader');
+  if (/0x[0-9a-f]{4,}/i.test(text)) out.push('contains an address');
+  if (f.token?.symbol && !text.includes(f.token.symbol)) out.push('leaves out the token');
+  if (has('TRUSTED_SPENDER') && !/uniswap/i.test(text)) out.push('leaves out who the spender is');
+  if (f.via === 'multicall' && !/bundle|hidden|multicall/i.test(text)) out.push('leaves out the hidden approval');
+  if (text.length > 420) out.push('too long');
+  return out;
+}
+
 export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): Promise<Explanation> {
   const v = verdict(flags);
   const fallback: Explanation = { verdict: v, text: templateText(f, flags, lang), source: 'template', rejected: [] };
@@ -177,10 +198,8 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
     if (!text) return fallback;
     const rejected = inventedNumbers(text, f);
     if (rejected.length) return { ...fallback, rejected };
-    // Danger must never be softened: if our rules say danger, the template's warning leads.
-    if (v === 'danger' && !/danger|wahala|stop|careful|shine your eye/i.test(text)) {
-      return { ...fallback, text: `${fallback.text} ${text}` };
-    }
+    const problems = aiProblems(text, f, flags, v);
+    if (problems.length) return { ...fallback, rejected: problems };
     return { verdict: v, text, source: 'ai', rejected: [] };
   } catch {
     return fallback;

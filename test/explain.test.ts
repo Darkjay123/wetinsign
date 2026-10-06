@@ -74,4 +74,31 @@ describe('explain', () => {
     expect(r.source).toBe('template');
     expect(r.text).toContain('carry ALL your USDT');
   });
+
+  // The next two are the exact answers the live model gave on 6 Oct for real transactions.
+  it('rejects AI text that shouts danger on an official Uniswap approval', async () => {
+    const data = encodeFunctionData({ abi, functionName: 'approve', args: ['0x000000000022D473030F116dDEE9F6B43aC78BA3', maxUint256] });
+    const f = await decodeCall({ chainId: 1, to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', data });
+    const flags = assessRisk(f, none);
+    const r = await explain(f, flags, 'en', async () => 'Danger! This person is giving away unlimited approval for this token (USDC) to a trusted spender.');
+    expect(r.verdict).toBe('warning');
+    expect(r.source).toBe('template');
+    expect(r.text).toContain('Uniswap');
+    expect(r.text).not.toMatch(/danger/i);
+  });
+
+  it('rejects AI text that talks as if the person already signed', async () => {
+    const data = encodeFunctionData({ abi, functionName: 'approve', args: [SPENDER, maxUint256] });
+    const f = await decodeCall({ chainId: 1, to: USDT, data });
+    const r = await explain(f, assessRisk(f, none), 'en', async () => 'Warning: Danger. When you gave unlimited approval to this address, they can take as much of your USDT as they want.');
+    expect(r.source).toBe('template');
+    expect(r.rejected).toContain('talks as if already signed');
+  });
+
+  it('keeps good AI text', async () => {
+    const data = encodeFunctionData({ abi, functionName: 'approve', args: [SPENDER, maxUint256] });
+    const f = await decodeCall({ chainId: 1, to: USDT, data });
+    const r = await explain(f, assessRisk(f, none), 'en', async () => 'Danger: signing this lets this address take all your USDT whenever it wants. Do not sign unless you fully trust the site.');
+    expect(r.source).toBe('ai');
+  });
 });
