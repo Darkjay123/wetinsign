@@ -1,4 +1,4 @@
-import { decodeFunctionData, parseAbi, type Hex } from 'viem';
+import { decodeAbiParameters, decodeFunctionData, parseAbi, type Hex } from 'viem';
 import { chainName, CHAINS } from './chains.js';
 import type { Facts, SeaportItem } from './facts.js';
 import { formatAmount, formatDeadline } from './format.js';
@@ -24,6 +24,9 @@ const MULTICALL_ABI = parseAbi([
 ]);
 
 /** Inner actions worth surfacing, most dangerous first. */
+const EXECUTE_ABI = parseAbi(['function execute(bytes32 mode, bytes executionData)']);
+const EXECUTION_ARRAY = [{ type: 'tuple[]', components: [{ name: 'target', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'callData', type: 'bytes' }] }] as const;
+
 const BUNDLE_PRIORITY = ['nft_approve_all', 'nft_approve', 'erc20_approve', 'permit2', 'transfer_from', 'transfer'] as const;
 
 const PERMIT2_ABI = parseAbi([
@@ -130,6 +133,34 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
     }
   } catch {
     // not a multicall either
+  }
+
+  // EIP-7702 wallets (MetaMask delegator, ERC-7821) run a batch of calls from your own address in one go.
+  // Inferno Drainer used this in May 2025 to get 10 unlimited approvals out of one "swap" click.
+  try {
+    const { args } = decodeFunctionData({ abi: EXECUTE_ABI, data });
+    const [mode, exec] = args as readonly [Hex, Hex];
+    const calls: Array<{ target: string; value: bigint; callData: Hex }> = [];
+    if (mode.slice(2, 4) === '01') {
+      const [arr] = decodeAbiParameters(EXECUTION_ARRAY, exec);
+      for (const c of arr) calls.push({ target: c.target, value: c.value, callData: c.callData });
+    } else if (mode.slice(2, 4) === '00' && exec.length >= 2 + 104) {
+      calls.push({ target: '0x' + exec.slice(2, 42), value: BigInt('0x' + exec.slice(42, 106)), callData: ('0x' + exec.slice(106)) as Hex });
+    }
+    if (calls.length) {
+      const inner: Facts[] = [];
+      for (const c of calls) inner.push(await decodeCall({ chainId, to: c.target, data: c.callData, value: c.value }, resolveToken));
+      const bundle = inner
+        .filter((f) => (BUNDLE_PRIORITY as readonly string[]).includes(f.kind))
+        .map((f) => ({ kind: f.kind, token: f.token, spender: f.spender ?? f.recipient, amount: f.amount }));
+      for (const kind of BUNDLE_PRIORITY) {
+        const hit = inner.find((f) => f.kind === kind);
+        if (hit) return { ...hit, via: 'batch', bundle, nativeValue };
+      }
+      return { ...base, kind: 'unknown_call', selector: data.slice(0, 10), via: 'batch', bundle, nativeValue };
+    }
+  } catch {
+    // not a wallet batch
   }
 
   return { ...base, kind: 'unknown_call', selector: data.slice(0, 10), nativeValue };

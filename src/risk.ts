@@ -21,7 +21,8 @@ export interface Flag {
     | 'SPENDER_UNKNOWN'
     | 'NFT_APPROVE_ONE'
     | 'TAKES_NOW'
-    | 'UNREADABLE_BATCH';
+    | 'UNREADABLE_BATCH'
+    | 'BATCH_APPROVALS';
   severity: Severity;
 }
 
@@ -41,6 +42,11 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   const bad = ctx.drainers ?? drainerList();
   const parties = [f.spender, f.recipient, f.contract].filter(Boolean).map((a) => a!.toLowerCase());
   if (parties.some((a) => bad.has(a))) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
+
+  // Several approvals in one wallet batch: a normal app swap needs at most one.
+  const batchApprovals = f.via === 'batch' ? (f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length : 0;
+  if (batchApprovals >= 3) flags.push({ code: 'BATCH_APPROVALS', severity: 'danger' });
+  else if (batchApprovals === 2) flags.push({ code: 'BATCH_APPROVALS', severity: 'warning' });
 
   switch (f.kind) {
     case 'erc20_approve':

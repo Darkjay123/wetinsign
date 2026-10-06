@@ -105,3 +105,19 @@ describe('Blur signatures', () => {
     expect(templateText(f, flags, 'en')).toContain('does not show which NFTs');
   });
 });
+
+describe('EIP-7702 wallet batches', () => {
+  it('a batch with one approval is careful and says it is a batch', async () => {
+    const { encodeAbiParameters, encodeFunctionData, parseAbi, maxUint256 } = await import('viem');
+    const approve = encodeFunctionData({ abi: parseAbi(['function approve(address,uint256)']), args: [PERMIT2, 5_000_000n] });
+    const exec = encodeAbiParameters([{ type: 'tuple[]', components: [{ name: 'target', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'callData', type: 'bytes' }] }], [[{ target: USDT, value: 0n, callData: approve }]]);
+    const data = encodeFunctionData({ abi: parseAbi(['function execute(bytes32,bytes)']), args: [('0x01' + '00'.repeat(31)) as `0x${string}`, exec] });
+    const { decodeCall } = await import('../src/decode.js');
+    const f = await decodeCall({ chainId: 1, to: FRESH, data });
+    expect(f.via).toBe('batch');
+    const flags = assessRisk(f, none);
+    expect(flags.map((x) => x.code)).not.toContain('BATCH_APPROVALS');
+    expect(templateText(f, flags, 'en')).toContain('wallet batch');
+    void maxUint256;
+  });
+});

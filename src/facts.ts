@@ -52,7 +52,9 @@ export interface Facts {
   deadline?: Deadline;
   selector?: string;
   /** Set when the real action was found hidden inside a bundle call such as multicall. */
-  via?: 'multicall';
+  via?: 'multicall' | 'batch';
+  /** For via 'batch' (EIP-7702 / ERC-7821 wallet batch): every approval or transfer found inside. */
+  bundle?: Array<{ kind: string; token?: TokenRef; spender?: string; amount?: Amount }>;
   nativeValue?: Amount;
   offer?: SeaportItem[];
   consideration?: SeaportItem[];

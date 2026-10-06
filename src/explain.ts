@@ -36,6 +36,21 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       : 'STOP: this address has been reported as a wallet drainer. Do not sign.');
   }
 
+  if (f.via === 'batch' && f.bundle?.length) {
+    const approvals = f.bundle.filter((b) => /approve|permit2/.test(b.kind));
+    const names = [...new Set(approvals.map((b) => b.token?.symbol).filter(Boolean))] as string[];
+    const list = names.length ? ` (${names.slice(0, 6).join(', ')}${names.length > 6 ? ' and more' : ''})` : '';
+    if (approvals.length >= 2) {
+      lines.push(pcm
+        ? `Wahala: this one transaction dey do ${f.bundle.length} things at once inside your wallet, and e dey give permission for ${approvals.length} different tokens${list} at the same time. Normal swap no dey need am like that. Na exactly so Inferno Drainer take thief people money with one click.`
+        : `Danger: this single transaction does ${f.bundle.length} things at once inside your wallet and gives permission over ${approvals.length} different tokens${list} in one go. A normal swap never needs that. This is exactly how Inferno Drainer emptied wallets with one click.`);
+    } else {
+      lines.push(pcm
+        ? `Shine your eye: this transaction dey run ${f.bundle.length} actions at once (wallet batch). The main one na below.`
+        : `Careful: this transaction runs ${f.bundle.length} actions at once (a wallet batch). The important one is below.`);
+    }
+  }
+
   if (f.via === 'multicall') {
     lines.push(pcm
       ? 'Shine your eye: dem hide this permission inside one bundle of actions (multicall). Na trick wey wallet drainers dey use make your wallet no warn you.'
@@ -195,7 +210,7 @@ function numbersIn(s: string): string[] {
 
 /** Every number the explanation is allowed to say: only what was decoded. */
 export function allowedNumbers(f: Facts): Set<string> {
-  const pool = [f.amount?.display, f.tokenId, f.price?.display, ...(f.batch ?? []).map((b) => b.amount.display), f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
+  const pool = [f.amount?.display, String(f.bundle?.length ?? ''), String((f.bundle ?? []).filter((b) => /approve|permit2/.test(b.kind)).length), f.tokenId, f.price?.display, ...(f.batch ?? []).map((b) => b.amount.display), f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
     ...(f.offer ?? []).map((i) => i.amount.display), ...(f.consideration ?? []).map((i) => i.amount.display)];
   const out = new Set<string>();
   for (const s of pool) if (s) for (const n of numbersIn(s)) out.add(n);
@@ -241,6 +256,7 @@ export function aiProblems(text: string, f: Facts, flags: Flag[], v: Severity): 
   if (f.token?.symbol && !text.includes(f.token.symbol)) out.push('leaves out the token');
   if (has('TRUSTED_SPENDER') && !/uniswap/i.test(text)) out.push('leaves out who the spender is');
   if (f.via === 'multicall' && !/bundle|hidden|multicall/i.test(text)) out.push('leaves out the hidden approval');
+  if (f.via === 'batch' && !/batch|at once|in one go|bundle/i.test(text)) out.push('leaves out the batch');
   if (text.length > 420) out.push('too long');
   return out;
 }
