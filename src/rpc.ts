@@ -3,6 +3,8 @@ import { keccak256 } from 'viem';
 import { rpcUrls } from './chains.js';
 import { knownToken, type TokenRef } from './tokens.js';
 import type { CallInput, TokenResolver } from './decode.js';
+import type { Facts } from './facts.js';
+import { fetchTronTx, TRON_ID, tronIsContract } from './tron.js';
 
 const clients = new Map<number, PublicClient>();
 
@@ -43,7 +45,11 @@ export const onchainResolver: TokenResolver = async (chainId, address): Promise<
   return { address, symbol: symbol as string | undefined, decimals: decimals === undefined ? undefined : Number(decimals), ...(isNft ? { isNft } : {}), ...(totalSupply && !isNft && decimals !== undefined ? { totalSupply } : {}) };
 };
 
-export async function fetchTransaction(chainId: number, hash: string): Promise<CallInput> {
+export async function fetchTransaction(chainId: number, hash: string): Promise<CallInput & { facts?: Facts }> {
+  if (chainId === TRON_ID) {
+    const t = await fetchTronTx(hash);
+    return t.call ?? { chainId, to: t.facts?.contract ?? '', facts: t.facts };
+  }
   const tx = await client(chainId).getTransaction({ hash: hash as Hex });
   if (!tx.to) throw new Error('This transaction created a contract; there is nothing to approve or send.');
   const auth = (tx as { authorizationList?: { address: string; chainId: number }[] }).authorizationList;
@@ -51,6 +57,7 @@ export async function fetchTransaction(chainId: number, hash: string): Promise<C
 }
 
 export async function isContract(chainId: number | undefined, address?: string): Promise<boolean | undefined> {
+  if (chainId === TRON_ID) return tronIsContract(address);
   if (chainId === undefined || !address || !/^0x[0-9a-fA-F]{40}$/.test(address)) return undefined;
   try {
     const code = await client(chainId).getCode({ address: address as Hex });

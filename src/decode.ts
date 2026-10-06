@@ -52,7 +52,7 @@ export async function decodeCall(input: CallInput, resolveToken: TokenResolver =
   const base = { chainId, chain: chainName(chainId), contract: input.to };
   const value = BigInt(input.value ?? 0);
   const data = (input.data ?? '0x') as Hex;
-  const nativeDecimals = chainId !== undefined && CHAINS[chainId] ? 18 : undefined;
+  const nativeDecimals = chainId !== undefined && CHAINS[chainId] ? (CHAINS[chainId].nativeDecimals ?? 18) : undefined;
 
   if (data === '0x' || data.length < 10) {
     return {

@@ -11,13 +11,14 @@ import { aiStatus, rumptyLlm } from './inference.js';
 import { drainerSet, drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
+import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
 
 export interface Deps {
   llm?: Llm;
   store: Store;
   resolveToken?: TokenResolver;
   codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string; code?: string } | undefined>;
-  fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[] }>;
+  fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[]; facts?: Facts }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
 }
 
@@ -27,7 +28,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v18';
+const CACHE_VERSION = 'v19';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -38,8 +39,10 @@ export function createApp(deps: Deps) {
     const spenderIsContract = deps.isContract ? await deps.isContract(facts.chainId, facts.spender) : undefined;
     const delegateCode = facts.kind === 'delegation' && deps.codeInfo && facts.spender ? await deps.codeInfo(facts.chainId, facts.spender) : undefined;
     const flags = assessRisk(facts, { spenderIsContract, delegateCode });
-    const explanation = await explain(facts, flags, l, deps.llm);
-    const result = { facts, flags, explanation };
+    // Risk is judged on 0x addresses; Tron users then see the T… addresses their wallet shows.
+    const shown = tronDisplay(facts);
+    const explanation = await explain(shown, flags, l, deps.llm);
+    const result = { facts: shown, flags, explanation };
     await deps.store.put(cacheKey, result).catch(() => undefined);
     return result;
   }
@@ -77,6 +80,22 @@ export function createApp(deps: Deps) {
 
   app.post('/api/explain/call', async (c) => {
     const body = await c.req.json().catch(() => null);
+    // Tron: the transaction JSON a dApp asks TronLink to sign, pasted whole.
+    const tronJson = body?.transaction ?? (typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined);
+    if (tronJson) {
+      const l = lang(body.lang);
+      const k = key(['trontx', tronJson, l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      try {
+        const t = await parseTronTx(tronJson);
+        const facts = t.facts ?? (await decodeCall(t.call!, deps.resolveToken));
+        return c.json(await respond(facts, l, k));
+      } catch {
+        return c.json({ error: 'We could not read that Tron transaction.' }, 422);
+      }
+    }
+    if (body && Number(body.chainId) === TRON_ID && body.to) body.to = tronToHex(body.to) ?? body.to;
     if (!body?.to || !/^0x[0-9a-fA-F]{40}$/.test(body.to)) return c.json({ error: 'A valid "to" address is required.' }, 400);
     const l = lang(body.lang);
     const input = { chainId: body.chainId ? Number(body.chainId) : undefined, to: body.to, data: body.data, value: body.value };
@@ -108,10 +127,12 @@ export function createApp(deps: Deps) {
     const auto = body?.chainId === undefined || body?.chainId === null || body?.chainId === '' || body?.chainId === 'auto' || body?.chainId === 0;
     let chainId = auto ? undefined : Number(body?.chainId);
     if (!auto && !CHAINS[chainId!]) return c.json({ error: 'Pick a supported network.' }, 400);
-    if (!/^0x[0-9a-fA-F]{64}$/.test(body?.hash ?? '')) return c.json({ error: 'A transaction hash is 0x followed by 64 characters.' }, 400);
+    // Tron explorers show the hash without 0x; accept both.
+    const rawHash = String(body?.hash ?? '').trim();
+    if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
     if (!deps.fetchTx) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
     const l = lang(body.lang);
-    const hash = body.hash.toLowerCase();
+    const hash = (rawHash.startsWith('0x') ? rawHash : '0x' + rawHash).toLowerCase();
     if (auto) {
       const hitAuto = await deps.store.get(key(['txauto', hash])).catch(() => undefined) as { chainId?: number } | undefined;
       if (hitAuto?.chainId && CHAINS[hitAuto.chainId]) chainId = hitAuto.chainId;
@@ -144,7 +165,7 @@ export function createApp(deps: Deps) {
         const fl = assessRisk(df, { drainers: drainerSet(), delegateCode });
         if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
       }
-      const facts = await decodeCall({ ...input, chainId }, deps.resolveToken);
+      const facts = input.facts ?? (await decodeCall({ ...input, chainId }, deps.resolveToken));
       return c.json(await respond(facts, l, k));
     } catch {
       return c.json({ error: 'We found the transaction but could not read it.' }, 422);

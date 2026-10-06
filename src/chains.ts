@@ -5,6 +5,8 @@ export interface Chain {
   /** Public RPCs, tried in order. Each answered eth_chainId with this id on 2026-10-06 (chain list: chainid.network). */
   rpcs: string[];
   explorer: string;
+  /** Decimals of the native coin. 18 unless set (TRX has 6). */
+  nativeDecimals?: number;
   /** @deprecated first of rpcs */
   defaultRpc?: string;
 }
@@ -58,6 +60,7 @@ export const CHAINS: Record<number, Chain> = {
   1776: { id: 1776, name: "Injective EVM", nativeSymbol: "INJ", rpcs: ["https://sentry.evm-rpc.injective.network", "https://injectiveevm-rpc.polkachu.com"], explorer: "https://blockscout.injective.network" },
   4663: { id: 4663, name: "Robinhood Chain", nativeSymbol: "ETH", rpcs: ["https://robinhood-rpc.publicnode.com", "https://rpc.mainnet.chain.robinhood.com/rpc", "https://rpc.mainnet.chain.robinhood.com"], explorer: "https://robinscan.io" },
   5042: { id: 5042, name: "Arc", nativeSymbol: "USDC", rpcs: ["https://rpc.mainnet.arc.io", "https://rpc.blockdaemon.mainnet.arc.io", "https://rpc.drpc.mainnet.arc.io"], explorer: "https://explorer.arc.io" },
+  728126428: { id: 728126428, name: "Tron", nativeSymbol: "TRX", nativeDecimals: 6, rpcs: ["https://api.trongrid.io/jsonrpc"], explorer: "https://tronscan.org" },
 };
 
 export function chainName(id?: number): string {

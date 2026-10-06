@@ -269,6 +269,46 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         ? `You dey send ${amt} ${tok} go ${who}. Crypto transfer no dey reverse, so check the address well well.`
         : `You are sending ${amt} ${tok} to ${who}. Crypto transfers cannot be reversed, so check the address.`);
       break;
+    case 'tron_permission': {
+      const others = [...new Set((f.permission ?? []).flatMap((p) => p.others))];
+      const list = others.slice(0, 3).map((o) => shortAddr(o)).join(', ') + (others.length > 3 ? ' and more' : '');
+      if (has('ACCOUNT_TAKEOVER')) {
+        lines.push(pcm
+          ? `Wahala dey: this one go change who control your Tron account. After you sign, ${list} go fit move all your TRX and USDT without you, and you no go fit change am back. Na the Tron multi-signature scam be this. No sign am.`
+          : `Danger: this changes who controls your Tron account. Once signed, ${list} can move all your TRX and USDT without you, and you cannot change it back. This is the Tron multi-signature scam. Do not sign.`);
+      } else if (has('PERMISSION_SHARED')) {
+        const needThem = (f.permission ?? []).some((p) => p.others.length && p.yourWeight < p.threshold);
+        lines.push(pcm
+          ? `Shine your eye: this one go add ${list} to your Tron account permissions. ${needThem ? 'After am, you no go fit move your money unless dem sign too.' : 'You still get control, but dem fit join sign transactions.'} Only do am if you dey set up shared wallet on purpose with person wey you trust.`
+          : `Careful: this adds ${list} to your Tron account permissions. ${needThem ? 'Afterwards you cannot move your money unless they sign too.' : 'You keep control, but they can co-sign transactions.'} Only do this if you are setting up a shared wallet on purpose with someone you trust.`);
+      } else {
+        lines.push(pcm
+          ? 'This one dey change the permission settings for your Tron account, but na only you still get control.'
+          : 'This changes your Tron account permission settings, but only you keep control.');
+      }
+      break;
+    }
+    case 'tron_action': {
+      const r = f.resource === 'ENERGY' ? (pcm ? 'energy' : 'energy') : (pcm ? 'bandwidth' : 'bandwidth');
+      const en: Record<string, string> = {
+        delegate_resource: `This lends your Tron ${r} to ${who}. Your TRX stays in your account and you can take the ${r} back later.`,
+        undelegate_resource: `This takes back the Tron ${r} you lent to ${who}.`,
+        stake: 'This stakes (freezes) TRX in your own account to get energy or bandwidth. The TRX stays yours.',
+        unstake: 'This starts unstaking your TRX. It comes back to your own account after the waiting period.',
+        vote: 'This votes for Tron super representatives with your staked TRX. It does not move your money.',
+        claim_rewards: 'This claims your Tron voting rewards into your own account.',
+      };
+      const pc: Record<string, string> = {
+        delegate_resource: `This one dey borrow your Tron ${r} give ${who}. Your TRX still dey your account, you fit collect the ${r} back later.`,
+        undelegate_resource: `This one dey collect back the Tron ${r} wey you borrow ${who}.`,
+        stake: 'This one dey stake (freeze) TRX for your own account to get energy or bandwidth. The TRX still be your own.',
+        unstake: 'This one dey start to unstake your TRX. E go return to your own account after the waiting time.',
+        vote: 'This one dey vote for Tron super representatives with your staked TRX. E no dey move your money.',
+        claim_rewards: 'This one dey collect your Tron voting rewards enter your own account.',
+      };
+      lines.push((pcm ? pc : en)[f.action ?? 'stake']);
+      break;
+    }
     case 'unknown_call':
     case 'unknown_signature':
       lines.push(pcm
@@ -351,7 +391,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation') return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action') return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

@@ -33,7 +33,11 @@ export interface Flag {
     | 'DELEGATION_SWEEPER'
     | 'DELEGATION_UNCHECKED'
     | 'DELEGATION_KNOWN'
-    | 'DELEGATION';
+    | 'DELEGATION'
+    | 'ACCOUNT_TAKEOVER'
+    | 'PERMISSION_SHARED'
+    | 'PERMISSION_CHANGE'
+    | 'TRON_ACTION';
   severity: Severity;
 }
 
@@ -156,6 +160,20 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     case 'transfer_from':
     case 'native_send':
       flags.push({ code: 'IRREVERSIBLE', severity: 'info' });
+      break;
+    case 'tron_permission': {
+      // The Tron multi-signature scam: a fake wallet, "airdrop" or "help desk" gets you to sign an AccountPermissionUpdate
+      // that adds their key. If their key alone meets the threshold, the account is theirs and you can no longer move it.
+      const ps = f.permission ?? [];
+      // Danger only when their keys can act WITHOUT you. A 2-of-2 where neither side acts alone is how real shared wallets work.
+      if (ps.some((p) => p.others.length && p.othersCanActAlone)) flags.push({ code: 'ACCOUNT_TAKEOVER', severity: 'danger' });
+      else if (ps.some((p) => p.others.length)) flags.push({ code: 'PERMISSION_SHARED', severity: 'warning' });
+      else flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
+      flags.push({ code: 'IRREVERSIBLE', severity: 'info' });
+      break;
+    }
+    case 'tron_action':
+      flags.push({ code: 'TRON_ACTION', severity: 'info' });
       break;
     case 'unknown_call':
     case 'unknown_signature':

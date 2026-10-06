@@ -17,6 +17,8 @@ export type Kind =
   | 'blur_bulk'
   | 'swap_order'
   | 'delegation'
+  | 'tron_permission'
+  | 'tron_action'
   | 'unknown_call'
   | 'unknown_signature';
 
@@ -67,4 +69,9 @@ export interface Facts {
   protocol?: string;
   primaryType?: string;
   appName?: string;
+  /** Tron AccountPermissionUpdate: who can control the account after this, per permission. */
+  permission?: Array<{ scope: 'owner' | 'active'; threshold: number; yourWeight: number; others: string[]; othersCanActAlone: boolean }>;
+  /** Tron native actions such as staking or lending energy. */
+  action?: 'delegate_resource' | 'undelegate_resource' | 'stake' | 'unstake' | 'vote' | 'claim_rewards';
+  resource?: string;
 }
