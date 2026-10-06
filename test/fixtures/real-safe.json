@@ -189,5 +189,734 @@
         "OFFCHAIN_SIGNATURE"
       ]
     }
+  },
+  {
+    "id": "aave-repay-permit-f665c452",
+    "title": "USDC permit for an Aave V3 repay (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool repayWithPermit",
+    "tx": "0xf665c452d3621cf9bb530ee381b5838d66f3d4c1f537ede90ea2548d6bc566f4",
+    "signer": "0xa7F0Ecd22a35Ee17Ad294bEB85727AF539B88d52",
+    "provenance": "typed data rebuilt from the repayWithPermit call the user sent; signature recovers to the sender with nonce 3, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0xa7F0Ecd22a35Ee17Ad294bEB85727AF539B88d52",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "3",
+          "deadline": "1791298174"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-repay-permit-da239e27",
+    "title": "USDC permit for an Aave V3 repay (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool repayWithPermit",
+    "tx": "0xda239e27f239bee427daaee020f4284e6505a54fa658f71148f180244730757a",
+    "signer": "0xDa85b5A69a4E8aDaB9d07334C64e6717B75073a6",
+    "provenance": "typed data rebuilt from the repayWithPermit call the user sent; signature recovers to the sender with nonce 3, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0xDa85b5A69a4E8aDaB9d07334C64e6717B75073a6",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "3",
+          "deadline": "1791297801"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-c8b9ebcd",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xc8b9ebcd124ba7cb8f88bd2383acdb3e3de607e4075f0e938b6f88df2e537ffb",
+    "signer": "0x5b8227560EDCEc133FDC2769B65abfF4793B9b00",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 0, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0x5b8227560EDCEc133FDC2769B65abfF4793B9b00",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "219311445",
+          "nonce": "0",
+          "deadline": "1791296647"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-a0b6a8ed",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xa0b6a8ed0abf5c1d8da6870e89cde3c46a3fb353cc199e751b61f406aab81d67",
+    "signer": "0x10c83Ff8B6989482a3E7Bfc416DF03E8B7BC4dA5",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 5, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0x10c83Ff8B6989482a3E7Bfc416DF03E8B7BC4dA5",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "4181251619",
+          "nonce": "5",
+          "deadline": "1791295980"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-repay-permit-03474fc9",
+    "title": "USDC permit for an Aave V3 repay (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool repayWithPermit",
+    "tx": "0x03474fc9d02be014891006e68b1e7b1c2c380228daa186f0fd0a08faafc56f6a",
+    "signer": "0x9EAe7832fD1C67B6cea0D3c7e7CD86E5fe6189aE",
+    "provenance": "typed data rebuilt from the repayWithPermit call the user sent; signature recovers to the sender with nonce 0, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0x9EAe7832fD1C67B6cea0D3c7e7CD86E5fe6189aE",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "0",
+          "deadline": "1791295951"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-bc195b2d",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xbc195b2db4529a44fa5009f9407beb5d7ab3e4ff3d755c685a9a32ada3ac47d9",
+    "signer": "0xd6281a53E9840277Fa3206BfabA1A844469449B2",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 1, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0xd6281a53E9840277Fa3206BfabA1A844469449B2",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "80511957804",
+          "nonce": "1",
+          "deadline": "1791294370"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-b558cc4c",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xb558cc4c96452ac3566d7748fe72791970216a87936220dab004e5a80e15ef10",
+    "signer": "0xA9740De502Df3753dCDAeBA8295BD24962A7e777",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 10, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0xA9740De502Df3753dCDAeBA8295BD24962A7e777",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "218642483",
+          "nonce": "10",
+          "deadline": "1791294206"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-ae392e00",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xae392e0066009826d35cf8bcd9c1a4b0724b4984f59d4b57a9e307931a9c1fc4",
+    "signer": "0x84979a1CeBcF36b7C20e64dbEA6f3De8486BB502",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 1, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0x84979a1CeBcF36b7C20e64dbEA6f3De8486BB502",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "416437437850",
+          "nonce": "1",
+          "deadline": "1791293138"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
+  },
+  {
+    "id": "aave-deposit-permit-c213bf2f",
+    "title": "USDC permit for an Aave V3 deposit (2026-10-06)",
+    "date": "2026-10-06",
+    "source": "Ethereum mainnet, Aave V3 Pool supplyWithPermit",
+    "tx": "0xc213bf2fd485ba8313ed44fd39db8f865483ffdb3b0fabedd28fcf9ba3db07e0",
+    "signer": "0x84979a1CeBcF36b7C20e64dbEA6f3De8486BB502",
+    "provenance": "typed data rebuilt from the supplyWithPermit call the user sent; signature recovers to the sender with nonce 0, domain matches USDC's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49044289483595225"
+    },
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        },
+        "message": {
+          "owner": "0x84979a1CeBcF36b7C20e64dbEA6f3De8486BB502",
+          "spender": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "value": "10010000000",
+          "nonce": "0",
+          "deadline": "1791292893"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "TRUSTED_SPENDER"
+      ]
+    }
   }
 ]

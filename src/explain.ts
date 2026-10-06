@@ -1,7 +1,7 @@
 import type { Facts } from './facts.js';
 import { shortAddr } from './format.js';
 import { verdict, type Flag, type Severity } from './risk.js';
-import { trustedSpender } from './trusted.js';
+import { trustedInfo } from './trusted.js';
 
 export type Lang = 'en' | 'pcm';
 
@@ -73,11 +73,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
           ? 'Shine your eye: na signature be this, no be transaction. E no go collect gas, and nothing go show for blockchain until dem use am. Scammers like this kind one.'
           : 'Careful: this is a signature, not a transaction. It costs no gas and nothing shows on-chain until it is used, which is why scammers love it.');
       }
-      const trusted = has('TRUSTED_SPENDER') ? trustedSpender(f.chainId, f.spender) : undefined;
-      if (trusted) {
+      const ti = has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+      if (ti) {
         lines.push(pcm
-          ? `${trusted} na official Uniswap contract. To approve am na normal step if you wan swap for Uniswap, but e go fit move ${f.amount?.unlimited ? 'ALL' : amt} your ${tok}. The real wahala na after: if any site come ask you to sign "Permit" for address wey you no know, stop.`
-          : `${trusted} is an official Uniswap contract. Approving it is a normal step for swapping on Uniswap, but it lets it move ${f.amount?.unlimited ? 'ALL of' : amt + ' of'} your ${tok}. The real risk comes after: if any site then asks you to sign a "Permit" for an address you do not know, stop.`);
+          ? `${ti.name} na official ${ti.protocol} contract. To approve am na normal step ${ti.usePcm}, but e go fit move ${f.amount?.unlimited ? 'ALL' : amt} your ${tok}. Only sign am if na you start am for the real ${ti.protocol} site. If any site come ask you to sign "Permit" for address wey you no know, stop.`
+          : `${ti.name} is an official ${ti.protocol} contract. Approving it is a normal step for ${ti.use}, but it lets it move ${f.amount?.unlimited ? 'ALL of' : amt + ' of'} your ${tok}. Only sign if you started this on the real ${ti.protocol} site. If any site asks you to sign a "Permit" for an address you do not know, stop.`);
       } else if (f.amount?.unlimited) {
         lines.push(pcm
           ? `Wahala dey: you dey give ${who} permission to carry ALL your ${tok}, no limit at all. If na thief get that address, dem fit clear this token comot from your wallet anytime, dem no go ask you again.`
@@ -103,11 +103,12 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       const what = f.batch && f.batch.length > 1
         ? f.batch.map((b) => `${b.amount.display} ${b.token.symbol ?? 'tokens'}`).join(', ')
         : `${amt} ${tok}`;
-      const trusted = has('TRUSTED_SPENDER') ? trustedSpender(f.chainId, f.spender) : undefined;
+      const ti = has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+      const trusted = ti?.name;
       if (trusted) {
         lines.push(pcm
-          ? `Na ${trusted} swap be this, official Uniswap. If you sign, ${trusted} go collect ${what} from your wallet once to do the swap. Na normal if na you start the swap for Uniswap.`
-          : `This is a ${trusted} swap, an official Uniswap contract. Signing lets it collect ${what} from your wallet once to fill the swap. That is normal if you started this swap on Uniswap.`);
+          ? `Na ${trusted} swap be this, official ${ti!.protocol}. If you sign, ${trusted} go collect ${what} from your wallet once to do the swap. Na normal if na you start the swap for ${ti!.protocol}.`
+          : `This is a ${trusted} swap, an official ${ti!.protocol} contract. Signing lets it collect ${what} from your wallet once to fill the swap. That is normal if you started this swap on ${ti!.protocol}.`);
       } else {
         lines.push(pcm
           ? `Shine your eye: if you sign this one, ${who} fit carry ${what} comot from your wallet immediately, one time, and you no go need do any transaction again. Na exactly so drainers dey use am.`
@@ -254,7 +255,8 @@ export function aiProblems(text: string, f: Facts, flags: Flag[], v: Severity): 
   if (/\b(this person|the user|this user)\b/i.test(text)) out.push('not speaking to the reader');
   if (/0x[0-9a-f]{4,}/i.test(text)) out.push('contains an address');
   if (f.token?.symbol && !text.includes(f.token.symbol)) out.push('leaves out the token');
-  if (has('TRUSTED_SPENDER') && !/uniswap/i.test(text)) out.push('leaves out who the spender is');
+  const ti = has('TRUSTED_SPENDER') ? trustedInfo(f.chainId, f.spender) : undefined;
+  if (ti && !text.toLowerCase().includes(ti.protocol.toLowerCase())) out.push('leaves out who the spender is');
   if (f.via === 'multicall' && !/bundle|hidden|multicall/i.test(text)) out.push('leaves out the hidden approval');
   if (f.via === 'batch' && !/batch|at once|in one go|bundle/i.test(text)) out.push('leaves out the batch');
   if (has('KNOWN_DRAINER') && !/drainer|reported|scam/i.test(text)) out.push('leaves out the drainer report');

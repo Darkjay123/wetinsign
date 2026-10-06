@@ -32,6 +32,13 @@ const ROWS: Array<[number, string, string]> = [
   [56, '0x00000000a55e50C71b70Db3C8B58749cd1E18eB2', 'UniswapX'],
   [8453, '0x000000001Ec5656dcdB24D90DFa42742738De729', 'UniswapX'],
   [1, '0x6000da47483062A0D734Ba3dc7576Ce6A0B645C4', 'UniswapX'],
+  // Aave V3 Pool: the spender when you deposit (supplyWithPermit) or repay (repayWithPermit) on Aave.
+  // From Aave's official address book (github.com/bgd-labs/aave-address-book, POOL constants, read 2026-10-06).
+  [1, '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2', 'Aave V3 Pool'],
+  [56, '0x6807dc923806fE8Fd134338EABCA509979a7e0cB', 'Aave V3 Pool'],
+  [8453, '0xA238Dd80C259a72e81d7e4664a9801593F98d1c5', 'Aave V3 Pool'],
+  [137, '0x794a61358D6845594F94dc1DB02A252b5b4814aD', 'Aave V3 Pool'],
+  [42161, '0x794a61358D6845594F94dc1DB02A252b5b4814aD', 'Aave V3 Pool'],
 ];
 
 const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${address.toLowerCase()}`, name]));
@@ -39,4 +46,18 @@ const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${addres
 export function trustedSpender(chainId: number | undefined, address: string | undefined): string | undefined {
   if (chainId === undefined || !address) return undefined;
   return MAP.get(`${chainId}:${address.toLowerCase()}`);
+}
+
+export interface TrustedInfo {
+  name: string;
+  protocol: string;
+  /** What a normal user is doing when this contract asks for approval, in English and Pidgin. */
+  use: string;
+  usePcm: string;
+}
+export function trustedInfo(chainId: number | undefined, address: string | undefined): TrustedInfo | undefined {
+  const name = trustedSpender(chainId, address);
+  if (!name) return undefined;
+  if (name.startsWith('Aave')) return { name, protocol: 'Aave', use: 'depositing or repaying a loan on Aave', usePcm: 'if you wan deposit or pay back loan for Aave' };
+  return { name, protocol: 'Uniswap', use: 'swapping on Uniswap', usePcm: 'if you wan swap for Uniswap' };
 }
