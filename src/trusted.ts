@@ -25,6 +25,13 @@ const ROWS: Array<[number, string, string]> = [
   [137, '0x8B844f885672f333Bc0042cB669255f93a4C1E6b', 'Uniswap Universal Router'],
   [8453, '0xF3A4F4094BD2c6C06cA2F61789d8727B8d1e7259', 'Uniswap Universal Router'],
   [8453, '0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD', 'Uniswap Universal Router'],
+  // UniswapX order reactors: the spender in a normal UniswapX swap signature (same feed).
+  [1, '0x00000011F84B9aa48e5f8aA8B9897600006289Be', 'UniswapX'],
+  [42161, '0xB274d5F4b833b61B340b654d600A864fB604a87c', 'UniswapX'],
+  [8453, '0x000000008a8330B5d1F43A62Bf4C673A49f27ba0', 'UniswapX'],
+  [56, '0x00000000a55e50C71b70Db3C8B58749cd1E18eB2', 'UniswapX'],
+  [8453, '0x000000001Ec5656dcdB24D90DFa42742738De729', 'UniswapX'],
+  [1, '0x6000da47483062A0D734Ba3dc7576Ce6A0B645C4', 'UniswapX'],
 ];
 
 const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${address.toLowerCase()}`, name]));

@@ -84,6 +84,48 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       }
       break;
     }
+    case 'permit2_transfer': {
+      const what = f.batch && f.batch.length > 1
+        ? f.batch.map((b) => `${b.amount.display} ${b.token.symbol ?? 'tokens'}`).join(', ')
+        : `${amt} ${tok}`;
+      const trusted = has('TRUSTED_SPENDER') ? trustedSpender(f.chainId, f.spender) : undefined;
+      if (trusted) {
+        lines.push(pcm
+          ? `Na ${trusted} swap be this, official Uniswap. If you sign, ${trusted} go collect ${what} from your wallet once to do the swap. Na normal if na you start the swap for Uniswap.`
+          : `This is a ${trusted} swap, an official Uniswap contract. Signing lets it collect ${what} from your wallet once to fill the swap. That is normal if you started this swap on Uniswap.`);
+      } else {
+        lines.push(pcm
+          ? `Shine your eye: if you sign this one, ${who} fit carry ${what} comot from your wallet immediately, one time, and you no go need do any transaction again. Na exactly so drainers dey use am.`
+          : `Careful: signing this lets ${who} take ${what} out of your wallet right away, one time, with no further transaction from you. This is exactly how many drainers work.`);
+      }
+      if (has('SPENDER_NOT_CONTRACT')) {
+        lines.push(pcm
+          ? 'Wahala: the address wey go collect am no be app contract at all (e never even dey for blockchain). Drainers dey use new empty address like this.'
+          : 'Danger: the address that would collect it is not an app contract (nothing is deployed there yet). Drainers use fresh empty addresses exactly like this.');
+      }
+      break;
+    }
+    case 'blur_order': {
+      const nft = `NFT #${f.tokenId ?? '?'}`;
+      const price = `${f.price?.display ?? 'an unknown amount'} ${tok}`;
+      if (has('FREE_LISTING')) {
+        lines.push(pcm
+          ? `Wahala dey: this one go list your ${nft} for Blur for ${price}, wey be like free. If you sign am, person fit buy am for nothing.`
+          : `Danger: this lists your ${nft} on Blur for ${price}, which is basically free. If you sign it, anyone can buy it for nothing.`);
+      } else if (f.side === 'sell') {
+        lines.push(pcm
+          ? `This one go list your ${nft} for Blur for ${price}. Check say na the price wey you want, because anybody fit buy am for that price.`
+          : `This lists your ${nft} for sale on Blur for ${price}. Make sure that is the price you want, because anyone can buy it at that price.`);
+      } else {
+        lines.push(pcm ? `This one na offer to buy ${nft} for Blur for ${price}.` : `This is an offer to buy ${nft} on Blur for ${price}.`);
+      }
+      break;
+    }
+    case 'blur_bulk':
+      lines.push(pcm
+        ? 'Shine your eye: this signature dey approve plenty Blur listing at once, and the signature no show which NFT or which price. Only sign am inside blur.io itself, after you don check the listings there.'
+        : 'Careful: this signature approves a whole batch of Blur listings at once, and the signature does not show which NFTs or prices. Only sign it on blur.io itself, after checking the listings there.');
+      break;
     case 'ownership_transfer':
       lines.push(pcm
         ? `Wahala dey: this one go hand over full control of this contract give ${who}. If na this contract hold your money (like DSProxy vault), the new owner fit carry everything. No sign am unless na you dey deliberately give am to person wey you know.`
@@ -153,7 +195,7 @@ function numbersIn(s: string): string[] {
 
 /** Every number the explanation is allowed to say: only what was decoded. */
 export function allowedNumbers(f: Facts): Set<string> {
-  const pool = [f.amount?.display, f.tokenId, f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
+  const pool = [f.amount?.display, f.tokenId, f.price?.display, ...(f.batch ?? []).map((b) => b.amount.display), f.deadline?.display, f.nativeValue?.display, f.chain, f.token?.symbol,
     ...(f.offer ?? []).map((i) => i.amount.display), ...(f.consideration ?? []).map((i) => i.amount.display)];
   const out = new Set<string>();
   for (const s of pool) if (s) for (const n of numbersIn(s)) out.add(n);

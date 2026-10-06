@@ -19,7 +19,9 @@ export interface Flag {
     | 'OWNERSHIP_TRANSFER'
     | 'TRUSTED_SPENDER'
     | 'SPENDER_UNKNOWN'
-    | 'NFT_APPROVE_ONE';
+    | 'NFT_APPROVE_ONE'
+    | 'TAKES_NOW'
+    | 'UNREADABLE_BATCH';
   severity: Severity;
 }
 
@@ -65,6 +67,25 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       if (!cleared && ctx.spenderIsContract === false) flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
       break;
     }
+    case 'permit2_transfer': {
+      const trusted = !flags.some((x) => x.code === 'KNOWN_DRAINER') && trustedSpender(f.chainId, f.spender);
+      const items = f.batch ?? (f.amount ? [{ amount: f.amount }] : []);
+      if (items.some((i) => i.amount.unlimited)) flags.push({ code: 'UNLIMITED_APPROVAL', severity: trusted ? 'warning' : 'danger' });
+      if (trusted) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
+      else flags.push({ code: 'TAKES_NOW', severity: 'warning' });
+      flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
+      if (ctx.spenderIsContract === false) flags.push({ code: 'SPENDER_NOT_CONTRACT', severity: 'danger' });
+      break;
+    }
+    case 'blur_order': {
+      // Under 0.001 ETH for an NFT is a giveaway, not a sale. We cannot know a collection's real value, so above that we show the price.
+      if (f.side === 'sell' && f.price && !f.price.unlimited && BigInt(f.price.raw) < 1_000_000_000_000_000n) flags.push({ code: 'FREE_LISTING', severity: 'danger' });
+      flags.push({ code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
+      break;
+    }
+    case 'blur_bulk':
+      flags.push({ code: 'UNREADABLE_BATCH', severity: 'warning' }, { code: 'OFFCHAIN_SIGNATURE', severity: 'warning' });
+      break;
     case 'ownership_transfer':
       flags.push({ code: 'OWNERSHIP_TRANSFER', severity: 'danger' });
       break;

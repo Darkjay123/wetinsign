@@ -55,5 +55,139 @@
         "REVOKE"
       ]
     }
+  },
+  {
+    "id": "blur-listing-priced-2023-02",
+    "title": "Real Blur listing priced at 0.1 Blur Pool ETH",
+    "date": "2023-02-25",
+    "tx": "0x2f8a55c5012a8455564c63b91ce33255877ffe3e321eda28866a56c1149ac07a",
+    "provenance": "sell order rebuilt from the Blur execute() call that filled it (all fields on-chain except nonce, set to 0)",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Order": [
+            {
+              "name": "trader",
+              "type": "address"
+            },
+            {
+              "name": "side",
+              "type": "uint8"
+            },
+            {
+              "name": "matchingPolicy",
+              "type": "address"
+            },
+            {
+              "name": "collection",
+              "type": "address"
+            },
+            {
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "name": "paymentToken",
+              "type": "address"
+            },
+            {
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "name": "listingTime",
+              "type": "uint256"
+            },
+            {
+              "name": "expirationTime",
+              "type": "uint256"
+            },
+            {
+              "name": "fees",
+              "type": "Fee[]"
+            },
+            {
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "name": "extraParams",
+              "type": "bytes"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "Fee": [
+            {
+              "name": "rate",
+              "type": "uint16"
+            },
+            {
+              "name": "recipient",
+              "type": "address"
+            }
+          ]
+        },
+        "primaryType": "Order",
+        "domain": {
+          "name": "Blur Exchange",
+          "version": "1.0",
+          "chainId": 1,
+          "verifyingContract": "0x000000000000Ad05Ccc4F10045630fb830B95127"
+        },
+        "message": {
+          "trader": "0xD7dADbC826664AF79319c0b989F02f405dDB0339",
+          "side": 1,
+          "matchingPolicy": "0x0000000000b92D5d043FaF7CECf7E2EE6aaeD232",
+          "collection": "0xD8ffb954189E2a2DE8a98F64CAf4234785A2e11a",
+          "tokenId": "616",
+          "amount": "1",
+          "paymentToken": "0x0000000000A39bb272e79075ade125fd351887Ac",
+          "price": "100000000000000000",
+          "listingTime": "1676845397",
+          "expirationTime": "1677327779",
+          "fees": [
+            {
+              "rate": 1050,
+              "recipient": "0x4A7C890856c1C7595E4B20c8F087250371A8B187"
+            }
+          ],
+          "salt": "190848917835381442445932178018514268230",
+          "extraParams": "0x01",
+          "nonce": "0"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "warning",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
   }
 ]

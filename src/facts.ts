@@ -12,6 +12,9 @@ export type Kind =
   | 'permit2'
   | 'seaport_order'
   | 'ownership_transfer'
+  | 'permit2_transfer'
+  | 'blur_order'
+  | 'blur_bulk'
   | 'unknown_call'
   | 'unknown_signature';
 
@@ -40,6 +43,12 @@ export interface Facts {
   approved?: boolean;
   /** For nft_approve: which NFT. */
   tokenId?: string;
+  /** For permit2_transfer with several tokens. */
+  batch?: Array<{ token: TokenRef; amount: Amount }>;
+  /** For blur_order. */
+  side?: 'sell' | 'buy';
+  collection?: string;
+  price?: Amount;
   deadline?: Deadline;
   selector?: string;
   /** Set when the real action was found hidden inside a bundle call such as multicall. */

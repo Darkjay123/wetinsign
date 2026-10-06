@@ -202,5 +202,49 @@ export async function decodeTypedData(
     };
   }
 
+  // Permit2 "SignatureTransfer": unlike PermitSingle, this lets the spender pull the tokens right away, once.
+  // Drainers point it at a fresh address that has no code yet. UniswapX swaps use the witness version legitimately.
+  if (/^Permit(Batch)?(Witness)?TransferFrom$/.test(td.primaryType ?? '') && msg.permitted) {
+    const items = Array.isArray(msg.permitted) ? msg.permitted : [msg.permitted];
+    const batch = [];
+    for (const it of items) {
+      const token = await resolveToken(chainId, it.token);
+      batch.push({ token, amount: formatAmount(big(it.amount), token) });
+    }
+    return {
+      ...base,
+      kind: 'permit2_transfer',
+      token: batch[0]?.token,
+      amount: batch[0]?.amount,
+      ...(batch.length > 1 ? { batch } : {}),
+      spender: msg.spender,
+      deadline: msg.deadline !== undefined ? formatDeadline(big(msg.deadline), nowSec) : undefined,
+    };
+  }
+
+  // Blur marketplace. A sell Order for (almost) nothing is how Blur listings get drained;
+  // a Root signs a whole batch of listings at once and does not show which ones.
+  if (/blur/i.test(td.domain?.name ?? '')) {
+    if (td.primaryType === 'Order' && msg.trader) {
+      const pay = String(msg.paymentToken ?? '').toLowerCase();
+      const symbol = /^0x0{40}$/.test(pay) ? 'ETH' : pay === BLUR_POOL ? 'Blur Pool ETH' : undefined;
+      const payToken = symbol ? { address: msg.paymentToken, symbol, decimals: 18 } : await resolveToken(chainId, msg.paymentToken);
+      return {
+        ...base,
+        kind: 'blur_order',
+        owner: msg.trader,
+        side: Number(msg.side) === 1 ? 'sell' : 'buy',
+        collection: msg.collection,
+        tokenId: big(msg.tokenId).toString(),
+        token: payToken,
+        price: formatAmount(big(msg.price), payToken),
+        deadline: msg.expirationTime !== undefined ? formatDeadline(big(msg.expirationTime), nowSec) : undefined,
+      };
+    }
+    if (td.primaryType === 'Root') return { ...base, kind: 'blur_bulk' };
+  }
+
   return { ...base, kind: 'unknown_signature' };
 }
+
+const BLUR_POOL = '0x0000000000a39bb272e79075ade125fd351887ac';
