@@ -61,6 +61,8 @@ export const CHAINS: Record<number, Chain> = {
   4663: { id: 4663, name: "Robinhood Chain", nativeSymbol: "ETH", rpcs: ["https://robinhood-rpc.publicnode.com", "https://rpc.mainnet.chain.robinhood.com/rpc", "https://rpc.mainnet.chain.robinhood.com"], explorer: "https://robinscan.io" },
   5042: { id: 5042, name: "Arc", nativeSymbol: "USDC", rpcs: ["https://rpc.mainnet.arc.io", "https://rpc.blockdaemon.mainnet.arc.io", "https://rpc.drpc.mainnet.arc.io"], explorer: "https://explorer.arc.io" },
   728126428: { id: 728126428, name: "Tron", nativeSymbol: "TRX", nativeDecimals: 6, rpcs: ["https://api.trongrid.io/jsonrpc"], explorer: "https://tronscan.org" },
+  // Solana is not EVM; src/solana.ts reads it. 501 is its SLIP-44 coin type.
+  501: { id: 501, name: "Solana", nativeSymbol: "SOL", nativeDecimals: 9, rpcs: ["https://solana-rpc.publicnode.com", "https://api.mainnet-beta.solana.com"], explorer: "https://solscan.io" },
 };
 
 export function chainName(id?: number): string {

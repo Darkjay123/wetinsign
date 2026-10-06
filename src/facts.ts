@@ -19,6 +19,7 @@ export type Kind =
   | 'delegation'
   | 'tron_permission'
   | 'tron_action'
+  | 'sol_authority'
   | 'unknown_call'
   | 'unknown_signature';
 
@@ -74,4 +75,6 @@ export interface Facts {
   /** Tron native actions such as staking or lending energy. */
   action?: 'delegate_resource' | 'undelegate_resource' | 'stake' | 'unstake' | 'vote' | 'claim_rewards';
   resource?: string;
+  /** Solana: which control this hands over. wallet_owner is System Assign on your wallet; the rest are SPL Token SetAuthority. */
+  authority?: 'wallet_owner' | 'token_owner' | 'close' | 'mint' | 'freeze' | 'remove' | 'other' | 'setup';
 }

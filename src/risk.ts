@@ -37,7 +37,10 @@ export interface Flag {
     | 'ACCOUNT_TAKEOVER'
     | 'PERMISSION_SHARED'
     | 'PERMISSION_CHANGE'
-    | 'TRON_ACTION';
+    | 'TRON_ACTION'
+    | 'SOL_OWNER_CHANGE'
+    | 'TOKEN_OWNER_CHANGE'
+    | 'CLOSE_AUTHORITY';
   severity: Severity;
 }
 
@@ -174,6 +177,14 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     }
     case 'tron_action':
       flags.push({ code: 'TRON_ACTION', severity: 'info' });
+      break;
+    case 'sol_authority':
+      // SlowMist, Dec 2025: a victim signed a System Assign that moved their wallet's Owner to the attacker,
+      // lost over $3 million and could no longer move or revoke anything. Token account owner changes are the same trick one level down.
+      if (f.authority === 'wallet_owner') flags.push({ code: 'SOL_OWNER_CHANGE', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
+      else if (f.authority === 'token_owner') flags.push({ code: 'TOKEN_OWNER_CHANGE', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
+      else if (f.authority === 'close') flags.push({ code: 'CLOSE_AUTHORITY', severity: 'warning' });
+      else flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
       break;
     case 'unknown_call':
     case 'unknown_signature':

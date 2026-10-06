@@ -64,9 +64,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     case 'permit2': {
       const sig = f.kind !== 'erc20_approve';
       if (has('REVOKE')) {
-        lines.push(pcm
-          ? `Correct: this one dey cancel the permission wey ${who} get to spend your ${tok}.`
-          : `Good: this removes ${who}'s permission to spend your ${tok}.`);
+        lines.push(!f.spender
+          ? (pcm ? `Correct: this one dey cancel the permission wey you give person to spend your ${tok}.` : `Good: this removes the permission you gave someone to spend your ${tok}.`)
+          : pcm
+            ? `Correct: this one dey cancel the permission wey ${who} get to spend your ${tok}.`
+            : `Good: this removes ${who}'s permission to spend your ${tok}.`);
         break;
       }
       if (sig) {
@@ -309,8 +311,33 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
       lines.push((pcm ? pc : en)[f.action ?? 'stake']);
       break;
     }
+    case 'sol_authority': {
+      const a = f.authority;
+      if (a === 'wallet_owner') lines.push(pcm
+        ? `Wahala dey: this one go hand your Solana wallet give ${who}. After you sign, your own key no go fit control the wallet again: dem fit carry your SOL and tokens and you no go fit collect am back. Na the Solana owner-change scam be this, wey make one person lose pass $3 million for December 2025. No sign am.`
+        : `Danger: this hands control of your Solana wallet to ${who}. After you sign, your wallet stops answering to your key: they can move your SOL and tokens and you cannot take it back. This is the Solana owner-change scam that cost one person over $3 million in December 2025. Do not sign.`);
+      else if (a === 'token_owner') lines.push(pcm
+        ? `Wahala dey: this one go give ${who} ownership of your ${tok} token account. After you sign, dem fit carry all the ${tok} wey dey inside, and you no go fit reverse am. Only sign am if ${who} na your own other wallet.`
+        : `Danger: this gives ${who} ownership of your ${tok} token account. After you sign they can move every ${tok} in it, and you cannot undo it. Only sign if ${who} is another wallet you own.`);
+      else if (a === 'close') lines.push(pcm
+        ? `Shine your eye: this one go allow ${who} close your ${tok} token account and collect the small SOL deposit wey dey inside. If na wrapped SOL dey the account, dem fit carry am too. Only sign am if you trust this site.`
+        : `Careful: this lets ${who} close your ${tok} token account and keep the SOL deposit inside it. If the account holds wrapped SOL, they can take that too. Only sign if you trust this site.`);
+      else if (a === 'remove') lines.push(pcm
+        ? `This one dey throw away one permission for the ${tok} token forever. E no dey move your money.`
+        : `This gives up a ${tok} token permission for good. It does not move your money.`);
+      else if (a === 'setup') lines.push(pcm
+        ? 'This one na only to set up account (like token account for new coin). E no dey move your money or give anybody permission.'
+        : 'This only sets up accounts (for example a token account for a new coin). It does not move or hand over your money.');
+      else lines.push(pcm
+        ? `This one dey change who fit create or freeze the ${tok} token itself. E matter only if na you create this token; e no dey move your money.`
+        : `This changes who can create or freeze the ${tok} token itself. It only matters if you made this token; it does not move your money.`);
+      break;
+    }
     case 'unknown_call':
     case 'unknown_signature':
+      if (f.chainId === 501 && f.nativeValue) lines.push(pcm
+        ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
+        : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
       lines.push(pcm
         ? 'We no fit read wetin this one dey do. No sign anything wey you no understand, especially link wey person send you.'
         : 'We could not read what this does. Do not sign anything you cannot understand, especially from a link someone sent you.');
@@ -391,7 +418,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action') return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

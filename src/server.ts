@@ -12,6 +12,7 @@ import { drainerSet, drainerStats, startDrainerRefresh } from './drainers.js';
 import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
+import { explainSolanaText, fetchSolanaTx, isSolSignature, looksLikeSolanaTx, SOLANA_ID, type Rpc } from './solana.js';
 
 export interface Deps {
   llm?: Llm;
@@ -20,6 +21,8 @@ export interface Deps {
   codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string; code?: string } | undefined>;
   fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[]; facts?: Facts }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
+  /** Solana JSON-RPC. Without it, pasted Solana transactions are read offline and signatures cannot be looked up. */
+  solanaRpc?: Rpc;
 }
 
 /** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
@@ -28,7 +31,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v19';
+const CACHE_VERSION = 'v20';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -80,8 +83,21 @@ export function createApp(deps: Deps) {
 
   app.post('/api/explain/call', async (c) => {
     const body = await c.req.json().catch(() => null);
+    // Solana: the base64 (or base58) transaction a site asks Phantom/Solflare to sign, pasted whole.
+    const solText = typeof body?.transaction === 'string' ? body.transaction : typeof body?.data === 'string' ? body.data : undefined;
+    if (solText && (Number(body?.chainId) === SOLANA_ID || looksLikeSolanaTx(solText))) {
+      const l = lang(body.lang);
+      const k = key(['soltext', solText.trim(), l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      try {
+        return c.json(await respond(await explainSolanaText(solText, deps.solanaRpc), l, k));
+      } catch {
+        return c.json({ error: 'We could not read that Solana transaction. Paste the base64 text the site asks your wallet to sign.' }, 422);
+      }
+    }
     // Tron: the transaction JSON a dApp asks TronLink to sign, pasted whole.
-    const tronJson = body?.transaction ?? (typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined);
+    const tronJson = (typeof body?.transaction === 'object' ? body.transaction : undefined) ?? (typeof body?.data === 'string' && body.data.trim().startsWith('{') ? (() => { try { return JSON.parse(body.data); } catch { return undefined; } })() : undefined);
     if (tronJson) {
       const l = lang(body.lang);
       const k = key(['trontx', tronJson, l]);
@@ -129,6 +145,18 @@ export function createApp(deps: Deps) {
     if (!auto && !CHAINS[chainId!]) return c.json({ error: 'Pick a supported network.' }, 400);
     // Tron explorers show the hash without 0x; accept both.
     const rawHash = String(body?.hash ?? '').trim();
+    // Solana signatures are base58, 87 or 88 characters.
+    if (isSolSignature(rawHash) || chainId === SOLANA_ID) {
+      if (!isSolSignature(rawHash)) return c.json({ error: 'A Solana transaction signature is 87 or 88 letters and numbers (copy it from Solscan or your wallet).' }, 400);
+      if (!deps.solanaRpc) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
+      const l = lang(body.lang);
+      const k = key(['soltx', rawHash, l]);
+      const hit = await deps.store.get(k).catch(() => undefined);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchSolanaTx(rawHash, deps.solanaRpc); } catch { return c.json({ error: 'We could not find that transaction on Solana.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
     if (!deps.fetchTx) return c.json({ error: 'Transaction lookup is not configured.' }, 503);
     const l = lang(body.lang);
@@ -141,7 +169,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number);
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => id !== SOLANA_ID);
         const found = await Promise.any(ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))));
         chainId = found.id;
         input = found.r;
@@ -178,6 +206,7 @@ export function createApp(deps: Deps) {
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
   const { onchainResolver, fetchTransaction, isContract, codeInfo } = await import('./rpc.js');
+  const { solanaRpc } = await import('./solana.js');
   const app = createApp({
     llm: rumptyLlm(),
     store: createStore(),
@@ -185,6 +214,7 @@ if (isMain) {
     fetchTx: fetchTransaction,
     isContract,
     codeInfo,
+    solanaRpc,
   });
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);
