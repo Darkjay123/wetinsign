@@ -8,6 +8,8 @@ export interface Amount {
   raw: string;
   display: string;
   unlimited: boolean;
+  /** Set when the amount is finite but more than the token's whole supply. */
+  moreThanSupply?: boolean;
 }
 
 export interface Deadline {
@@ -23,9 +25,14 @@ function groupThousands(s: string): string {
 }
 
 /** Turn a raw on-chain integer into something a person can read. Never rounds silently. */
-export function formatAmount(raw: bigint, token?: Pick<TokenRef, 'decimals'>): Amount {
-  const unlimited = raw >= UINT160_MAX; // uint160 max (Permit2) and anything near uint256 max
-  if (unlimited) return { raw: raw.toString(), display: 'unlimited', unlimited };
+export function formatAmount(raw: bigint, token?: Pick<TokenRef, 'decimals' | 'totalSupply'>): Amount {
+  // uint160 max (Permit2) and anything near uint256 max
+  if (raw >= UINT160_MAX) return { raw: raw.toString(), display: 'unlimited', unlimited: true };
+  // Drainers also ask for silly round numbers (1e29 USDC) that are more than the token's whole supply.
+  // Shown as a 40-digit amount it looks like a limit; in practice it is unlimited.
+  const supply = token?.totalSupply ? BigInt(token.totalSupply) : 0n;
+  if (supply > 0n && raw >= supply) return { raw: raw.toString(), display: 'unlimited', unlimited: true, moreThanSupply: true };
+  const unlimited = false;
   if (token?.decimals !== undefined) {
     return { raw: raw.toString(), display: groupThousands(formatUnits(raw, token.decimals)), unlimited };
   }

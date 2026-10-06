@@ -16,23 +16,29 @@ function client(chainId: number): PublicClient {
   return c;
 }
 
-const META_ABI = parseAbi(['function symbol() view returns (string)', 'function decimals() view returns (uint8)', 'function supportsInterface(bytes4 id) view returns (bool)']);
+const META_ABI = parseAbi(['function symbol() view returns (string)', 'function decimals() view returns (uint8)', 'function supportsInterface(bytes4 id) view returns (bool)', 'function totalSupply() view returns (uint256)']);
 const ERC721_ID = '0x80ac58cd';
 
 /** Token symbol and decimals: offline table first, then the chain. Unknown fields stay unknown. */
 export const onchainResolver: TokenResolver = async (chainId, address): Promise<TokenRef> => {
   const known = knownToken(chainId, address);
-  if (known.symbol || chainId === undefined || !/^0x[0-9a-fA-F]{40}$/.test(address)) return known;
+  if (chainId === undefined || !/^0x[0-9a-fA-F]{40}$/.test(address)) return known;
   const c = client(chainId);
-  const [symbol, decimals] = await Promise.all([
+  const supply = c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'totalSupply' }).then((v) => (v as bigint).toString()).catch(() => undefined);
+  if (known.symbol) {
+    const totalSupply = await supply;
+    return totalSupply ? { ...known, totalSupply } : known;
+  }
+  const [symbol, decimals, totalSupply] = await Promise.all([
     c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'symbol' }).catch(() => undefined),
     c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'decimals' }).catch(() => undefined),
+    supply,
   ]);
   let isNft: boolean | undefined;
   if (decimals === undefined) {
     isNft = (await c.readContract({ address: address as Hex, abi: META_ABI, functionName: 'supportsInterface', args: [ERC721_ID] }).catch(() => false)) as boolean;
   }
-  return { address, symbol: symbol as string | undefined, decimals: decimals === undefined ? undefined : Number(decimals), ...(isNft ? { isNft } : {}) };
+  return { address, symbol: symbol as string | undefined, decimals: decimals === undefined ? undefined : Number(decimals), ...(isNft ? { isNft } : {}), ...(totalSupply && !isNft && decimals !== undefined ? { totalSupply } : {}) };
 };
 
 export async function fetchTransaction(chainId: number, hash: string): Promise<CallInput> {

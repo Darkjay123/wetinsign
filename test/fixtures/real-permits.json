@@ -1,0 +1,1745 @@
+[
+  {
+    "id": "lon-permit-7652d90c",
+    "title": "LON permit signature redeemed by a listed drainer (2023-02-27)",
+    "date": "2023-02-27",
+    "source": "Scam Sniffer scam-database drainer 0xdb2DFedDd270b1B2A5e817DfC51E30ba638199C3",
+    "victim": "0x3498D20579aD39e9D83D56ab364C17882Cf8fCBf",
+    "tx": "0x7652d90ce98790aecb407562b66f7051ce702f7b2d1e4ca9af2532912396977b",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 1 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "LON",
+      "decimals": 18,
+      "totalSupply": "140451028838767009507842771"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Tokenlon",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x0000000000095413afC295d19EDeb1Ad7B71c952"
+        },
+        "message": {
+          "owner": "0x3498D20579aD39e9D83D56ab364C17882Cf8fCBf",
+          "spender": "0xdb2DFedDd270b1B2A5e817DfC51E30ba638199C3",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "1",
+          "deadline": "1708244012695"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "boba-permit-f635c4b3",
+    "title": "BOBA permit signature redeemed by a listed drainer (2023-01-16)",
+    "date": "2023-01-16",
+    "source": "Scam Sniffer scam-database drainer 0xd688F63104a91E350068938A008f1e28C9602d27",
+    "victim": "0x0ad971247701dA67bF1fD8931d365B369034C17b",
+    "tx": "0xf635c4b3e3cc650a852aa731f0a7b273a34c487883d4ab7fba474f6e01870802",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "BOBA",
+      "decimals": 18,
+      "totalSupply": "500000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Boba Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x42bBFa2e77757C645eeaAd1655E0911a7553Efbc"
+        },
+        "message": {
+          "owner": "0x0ad971247701dA67bF1fD8931d365B369034C17b",
+          "spender": "0xd688F63104a91E350068938A008f1e28C9602d27",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1704659416081"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "jpeg-permit-444b6ee8",
+    "title": "JPEG permit signature redeemed by a listed drainer (2023-01-12)",
+    "date": "2023-01-12",
+    "source": "Scam Sniffer scam-database drainer 0xd688F63104a91E350068938A008f1e28C9602d27",
+    "victim": "0x4a215280446ffA9508CDF7cf7d2a8dAd02189Dc3",
+    "tx": "0x444b6ee88962d7f84347b7cc9363841052a63b8bb0914be7a5ac19b6f5ef11bd",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "JPEG",
+      "decimals": 18,
+      "totalSupply": "69420000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "JPEG\u2019d Governance Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xE80C0cd204D654CEbe8dd64A4857cAb6Be8345a3"
+        },
+        "message": {
+          "owner": "0x4a215280446ffA9508CDF7cf7d2a8dAd02189Dc3",
+          "spender": "0xd688F63104a91E350068938A008f1e28C9602d27",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1704250402496"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "lyra-permit-b2a5522a",
+    "title": "LYRA permit signature redeemed by a listed drainer (2023-01-06)",
+    "date": "2023-01-06",
+    "source": "Scam Sniffer scam-database drainer 0xd688F63104a91E350068938A008f1e28C9602d27",
+    "victim": "0x6a316Af251F027E274710d956d7b75627E91B26d",
+    "tx": "0xb2a5522a78884ea7942da9aeceb10dde2198a3f027502a1bb79dd4163a80e245",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "LYRA",
+      "decimals": 18,
+      "totalSupply": "1000000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Lyra Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x01BA67AAC7f75f647D94220Cc98FB30FCc5105Bf"
+        },
+        "message": {
+          "owner": "0x6a316Af251F027E274710d956d7b75627E91B26d",
+          "spender": "0xd688F63104a91E350068938A008f1e28C9602d27",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1703799727560"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "impt-permit-5595c3fd",
+    "title": "IMPT permit signature redeemed by a listed drainer (2023-04-26)",
+    "date": "2023-04-26",
+    "source": "Scam Sniffer scam-database drainer 0x4A404BE0cc6982ed80138F4b8DdEa4Db64deaa4E",
+    "victim": "0xBa7443AF6ba9c1cf274dFE9B4842e12369767cF1",
+    "tx": "0x5595c3fde190735913441cd4c2d010eada77c4f7ddfaf8cd83bf97d09fc5a094",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "IMPT",
+      "decimals": 18,
+      "totalSupply": "2754241485431443562616372747"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "IMPT",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x04C17b9D3b29A78F7Bd062a57CF44FC633e71f85"
+        },
+        "message": {
+          "owner": "0xBa7443AF6ba9c1cf274dFE9B4842e12369767cF1",
+          "spender": "0x4A404BE0cc6982ed80138F4b8DdEa4Db64deaa4E",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1713258700215"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "maticpo-permit-836fc7c3",
+    "title": "MATICPO permit signature redeemed by a listed drainer (2023-04-08)",
+    "date": "2023-04-08",
+    "source": "Scam Sniffer scam-database drainer 0x7e92B316D18459e859f33d345D41DB6c6D90F615",
+    "victim": "0x3e542154cc3b20F34f10cd816850C7569b0119b1",
+    "tx": "0x836fc7c37aae116e017bdda54bc40fbfb5e2b88e40c121922de15b6c23ef0b7b",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "MATICPO",
+      "decimals": 18,
+      "totalSupply": "48260414621650000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Wrapped Matic",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x7c9f4C87d911613Fe9ca58b579f737911AAD2D43"
+        },
+        "message": {
+          "owner": "0x3e542154cc3b20F34f10cd816850C7569b0119b1",
+          "spender": "0x7e92B316D18459e859f33d345D41DB6c6D90F615",
+          "value": "10000000000000000000000000000000000000000000000",
+          "nonce": "0",
+          "deadline": "2000000000"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "ampl-permit-073ff167",
+    "title": "AMPL permit signature redeemed by a listed drainer (2023-02-20)",
+    "date": "2023-02-20",
+    "source": "Scam Sniffer scam-database drainer 0x02CBbeDe84577866616119D1B78858A6a49D617e",
+    "victim": "0xc7467F90bbDB15DBBD7106c129cCBc7435C1440e",
+    "tx": "0x073ff167e68e1a0397776ae9245520b51317f16909508a42800fff954afda2ea",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "AMPL",
+      "decimals": 9,
+      "totalSupply": "2847126586978750"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Ampleforth",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xD46bA6D942050d489DBd938a2C909A5d5039A161"
+        },
+        "message": {
+          "owner": "0xc7467F90bbDB15DBBD7106c129cCBc7435C1440e",
+          "spender": "0x02CBbeDe84577866616119D1B78858A6a49D617e",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "0",
+          "deadline": "1707478648052"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "hez-permit-4ca75e34",
+    "title": "HEZ permit signature redeemed by a listed drainer (2023-03-20)",
+    "date": "2023-03-20",
+    "source": "Scam Sniffer scam-database drainer 0x0000000F7e71BFbcdAe6D29aA49ED557aFAEF9D2",
+    "victim": "0x2c3a2BF22819F0583b7D969Ec0b6d191C5331993",
+    "tx": "0x4ca75e344a157ce3342cc2246bbabf65b14e3ab6f428dcdb5efb84fd5a5ee0e2",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "HEZ",
+      "decimals": 18,
+      "totalSupply": "11065762524832683591755198"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Hermez Network Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xEEF9f339514298C6A857EfCfC1A762aF84438dEE"
+        },
+        "message": {
+          "owner": "0x2c3a2BF22819F0583b7D969Ec0b6d191C5331993",
+          "spender": "0x0000000F7e71BFbcdAe6D29aA49ED557aFAEF9D2",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1710098995290"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "grt-permit-f8c27eff",
+    "title": "GRT permit signature redeemed by a listed drainer (2023-03-20)",
+    "date": "2023-03-20",
+    "source": "Scam Sniffer scam-database drainer 0x0000000F7e71BFbcdAe6D29aA49ED557aFAEF9D2",
+    "victim": "0x9b17F731409a6F3F537c32cBa014231E60F50B94",
+    "tx": "0xf8c27eff8923feff4940f4f32f3cbfdd3125b1fbbdbe26022844dbc8cc3f9ac1",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "GRT",
+      "decimals": 18,
+      "totalSupply": "10800262816048213436822328009"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Graph Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xc944E90C64B2c07662A292be6244BDf05Cda44a7"
+        },
+        "message": {
+          "owner": "0x9b17F731409a6F3F537c32cBa014231E60F50B94",
+          "spender": "0x0000000F7e71BFbcdAe6D29aA49ED557aFAEF9D2",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1710091071640"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "lqty-permit-137e670d",
+    "title": "LQTY permit signature redeemed by a listed drainer (2023-03-05)",
+    "date": "2023-03-05",
+    "source": "Scam Sniffer scam-database drainer 0xe1d8EE60eD60D6E31aEd8286fed0864f26898458",
+    "victim": "0x964d71f1623Be9691633a91a0637B0B48c2E9858",
+    "tx": "0x137e670d7d0f52a5e0613910c761c66d59bf525313b04c38279ec834ef6e9481",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "LQTY",
+      "decimals": 18,
+      "totalSupply": "100000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "LQTY",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D"
+        },
+        "message": {
+          "owner": "0x964d71f1623Be9691633a91a0637B0B48c2E9858",
+          "spender": "0xe1d8EE60eD60D6E31aEd8286fed0864f26898458",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1708797317118"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "ohm-permit-2fbedd7f",
+    "title": "OHM permit signature redeemed by a listed drainer (2023-02-14)",
+    "date": "2023-02-14",
+    "source": "Scam Sniffer scam-database drainer 0xe1d8EE60eD60D6E31aEd8286fed0864f26898458",
+    "victim": "0x929bf7DFC9C9Ef3d3824Ba368Cb5b70300Fc0186",
+    "tx": "0x2fbedd7fc5fb969c5efbffec705f1033b49c68aa3b9454c6c8b7ac9d91ef6d6e",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "OHM",
+      "decimals": 9,
+      "totalSupply": "19692028739828419"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Olympus",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5"
+        },
+        "message": {
+          "owner": "0x929bf7DFC9C9Ef3d3824Ba368Cb5b70300Fc0186",
+          "spender": "0xe1d8EE60eD60D6E31aEd8286fed0864f26898458",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1707134222573"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "nst-permit-3a822457",
+    "title": "NST permit signature redeemed by a listed drainer (2023-03-20)",
+    "date": "2023-03-20",
+    "source": "Scam Sniffer scam-database drainer 0x7784604037F1245E8A720059cFB8ecC809A215F9",
+    "victim": "0x96014ea58580eb4FDCbe94fe5Bd1cFBe820A161D",
+    "tx": "0x3a822457a8b112ca210aee560ae69707ceca2d7b084b7613b27bd0c9e5ec6e68",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 1 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "NST",
+      "decimals": 18,
+      "totalSupply": "8611274430000000000150000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Ninja Squad Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x70Bef3bB2f001dA2fDDb207dAe696cD9FAFf3f5d"
+        },
+        "message": {
+          "owner": "0x96014ea58580eb4FDCbe94fe5Bd1cFBe820A161D",
+          "spender": "0x7784604037F1245E8A720059cFB8ecC809A215F9",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "1",
+          "deadline": "1710031018154"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "strngr-permit-b6de6532",
+    "title": "STRNGR permit signature redeemed by a listed drainer (2023-03-14)",
+    "date": "2023-03-14",
+    "source": "Scam Sniffer scam-database drainer 0x7784604037F1245E8A720059cFB8ecC809A215F9",
+    "victim": "0x784Ed0BC5db752A2AB6d9ed2C8a95a6b0C99d280",
+    "tx": "0xb6de65322a53534f7756c8ace42fc4774a70ac7a86663149148adc8206280236",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "STRNGR",
+      "decimals": 18,
+      "totalSupply": "10000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Stronger",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xDc0327D50E6C73db2F8117760592C8BBf1CDCF38"
+        },
+        "message": {
+          "owner": "0x784Ed0BC5db752A2AB6d9ed2C8a95a6b0C99d280",
+          "spender": "0x7784604037F1245E8A720059cFB8ecC809A215F9",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1709546366012"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "bal-permit-2d156bab",
+    "title": "BAL permit signature redeemed by a listed drainer (2023-03-08)",
+    "date": "2023-03-08",
+    "source": "Scam Sniffer scam-database drainer 0x7784604037F1245E8A720059cFB8ecC809A215F9",
+    "victim": "0x30A78A05b9485Ec32Ac006FACE3D6E8b5A920C78",
+    "tx": "0x2d156bab552821d920a959c8c1087d0ef16ed127b0e0ce4012c59b924a4b3734",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 1 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "BAL",
+      "decimals": 18,
+      "totalSupply": "72373921014230608268471413"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Balancer",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0xba100000625a3754423978a60c9317c58a424e3D"
+        },
+        "message": {
+          "owner": "0x30A78A05b9485Ec32Ac006FACE3D6E8b5A920C78",
+          "spender": "0x7784604037F1245E8A720059cFB8ecC809A215F9",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "1",
+          "deadline": "1709032333454"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "1inch-permit-91a7011d",
+    "title": "1INCH permit signature redeemed by a listed drainer (2023-03-08)",
+    "date": "2023-03-08",
+    "source": "Scam Sniffer scam-database drainer 0x7784604037F1245E8A720059cFB8ecC809A215F9",
+    "victim": "0x30A78A05b9485Ec32Ac006FACE3D6E8b5A920C78",
+    "tx": "0x91a7011d135087ca1a1a94e983cae94b1c8cc7497056e6ea768a935c4f45228a",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "1INCH",
+      "decimals": 18,
+      "totalSupply": "1499999999997000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "1INCH Token",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0x111111111117dC0aa78b770fA6A738034120C302"
+        },
+        "message": {
+          "owner": "0x30A78A05b9485Ec32Ac006FACE3D6E8b5A920C78",
+          "spender": "0x7784604037F1245E8A720059cFB8ecC809A215F9",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1709024753696"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "aave-permit-ab6445f8",
+    "title": "AAVE permit signature redeemed by a listed drainer (2023-02-25)",
+    "date": "2023-02-25",
+    "source": "Scam Sniffer scam-database drainer 0x141F6CEA8461B58f210dee23319858b3B6DcD0Ec",
+    "victim": "0x8BbA13FB6fBe4705e51C7fDEF0c3Fd6F8975a27b",
+    "tx": "0xab6445f878042414aaeb930033d5970b459d739fd3b360c32102b4623d671978",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0",
+    "token": {
+      "symbol": "AAVE",
+      "decimals": 18,
+      "totalSupply": "16000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Aave Token",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
+        },
+        "message": {
+          "owner": "0x8BbA13FB6fBe4705e51C7fDEF0c3Fd6F8975a27b",
+          "spender": "0x141F6CEA8461B58f210dee23319858b3B6DcD0Ec",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "0",
+          "deadline": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "sd-permit-dfb67db8",
+    "title": "SD permit signature redeemed by a listed drainer (2023-03-06)",
+    "date": "2023-03-06",
+    "source": "Scam Sniffer scam-database drainer 0x0F732ccBB681021Ba33D99F976B9A6199F8e72d8",
+    "victim": "0x6c4D01B9A5c0D875F1780137e9b91c0637d4EFb3",
+    "tx": "0xdfb67db8b7ec3439a34fa66e1dc3a8ae35583117b3ff1ebb89969759ffb5ef3c",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "SD",
+      "decimals": 18,
+      "totalSupply": "150000000000000000000000000"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "Stader",
+          "version": "1",
+          "chainId": 1,
+          "verifyingContract": "0x30D20208d987713f46DFD34EF128Bb16C404D10f"
+        },
+        "message": {
+          "owner": "0x6c4D01B9A5c0D875F1780137e9b91c0637d4EFb3",
+          "spender": "0x0F732ccBB681021Ba33D99F976B9A6199F8e72d8",
+          "value": "1158472395435294898592384258348512586931256000000000000000000",
+          "nonce": "0",
+          "deadline": "1708871243024"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "usdc-permit-fd355a09",
+    "title": "USDC permit signature redeemed by a listed drainer (2023-04-07)",
+    "date": "2023-04-07",
+    "source": "Scam Sniffer scam-database drainer 0xdc54Ddeae33a65A232622Ede8F7E30c7bd0b0F9E",
+    "victim": "0x18625B6F2596798E4b5Ef694E924755055E6dD8D",
+    "tx": "0xfd355a09ba4857896baf2cb2abb8189348d50e761d532466ae8f12ece9716209",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49029358585597355"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "message": {
+          "owner": "0x18625B6F2596798E4b5Ef694E924755055E6dD8D",
+          "spender": "0xdc54Ddeae33a65A232622Ede8F7E30c7bd0b0F9E",
+          "value": "10970000",
+          "nonce": "0",
+          "deadline": "1681008795"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "usdc-permit-e7c13515",
+    "title": "USDC permit signature redeemed by a listed drainer (2023-01-11)",
+    "date": "2023-01-11",
+    "source": "Scam Sniffer scam-database drainer 0xC94c714C607D4e74aa78A1E6e6CB536CA4BD56a9",
+    "victim": "0xf48CaA499F5525eA37993F12Ff37cf044c2bd4e9",
+    "tx": "0xe7c13515a5323c90aeaa96578d1fb406de05134f3c8cd3460fdced00b1c9fdfb",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49029358585597355"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "message": {
+          "owner": "0xf48CaA499F5525eA37993F12Ff37cf044c2bd4e9",
+          "spender": "0xa372a45fAb2aA66d79Fae09b6089DA5c53Ca8Fdf",
+          "value": "10000000000000000",
+          "nonce": "0",
+          "deadline": "13667481974765"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "usdc-permit-c191670e",
+    "title": "USDC permit signature redeemed by a listed drainer (2023-02-23)",
+    "date": "2023-02-23",
+    "source": "Scam Sniffer scam-database drainer 0x7e92B316D18459e859f33d345D41DB6c6D90F615",
+    "victim": "0x502F1F166d4412bb5b6497d02e5B520511049f35",
+    "tx": "0xc191670e1fd3d8c840064ca5b3761e4274a197e03e8ca4e828ee124d61ce7651",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49029358585597355"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "message": {
+          "owner": "0x502F1F166d4412bb5b6497d02e5B520511049f35",
+          "spender": "0x7e92B316D18459e859f33d345D41DB6c6D90F615",
+          "value": "10000000000000000000000000000000000000000000000",
+          "nonce": "0",
+          "deadline": "2000000000"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  },
+  {
+    "id": "usdc-permit-52209acc",
+    "title": "USDC permit signature redeemed by a listed drainer (2023-01-11)",
+    "date": "2023-01-11",
+    "source": "Scam Sniffer scam-database drainer 0xEBCA295E309e3BeD2695dbC2A04D22cBD1bD6bAd",
+    "victim": "0x1Ca7b496Ac4E609cf400793Db67916AC91773927",
+    "tx": "0x52209acc0f5012dd1474d392a30802495b4fbabe52418caa89ca7fc4e7a4d980",
+    "provenance": "typed data rebuilt from the drainer's on-chain permit() call; signature recovers to the victim with nonce 0 and the domain matches the token's on-chain DOMAIN_SEPARATOR",
+    "token": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "totalSupply": "49029358585597355"
+    },
+    "token_source": "symbol/decimals/total supply from Blockscout token API, 6 Oct 2026",
+    "endpoint": "signature",
+    "input": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "USD Coin",
+          "version": "2",
+          "chainId": 1,
+          "verifyingContract": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "message": {
+          "owner": "0x1Ca7b496Ac4E609cf400793Db67916AC91773927",
+          "spender": "0xEBCA295E309e3BeD2695dbC2A04D22cBD1bD6bAd",
+          "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "nonce": "0",
+          "deadline": "1992689033"
+        }
+      }
+    },
+    "expect": {
+      "verdict": "danger",
+      "kind": "permit",
+      "flags": [
+        "OFFCHAIN_SIGNATURE"
+      ]
+    }
+  }
+]

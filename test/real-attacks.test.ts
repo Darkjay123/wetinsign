@@ -50,3 +50,27 @@ describe('real everyday actions are not called danger', () => {
     });
   }
 });
+
+// 21 permit signatures that drainers actually redeemed on Ethereum, 17 different tokens.
+// Each one was rebuilt from the drainer's permit() call and checked by recovering the signature to the victim.
+const permits = JSON.parse(readFileSync(new URL('./fixtures/real-permits.json', import.meta.url), 'utf8'));
+describe('real redeemed permits', () => {
+  for (const c of permits) {
+    it(c.title, async () => {
+      const f: any = await factsFor(c);
+      const flags = assessRisk(f, { ...none, spenderIsContract: false });
+      expect(f.kind).toBe('permit');
+      expect(f.spender.toLowerCase()).toBe(c.input.typedData.message.spender.toLowerCase());
+      for (const code of c.expect.flags) expect(flags.map((x) => x.code)).toContain(code);
+      expect(verdict(flags)).toBe('danger');
+      // An amount bigger than the whole token supply must read as unlimited, not as a 40-digit "limit".
+      if (c.token?.totalSupply && BigInt(c.input.typedData.message.value) >= BigInt(c.token.totalSupply)) {
+        expect(f.amount.unlimited).toBe(true);
+        expect(flags.map((x) => x.code)).toContain('UNLIMITED_APPROVAL');
+      }
+    });
+  }
+  it('stays at least a warning even without the spender code check', async () => {
+    for (const c of permits) expect(['danger', 'warning'], c.id).toContain(verdict(assessRisk(await factsFor(c), none)));
+  });
+});

@@ -4,6 +4,8 @@ export interface TokenRef {
   decimals?: number;
   /** True when the contract says it is an ERC-721 NFT collection. approve() on it hands over one NFT, not an amount. */
   isNft?: boolean;
+  /** Raw total supply, when the chain told us. An approval for more than exists is unlimited in practice. */
+  totalSupply?: string;
 }
 
 // A small offline table of the stablecoins Nigerians actually hold. Anything else is
