@@ -76,6 +76,13 @@ const ROWS: Array<[number, string, string]> = [
   [56, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
   [8453, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
   [42161, '0x000000005c84F8Fd50b21CAC312528A64437030e', 'Uniswap Wallet Calibur'],
+  // Coinbase Smart Wallet EIP7702Proxy, CREATE2 via the canonical factory so the same code on every chain; from the
+  // deployments table in github.com/base/eip-7702-proxy README (read 2026-10-06).
+  [1, '0x7702cb554e6bFb442cb743A7dF23154544a7176C', 'Coinbase Smart Wallet EIP-7702 proxy'],
+  [56, '0x7702cb554e6bFb442cb743A7dF23154544a7176C', 'Coinbase Smart Wallet EIP-7702 proxy'],
+  [8453, '0x7702cb554e6bFb442cb743A7dF23154544a7176C', 'Coinbase Smart Wallet EIP-7702 proxy'],
+  [137, '0x7702cb554e6bFb442cb743A7dF23154544a7176C', 'Coinbase Smart Wallet EIP-7702 proxy'],
+  [42161, '0x7702cb554e6bFb442cb743A7dF23154544a7176C', 'Coinbase Smart Wallet EIP-7702 proxy'],
 ];
 
 const MAP = new Map(ROWS.map(([chainId, address, name]) => [`${chainId}:${address.toLowerCase()}`, name]));
@@ -96,6 +103,7 @@ export function trustedInfo(chainId: number | undefined, address: string | undef
   const name = trustedSpender(chainId, address);
   if (!name) return undefined;
   if (name.startsWith('Aave')) return { name, protocol: 'Aave', use: 'depositing or repaying a loan on Aave', usePcm: 'if you wan deposit or pay back loan for Aave' };
+  if (name.startsWith('Coinbase')) return { name: 'Coinbase Smart Wallet', protocol: 'Coinbase Wallet', use: 'turning on Coinbase smart wallet features', usePcm: 'if you wan on Coinbase smart wallet' };
   if (name.startsWith('MetaMask')) return { name, protocol: 'MetaMask', use: 'turning on MetaMask smart account features', usePcm: 'if you wan on MetaMask smart account' };
   if (name.startsWith('Uniswap Wallet')) return { name, protocol: 'Uniswap Wallet', use: 'turning on Uniswap Wallet smart account features', usePcm: 'if you wan on Uniswap Wallet smart account' };
   if (name.startsWith('CoW')) return { name, protocol: 'CoW Swap', use: 'trading on CoW Swap', usePcm: 'if you wan trade for CoW Swap' };

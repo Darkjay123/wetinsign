@@ -16,6 +16,7 @@ export interface Deps {
   llm?: Llm;
   store: Store;
   resolveToken?: TokenResolver;
+  codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string } | undefined>;
   fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[] }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
 }
@@ -26,7 +27,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v14';
+const CACHE_VERSION = 'v15';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
@@ -35,7 +36,8 @@ export function createApp(deps: Deps) {
 
   async function respond(facts: Facts, l: Lang, cacheKey: string) {
     const spenderIsContract = deps.isContract ? await deps.isContract(facts.chainId, facts.spender) : undefined;
-    const flags = assessRisk(facts, { spenderIsContract });
+    const delegateCode = facts.kind === 'delegation' && deps.codeInfo && facts.spender ? await deps.codeInfo(facts.chainId, facts.spender) : undefined;
+    const flags = assessRisk(facts, { spenderIsContract, delegateCode });
     const explanation = await explain(facts, flags, l, deps.llm);
     const result = { facts, flags, explanation };
     await deps.store.put(cacheKey, result).catch(() => undefined);
@@ -116,7 +118,8 @@ export function createApp(deps: Deps) {
       // A type-4 transaction can upgrade accounts as well as make a call. An unrecognised upgrade outranks whatever the call does.
       for (const a of input.authorizations ?? []) {
         const df = decodeDelegation({ chainId, address: a.address });
-        const fl = assessRisk(df, { drainers: drainerSet() });
+        const delegateCode = deps.codeInfo ? await deps.codeInfo(chainId, a.address) : undefined;
+        const fl = assessRisk(df, { drainers: drainerSet(), delegateCode });
         if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
       }
       const facts = await decodeCall(input, deps.resolveToken);
@@ -131,13 +134,14 @@ export function createApp(deps: Deps) {
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
-  const { onchainResolver, fetchTransaction, isContract } = await import('./rpc.js');
+  const { onchainResolver, fetchTransaction, isContract, codeInfo } = await import('./rpc.js');
   const app = createApp({
     llm: rumptyLlm(),
     store: createStore(),
     resolveToken: onchainResolver,
     fetchTx: fetchTransaction,
     isContract,
+    codeInfo,
   });
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);

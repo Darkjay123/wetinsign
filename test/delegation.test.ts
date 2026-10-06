@@ -4,6 +4,8 @@ import { assessRisk, verdict } from '../src/risk.js';
 import { templateText } from '../src/explain.js';
 
 const none = { drainers: new Set<string>() };
+// Code read on-chain 6 Oct 2026: every CrimeEnjoyor deployment is the same 1,042 bytes.
+const CRIME = { size: 1042, hash: '0xcff0edcc2dfd8d66bfbdb21739029900977274dfd6e73332e0272aa9bb40e7f1' };
 
 // Real EIP-7702 sweeper contracts: verified on Etherscan/Blockscout under the name "CrimeEnjoyor", the copy-paste
 // drainer Wintermute reported behind most 2025 delegations. Read from eth.blockscout.com search on 6 Oct 2026.
@@ -18,8 +20,8 @@ describe('EIP-7702 account upgrades', () => {
   for (const a of SWEEPERS) {
     it(`real CrimeEnjoyor sweeper ${a.slice(0, 10)} is danger`, () => {
       const f = decodeDelegation({ chainId: 1, address: a });
-      const fl = assessRisk(f, none);
-      expect(fl.map((x) => x.code)).toContain('DELEGATION_UNKNOWN');
+      const fl = assessRisk(f, { ...none, delegateCode: CRIME });
+      expect(fl.map((x) => x.code)).toContain('DELEGATION_SWEEPER');
       expect(verdict(fl)).toBe('danger');
     });
   }
@@ -35,6 +37,37 @@ describe('EIP-7702 account upgrades', () => {
     const fl = assessRisk(decodeDelegation({ chainId: 8453, address: '0x000000005c84F8Fd50b21CAC312528A64437030e' }), none);
     expect(verdict(fl)).toBe('warning');
     expect(fl.map((x) => x.code)).toContain('TRUSTED_SPENDER');
+  });
+
+  // Real account code seen in live Ethereum delegations on 6 Oct 2026, none on our official list.
+  for (const [name, addr, size] of [
+    ['WalletCore', '0x69e6bd1C4082403Fc7917a61F6216552fC1a541D', 9768],
+    ['Simple7702Account', '0xe6Cae83BdE06E4c305530e199D7217f42808555B', 3639],
+    ['CaliburEntry (newer)', '0x000000009B1D0aF20D8C6d0A44e162d11F9b8f00', 24504],
+    ['Railgun RelayAdapt7702', '0x05ae73c5925d843864ae6F261f3175De2ebCd963', 17451],
+  ] as const) {
+    it(`real unrecognised wallet code ${name} is a warning, not danger`, () => {
+      const f = decodeDelegation({ chainId: 1, address: addr });
+      const fl = assessRisk(f, { ...none, delegateCode: { size, hash: '0x' + '11'.repeat(32) } });
+      expect(fl.map((x) => x.code)).toContain('DELEGATION_UNKNOWN');
+      expect(verdict(fl)).toBe('warning');
+    });
+  }
+
+  it('Coinbase Smart Wallet proxy (official) is a trusted warning', () => {
+    const fl = assessRisk(decodeDelegation({ chainId: 8453, address: '0x7702cb554e6bFb442cb743A7dF23154544a7176C' }), none);
+    expect(fl.map((x) => x.code)).toEqual(['DELEGATION', 'TRUSTED_SPENDER']);
+  });
+
+  it('code we could not read is danger', () => {
+    const fl = assessRisk(decodeDelegation({ chainId: 1, address: '0x490Aac77c960B0569C8E446aC7E12490bD44Ca1D' }), none);
+    expect(fl.map((x) => x.code)).toContain('DELEGATION_UNCHECKED');
+    expect(verdict(fl)).toBe('danger');
+  });
+
+  it('an address with no code at all is danger', () => {
+    const fl = assessRisk(decodeDelegation({ chainId: 1, address: '0x1111111111111111111111111111111111111111' }), { ...none, delegateCode: { size: 0, hash: '0x' } });
+    expect(verdict(fl)).toBe('danger');
   });
 
   it('pointing the account at zero undoes the upgrade', () => {

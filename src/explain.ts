@@ -205,10 +205,14 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         lines.push(pcm
           ? `This one go upgrade your whole wallet to ${dti.name}, the official ${dti.protocol} code. E dey normal ${dti.usePcm}, but after am, any signature you sign fit move everything for the wallet. Only do am inside the real ${dti.protocol} app.`
           : `This upgrades your whole wallet to ${dti.name}, official ${dti.protocol} code. That is normal for ${dti.use}, but afterwards any batch you sign can move everything in the wallet. Only do this inside the real ${dti.protocol} app.`);
+      } else if (has('DELEGATION_UNKNOWN')) {
+        lines.push(pcm
+          ? `Careful: this one go upgrade your WHOLE wallet to the code for ${shortAddr(f.spender)}. E fit be real wallet code, but we no sabi am. Only accept am inside your own wallet app upgrade screen. If na website dey ask you, no sign.`
+          : `Careful: this upgrades your WHOLE wallet to the code at ${shortAddr(f.spender)}. It looks like real wallet code, but we do not recognise it. Only accept it from your own wallet app's upgrade screen. If a website is asking, do not sign.`);
       } else {
         lines.push(pcm
-          ? `Wahala dey: this one go hand your WHOLE wallet give the code for ${shortAddr(f.spender)}. We no sabi am as official wallet code. Most of these upgrades na "sweeper" wey dey empty wallet. No sign am.`
-          : `Danger: this hands your WHOLE wallet to the code at ${shortAddr(f.spender)}. We do not recognise it as official wallet code, and most upgrades like this are "sweepers" that empty the wallet. Do not sign.`);
+          ? `Wahala dey: this one go hand your WHOLE wallet give the code for ${shortAddr(f.spender)}. ${has('DELEGATION_UNCHECKED') ? 'We no fit check the code, and' : 'E be like "sweeper" code:'} once you sign, dem fit empty everything wey dey the wallet. No sign am.`
+          : `Danger: this hands your WHOLE wallet to the code at ${shortAddr(f.spender)}. ${has('DELEGATION_UNCHECKED') ? 'We could not check that code, and' : 'It looks like "sweeper" code:'} once signed, everything in the wallet can be emptied. Do not sign.`);
       }
       break;
     }

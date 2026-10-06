@@ -34,7 +34,7 @@ describe('api', () => {
   });
 
   it('a type-4 transaction that points an account at unknown sweeper code reads as danger', async () => {
-    const app = createApp({ store: createStore(''), fetchTx: async (chainId) => ({ chainId, to: USDT, data, value: 0n, authorizations: [{ address: '0x9EA61f15CdbaF5D2039771381FA2AdCFb1b76321', chainId: 1 }] }) });
+    const app = createApp({ store: createStore(''), codeInfo: async () => ({ size: 1042, hash: '0xcff0edcc2dfd8d66bfbdb21739029900977274dfd6e73332e0272aa9bb40e7f1' }), fetchTx: async (chainId) => ({ chainId, to: USDT, data, value: 0n, authorizations: [{ address: '0x9EA61f15CdbaF5D2039771381FA2AdCFb1b76321', chainId: 1 }] }) });
     const j = await (await post(app, '/api/explain/tx', { chainId: 1, hash: '0x' + 'cd'.repeat(32) })).json();
     expect(j.facts.kind).toBe('delegation');
     expect(j.explanation.verdict).toBe('danger');

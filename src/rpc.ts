@@ -1,4 +1,5 @@
 import { createPublicClient, http, parseAbi, type Hex, type PublicClient } from 'viem';
+import { keccak256 } from 'viem';
 import { rpcUrl } from './chains.js';
 import { knownToken, type TokenRef } from './tokens.js';
 import type { CallInput, TokenResolver } from './decode.js';
@@ -53,6 +54,15 @@ export async function isContract(chainId: number | undefined, address?: string):
   try {
     const code = await client(chainId).getCode({ address: address as Hex });
     return !!code && code !== '0x';
+  } catch {
+    return undefined;
+  }
+}
+
+export async function codeInfo(chainId: number | undefined, address: string): Promise<{ size: number; hash: string } | undefined> {
+  try {
+    const code = (await client(chainId ?? 1).getCode({ address: address as Hex })) ?? '0x';
+    return { size: (code.length - 2) / 2, hash: keccak256(code as Hex) };
   } catch {
     return undefined;
   }
