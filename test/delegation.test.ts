@@ -41,7 +41,7 @@ describe('EIP-7702 account upgrades', () => {
 
   // Real account code seen in live Ethereum delegations on 6 Oct 2026, none on our official list.
   for (const [name, addr, size] of [
-    ['WalletCore', '0x69e6bd1C4082403Fc7917a61F6216552fC1a541D', 9768],
+    ['SafePal WalletCore', '0x69e6bd1C4082403Fc7917a61F6216552fC1a541D', 9768],
     ['Simple7702Account', '0xe6Cae83BdE06E4c305530e199D7217f42808555B', 3639],
     ['CaliburEntry (newer)', '0x000000009B1D0aF20D8C6d0A44e162d11F9b8f00', 24504],
     ['Railgun RelayAdapt7702', '0x05ae73c5925d843864ae6F261f3175De2ebCd963', 17451],
@@ -49,7 +49,7 @@ describe('EIP-7702 account upgrades', () => {
     it(`real unrecognised wallet code ${name} is a warning, not danger`, () => {
       const f = decodeDelegation({ chainId: 1, address: addr });
       const fl = assessRisk(f, { ...none, delegateCode: { size, hash: '0x' + '11'.repeat(32) } });
-      expect(fl.map((x) => x.code)).toContain('DELEGATION_UNKNOWN');
+      expect(fl.map((x) => x.code).some((c) => c === 'DELEGATION_UNKNOWN' || c === 'DELEGATION_KNOWN')).toBe(true);
       expect(verdict(fl)).toBe('warning');
     });
   }
@@ -60,7 +60,7 @@ describe('EIP-7702 account upgrades', () => {
   });
 
   it('code we could not read is danger', () => {
-    const fl = assessRisk(decodeDelegation({ chainId: 1, address: '0x490Aac77c960B0569C8E446aC7E12490bD44Ca1D' }), none);
+    const fl = assessRisk(decodeDelegation({ chainId: 1, address: '0x2222222222222222222222222222222222222222' }), none);
     expect(fl.map((x) => x.code)).toContain('DELEGATION_UNCHECKED');
     expect(verdict(fl)).toBe('danger');
   });
@@ -81,5 +81,31 @@ describe('EIP-7702 account upgrades', () => {
     const f = decodeDelegation({ chainId: 1, address: SWEEPERS[0] });
     const fl = assessRisk(f, { drainers: new Set([SWEEPERS[0].toLowerCase()]) });
     expect(templateText(f, fl, 'en')).toMatch(/^STOP/);
+  });
+});
+
+describe('EIP-7702 real code corpus (Ethereum mainnet, read 6 Oct 2026)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { looksLikeSweeper } = await import('../src/bytecode.js');
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/delegate-code.json', import.meta.url), 'utf8')) as { bad: Record<string, string>; good: Record<string, string>; codes: Record<string, string> };
+  const size = (h: string) => (fx.codes[h].length - 2) / 2;
+
+  it(`all ${Object.keys(fx.bad).length} real sweeper/scam delegates read as danger`, () => {
+    for (const [a, h] of Object.entries(fx.bad)) {
+      const fl = assessRisk(decodeDelegation({ chainId: 1, address: a }), { ...none, delegateCode: { size: size(h), hash: h, code: fx.codes[h] } });
+      expect(verdict(fl), a).toBe('danger');
+    }
+  });
+
+  it(`all ${Object.keys(fx.good).length} real known wallet delegates read as warning, never danger`, () => {
+    for (const [a, h] of Object.entries(fx.good)) {
+      const fl = assessRisk(decodeDelegation({ chainId: 1, address: a }), { ...none, delegateCode: { size: size(h), hash: h, code: fx.codes[h] } });
+      expect(verdict(fl), a).toBe('warning');
+    }
+  });
+
+  it('the code check alone (no address or hash lists) catches most real sweepers', () => {
+    const hits = Object.values(fx.bad).filter((h) => looksLikeSweeper(fx.codes[h], size(h)));
+    expect(hits.length / Object.keys(fx.bad).length).toBeGreaterThan(0.75);
   });
 });

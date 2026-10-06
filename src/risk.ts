@@ -1,3 +1,5 @@
+import { looksLikeSweeper } from './bytecode.js';
+import { knownDelegate, SCAM_DELEGATES, SWEEPER_CODE_HASHES } from './delegates.js';
 import { drainerSet } from './drainers.js';
 import type { Facts } from './facts.js';
 import { trustedSpender } from './trusted.js';
@@ -30,6 +32,7 @@ export interface Flag {
     | 'DELEGATION_UNKNOWN'
     | 'DELEGATION_SWEEPER'
     | 'DELEGATION_UNCHECKED'
+    | 'DELEGATION_KNOWN'
     | 'DELEGATION';
   severity: Severity;
 }
@@ -44,19 +47,10 @@ export interface RiskContext {
   spenderIsContract?: boolean;
   drainers?: Set<string>;
   /** EIP-7702: size and keccak256 of the code an account would be pointed at, read on-chain. */
-  delegateCode?: { size: number; hash: string };
+  delegateCode?: { size: number; hash: string; code?: string };
 }
 
-/**
- * Bytecode hashes of known copy-paste EIP-7702 sweepers. 0xcff0edcc… is the 1,042-byte "CrimeEnjoyor" contract; every one
- * of the 11 verified CrimeEnjoyor deployments we read on 6 Oct 2026 has this exact code.
- */
-const SWEEPER_CODE = new Set(['0xcff0edcc2dfd8d66bfbdb21739029900977274dfd6e73332e0272aa9bb40e7f1']);
-/**
- * Real wallet account code is large: in 52 live Ethereum delegations sampled on 6 Oct 2026 the smallest was 2,725 bytes,
- * while sweepers are about 1 KB. Anything under this, or with no code at all, is treated as a sweeper.
- */
-const MIN_WALLET_CODE = 2000;
+
 
 export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   const flags: Flag[] = [];
@@ -128,12 +122,14 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
     }
     case 'delegation': {
       if (/^0x0{40}$/i.test(f.spender ?? '')) { flags.push({ code: 'REVOKE', severity: 'safe' }); break; }
-      if (flags.some((x) => x.code === 'KNOWN_DRAINER')) { flags.push({ code: 'DELEGATION_SWEEPER', severity: 'danger' }); break; }
-      if (trustedSpender(f.chainId, f.spender)) { flags.push({ code: 'DELEGATION', severity: 'warning' }, { code: 'TRUSTED_SPENDER', severity: 'info' }); break; }
       const code = ctx.delegateCode;
+      const scam = flags.some((x) => x.code === 'KNOWN_DRAINER') || SCAM_DELEGATES.has((f.spender ?? '').toLowerCase()) || (code && SWEEPER_CODE_HASHES.has(code.hash.toLowerCase()));
+      if (scam) { flags.push({ code: 'DELEGATION_SWEEPER', severity: 'danger' }); break; }
+      if (trustedSpender(f.chainId, f.spender)) { flags.push({ code: 'DELEGATION', severity: 'warning' }, { code: 'TRUSTED_SPENDER', severity: 'info' }); break; }
+      if (knownDelegate(f.chainId, f.spender)) { flags.push({ code: 'DELEGATION_KNOWN', severity: 'warning' }); break; }
       // Without reading the code we cannot tell a wallet from a sweeper, and the downside is the whole wallet.
       if (!code) flags.push({ code: 'DELEGATION_UNCHECKED', severity: 'danger' });
-      else if (code.size === 0 || code.size < MIN_WALLET_CODE || SWEEPER_CODE.has(code.hash.toLowerCase())) flags.push({ code: 'DELEGATION_SWEEPER', severity: 'danger' });
+      else if (code.size === 0 || looksLikeSweeper(code.code ?? '0x', code.size)) flags.push({ code: 'DELEGATION_SWEEPER', severity: 'danger' });
       else flags.push({ code: 'DELEGATION_UNKNOWN', severity: 'warning' });
       break;
     }

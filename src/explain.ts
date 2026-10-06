@@ -1,3 +1,4 @@
+import { knownDelegate } from './delegates.js';
 import type { Facts } from './facts.js';
 import { shortAddr } from './format.js';
 import { verdict, type Flag, type Severity } from './risk.js';
@@ -205,6 +206,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         lines.push(pcm
           ? `This one go upgrade your whole wallet to ${dti.name}, the official ${dti.protocol} code. E dey normal ${dti.usePcm}, but after am, any signature you sign fit move everything for the wallet. Only do am inside the real ${dti.protocol} app.`
           : `This upgrades your whole wallet to ${dti.name}, official ${dti.protocol} code. That is normal for ${dti.use}, but afterwards any batch you sign can move everything in the wallet. Only do this inside the real ${dti.protocol} app.`);
+      } else if (has('DELEGATION_KNOWN')) {
+        const n = knownDelegate(f.chainId, f.spender);
+        lines.push(pcm
+          ? `This one go upgrade your WHOLE wallet to ${n} wallet code (e dey Revoke.cash list of known wallet upgrades). E normal if na ${n} you dey use, but after am, any batch you sign fit move everything. Only accept am inside ${n} own app.`
+          : `This upgrades your WHOLE wallet to ${n} wallet code (it is on Revoke.cash's list of known wallet upgrades). That is normal if you use ${n}, but afterwards any batch you sign can move everything. Only accept it inside ${n}'s own app.`);
       } else if (has('DELEGATION_UNKNOWN')) {
         lines.push(pcm
           ? `Careful: this one go upgrade your WHOLE wallet to the code for ${shortAddr(f.spender)}. E fit be real wallet code, but we no sabi am. Only accept am inside your own wallet app upgrade screen. If na website dey ask you, no sign.`

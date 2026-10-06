@@ -59,10 +59,10 @@ export async function isContract(chainId: number | undefined, address?: string):
   }
 }
 
-export async function codeInfo(chainId: number | undefined, address: string): Promise<{ size: number; hash: string } | undefined> {
+export async function codeInfo(chainId: number | undefined, address: string): Promise<{ size: number; hash: string; code: string } | undefined> {
   try {
     const code = (await client(chainId ?? 1).getCode({ address: address as Hex })) ?? '0x';
-    return { size: (code.length - 2) / 2, hash: keccak256(code as Hex) };
+    return { size: (code.length - 2) / 2, hash: keccak256(code as Hex), code };
   } catch {
     return undefined;
   }

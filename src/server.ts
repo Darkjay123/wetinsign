@@ -16,7 +16,7 @@ export interface Deps {
   llm?: Llm;
   store: Store;
   resolveToken?: TokenResolver;
-  codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string } | undefined>;
+  codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string; code?: string } | undefined>;
   fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[] }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
 }
@@ -27,7 +27,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v15';
+const CACHE_VERSION = 'v16';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 export function createApp(deps: Deps) {
