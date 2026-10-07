@@ -47,7 +47,10 @@ export interface Flag {
     | 'MASTER_DISABLED'
     | 'PULL_PERMISSION'
     | 'PRICE_UNKNOWN'
-    | 'LEDGER_ACTION';
+    | 'LEDGER_ACTION'
+    | 'GUARDIAN_SET'
+    | 'TRADING_AGENT'
+    | 'HIGH_FEE';
   severity: Severity;
 }
 
@@ -73,7 +76,7 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
   if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
-  else if ([607, 784, 637, 144, 397].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  else if ([607, 784, 637, 144, 397, 126, 508].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
@@ -210,7 +213,11 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
         if (ps.some((p) => p.others.length && p.othersCanActAlone)) flags.push({ code: 'ACCOUNT_TAKEOVER', severity: 'danger' });
         else if (ps.some((p) => p.others.length)) flags.push({ code: 'PERMISSION_SHARED', severity: 'warning' });
         else flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
-      } else if (c === 'remove_key') flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
+      } else if (c === 'guardian') flags.push({ code: 'GUARDIAN_SET', severity: 'warning' });
+      // Hyperliquid API wallet: trades for your whole account but cannot withdraw. Legit bots and front-ends use it,
+      // phishing sites use it to trade your margin away. A warning, not a danger.
+      else if (c === 'trading_agent') flags.push({ code: 'TRADING_AGENT', severity: 'warning' });
+      else if (c === 'remove_key') flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
       else if (c === 'account_delete') flags.push({ code: 'ACCOUNT_DELETE', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
       else if (c === 'disable_master') flags.push({ code: 'MASTER_DISABLED', severity: 'warning' });
       else flags.push({ code: 'ACCOUNT_TAKEOVER', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
@@ -220,6 +227,11 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       const a = f.ledgerAction;
       if (a === 'nft_sell_free') flags.push({ code: 'FREE_LISTING', severity: 'danger' });
       else if (a === 'check') flags.push({ code: 'PULL_PERMISSION', severity: 'warning' });
+      else if (a === 'builder_fee') {
+        // Hyperliquid caps builder fees at 0.1% on perps and 1% on spot. Anything above 0.1% is worth a second look.
+        const pct = Number(String(f.feeRate ?? '').replace('%', ''));
+        flags.push(Number.isFinite(pct) && pct > 0.1 ? { code: 'HIGH_FEE', severity: 'warning' } : { code: 'LEDGER_ACTION', severity: 'info' });
+      }
       else if (a === 'app_deposit') flags.push({ code: 'UNKNOWN_CONTRACT', severity: 'warning' });
       else if (a === 'nft_accept' && !f.price) flags.push({ code: 'PRICE_UNKNOWN', severity: 'warning' });
       else if (a === 'nft_accept' || a === 'escrow') flags.push({ code: 'IRREVERSIBLE', severity: 'info' });

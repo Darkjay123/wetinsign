@@ -15,7 +15,9 @@ import { assessRisk } from './risk.js';
 import { createStore, type Store } from './store.js';
 import { parseTronTx, TRON_ID, tronDisplay, tronToHex } from './tron.js';
 import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLookup } from './ton.js';
-import { aptosFacts, asAptosPayload, APTOS_ID, fetchAptosTx, type AptosLookup } from './aptos.js';
+import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_NET, fetchAptosTx, type AptosLookup } from './aptos.js';
+import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
+import { HL_ID } from './hyperliquid.js';
 import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
 import { fetchNearTx, isNearRequest, NEAR_ID, nearFacts, nearFromJson, parseNearText, type NearLookup } from './near.js';
 import { fetchXrplTx, isXrplTx, parseXrplText, XRPL_ID, xrplFacts, type XrplLookup } from './xrpl.js';
@@ -35,6 +37,8 @@ export interface Deps {
   /** Sui node (dry-runs and lookups), Aptos REST and XRP Ledger JSON-RPC. Without them those networks are read offline where possible. */
   suiLookup?: SuiLookup;
   aptosLookup?: AptosLookup;
+  movementLookup?: AptosLookup;
+  mvxLookup?: MvxLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
 }
@@ -45,7 +49,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v27';
+const CACHE_VERSION = 'v28';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -166,7 +170,14 @@ export function createApp(deps: Deps) {
     if (aptosP) {
       const l = lang(body.lang);
       const sender = [body?.from, pastedJson?.sender].find((v) => typeof v === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(v)) as string | undefined;
-      return cached(key(['aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, deps.aptosLookup, sender), l, 'We could not read that Aptos transaction.');
+      const mv = Number(body?.chainId) === MOVEMENT_ID;
+      return cached(key([mv ? 'movement' : 'aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, mv ? deps.movementLookup : deps.aptosLookup, sender, mv ? MOVEMENT_NET : APTOS_NET), l, `We could not read that ${mv ? 'Movement' : 'Aptos'} transaction.`);
+    }
+    // MultiversX: the { receiver, sender, value, data } transaction xPortal or the web wallet is asked to sign.
+    const mvxTxs = asMvxTxs(pastedJson) ?? (body?.receiver ? asMvxTxs(body) : undefined);
+    if (mvxTxs) {
+      const l = lang(body.lang);
+      return cached(key(['mvx', mvxTxs, l]), () => mvxFacts(mvxTxs, deps.mvxLookup), l, 'We could not read that MultiversX transaction.');
     }
     // NEAR: wallet-selector or near-api-js JSON, base64 borsh bytes, or a wallet link with ?transactions=.
     const nearTxs = pastedJson && isNearRequest(pastedJson) ? nearFromJson(pastedJson) : isNearRequest(body?.transaction ?? body) ? nearFromJson(body?.transaction ?? body) : pastedText ? parseNearText(pastedText) : undefined;
@@ -302,14 +313,15 @@ export function createApp(deps: Deps) {
       try { facts = await fetchSuiTx(rawHash, deps.suiLookup); } catch { return c.json({ error: 'We could not find that transaction on Sui.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
-    if ((chainId === APTOS_ID && deps.aptosLookup) || (chainId === XRPL_ID && deps.xrplLookup)) {
+    if (chainId === HL_ID) return c.json({ error: 'Hyperliquid trades and transfers are signed messages, not transactions with a hash. Paste the signature request your wallet shows instead.' }, 400);
+    if ((chainId === APTOS_ID && deps.aptosLookup) || (chainId === XRPL_ID && deps.xrplLookup) || (chainId === MOVEMENT_ID && deps.movementLookup) || (chainId === MVX_ID && deps.mvxLookup)) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
       const l = lang(body.lang);
       const k = key(['nonevm', chainId, rawHash.toLowerCase(), l]);
       const hit = await fromCache(k);
       if (hit) return c.json({ ...(hit as object), cached: true });
       let facts: Facts;
-      try { facts = chainId === APTOS_ID ? await fetchAptosTx(rawHash, deps.aptosLookup) : await fetchXrplTx(rawHash, deps.xrplLookup); } catch { return c.json({ error: `We could not find that transaction on ${CHAINS[chainId!].name}.` }, 404); }
+      try { facts = chainId === APTOS_ID ? await fetchAptosTx(rawHash, deps.aptosLookup) : chainId === MOVEMENT_ID ? await fetchAptosTx(rawHash, deps.movementLookup, MOVEMENT_NET) : chainId === MVX_ID ? await fetchMvxTx(rawHash, deps.mvxLookup) : await fetchXrplTx(rawHash, deps.xrplLookup); } catch { return c.json({ error: `We could not find that transaction on ${CHAINS[chainId!].name}.` }, 404); }
       return c.json(await respond(facts, l, k));
     }
     // TON: tonviewer shows a 64-character hash, toncenter a 44-character base64 one. Either works.
@@ -335,13 +347,15 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
           ...(deps.tonLookup ? [wrap(TON_ID, fetchTonTx(hash, deps.tonLookup))] : []),
           ...(deps.aptosLookup ? [wrap(APTOS_ID, fetchAptosTx(hash, deps.aptosLookup))] : []),
           ...(deps.xrplLookup ? [wrap(XRPL_ID, fetchXrplTx(hash, deps.xrplLookup))] : []),
+          ...(deps.movementLookup ? [wrap(MOVEMENT_ID, fetchAptosTx(hash, deps.movementLookup, MOVEMENT_NET))] : []),
+          ...(deps.mvxLookup ? [wrap(MVX_ID, fetchMvxTx(hash, deps.mvxLookup))] : []),
         ];
         const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...others]);
         chainId = found.id;
@@ -382,7 +396,8 @@ if (isMain) {
   const { solanaRpc } = await import('./solana.js');
   const { tonLookup } = await import('./ton.js');
   const { suiLookup } = await import('./sui.js');
-  const { aptosLookup } = await import('./aptos.js');
+  const { aptosLookup, movementLookup } = await import('./aptos.js');
+  const { mvxLookup } = await import('./multiversx.js');
   const { xrplLookup } = await import('./xrpl.js');
   const { nearLookup } = await import('./near.js');
   const app = createApp({
@@ -396,6 +411,8 @@ if (isMain) {
     tonLookup,
     suiLookup,
     aptosLookup,
+    movementLookup,
+    mvxLookup,
     xrplLookup,
     nearLookup,
   });

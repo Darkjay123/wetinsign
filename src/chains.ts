@@ -70,6 +70,14 @@ export const CHAINS: Record<number, Chain> = {
   637: { id: 637, name: "Aptos", nativeSymbol: "APT", nativeDecimals: 8, rpcs: ["https://api.mainnet.aptoslabs.com/v1"], explorer: "https://explorer.aptoslabs.com" },
   // NEAR is not EVM; src/near.ts reads it. 397 is its SLIP-44 coin type.
   397: { id: 397, name: "NEAR", nativeSymbol: "NEAR", nativeDecimals: 24, rpcs: ["https://archival-rpc.mainnet.fastnear.com", "https://rpc.mainnet.near.org"], explorer: "https://nearblocks.io" },
+  // Step Network (Avalanche subnet, FITFI). rpc.step.network refused TLS on 7 Oct 2026; thirdweb's answered eth_chainId 0x4d2.
+  1234: { id: 1234, name: "Step Network", nativeSymbol: "FITFI", rpcs: ["https://1234.rpc.thirdweb.com", "https://rpc.step.network"], explorer: "https://stepscan.io" },
+  // Movement uses the Aptos node API (src/aptos.ts). Its node reports chain_id 126.
+  126: { id: 126, name: "Movement", nativeSymbol: "MOVE", nativeDecimals: 8, rpcs: ["https://mainnet.movementnetwork.xyz/v1"], explorer: "https://explorer.movementnetwork.xyz" },
+  // MultiversX is not EVM; src/multiversx.ts reads it. 508 is EGLD's SLIP-44 coin type.
+  508: { id: 508, name: "MultiversX", nativeSymbol: "EGLD", nativeDecimals: 18, rpcs: ["https://api.multiversx.com"], explorer: "https://explorer.multiversx.com" },
+  // Hyperliquid's own exchange (HyperCore). Users sign EIP-712 actions (src/hyperliquid.ts); there is no hash to look up.
+  1337: { id: 1337, name: "Hyperliquid", nativeSymbol: "USDC", nativeDecimals: 6, rpcs: [], explorer: "https://app.hyperliquid.xyz/explorer" },
   144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };
 

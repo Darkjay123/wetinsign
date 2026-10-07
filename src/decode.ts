@@ -1,3 +1,4 @@
+import { hyperliquidFacts, isHyperliquid } from './hyperliquid.js';
 import { decodeAbiParameters, decodeFunctionData, parseAbi, type Hex } from 'viem';
 import { chainName, CHAINS, nativeSymbol } from './chains.js';
 import type { Facts, SeaportItem } from './facts.js';
@@ -216,6 +217,7 @@ export async function decodeTypedData(
   signer?: string,
 ): Promise<Facts> {
   const td: TypedData = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  if (isHyperliquid(td)) return hyperliquidFacts(td, signer);
   const chainId = td.domain?.chainId !== undefined ? Number(td.domain.chainId) : undefined;
   const msg = td.message ?? {};
   const base = { chainId, chain: chainName(chainId), contract: td.domain?.verifyingContract, primaryType: td.primaryType, appName: td.domain?.name };
