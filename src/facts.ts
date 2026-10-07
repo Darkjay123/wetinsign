@@ -90,6 +90,8 @@ export interface Facts {
   ledgerAction?: 'trustline' | 'trustline_remove' | 'dex_order' | 'swap' | 'app_deposit' | 'nft_sell_free' | 'nft_sell' | 'nft_buy' | 'nft_accept' | 'check' | 'escrow' | 'amm' | 'stake' | 'cancel' | 'setup' | 'settings' | 'app_key' | 'builder_fee' | 'internal_move' | 'close_out';
   /** Hyperliquid ApproveBuilderFee: the most a builder may charge per trade, as signed (e.g. "0.1%"). */
   feeRate?: string;
+  /** Stacks post-condition mode "allow": the contract may move any of your assets, not just the listed amounts. */
+  noLimits?: boolean;
   /** XRP Ledger: the destination tag exchanges use to credit your account. */
   destinationTag?: string;
   authority?: 'wallet_owner' | 'token_owner' | 'close' | 'mint' | 'freeze' | 'remove' | 'other' | 'setup';

@@ -347,7 +347,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'account_control': {
       const c = f.control, ch = f.chain;
-      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
+      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO', 5757: 'STX' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
       if (c === 'rekey') lines.push(pcm
         ? `Wahala dey: this one go "rekey" your ${ch} account give ${who}. After you sign, your own key no go fit move anything again: na ${who} go control all your ${coin} and tokens, forever. Na the most common Algorand drain. No sign am unless na your own other wallet.`
         : `Danger: this "rekeys" your ${ch} account to ${who}. Once signed, your own key stops working: ${who} controls all your ${coin} and tokens from then on. This is the most common Algorand drain. Only sign if ${who} is another wallet of your own.`);
@@ -444,7 +444,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'unknown_call':
     case 'unknown_signature':
-      if ([637, 397, 126, 508, 283].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
+      if ([637, 397, 126, 508, 283, 5757].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
       if (f.chainId === 501 && f.nativeValue) lines.push(pcm
         ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
         : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
@@ -459,6 +459,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
   if (f.destinationTag) lines.push(pcm
     ? `Destination tag na ${f.destinationTag}. Exchange dey use am know whose account to credit, so make sure e correct.`
     : `Destination tag: ${f.destinationTag}. Exchanges use it to know whose account to credit, so make sure it is right.`);
+  if (f.noLimits) lines.push(pcm ? 'Shine your eye: this transaction no put any limit on wetin fit comot your wallet ("allow" mode). The contract fit carry ANY of your coins or NFTs, no be only the amount wey you see. Na so Stacks drainers dey work. Only sign am for app wey you trust well well.' : 'Careful: this transaction sets no limit on what can leave your wallet ("allow" mode). The contract can take ANY of your coins or NFTs, not just the amount shown. Stacks drainers work this way. Only sign for an app you fully trust.');
   if (f.memo) lines.push(pcm ? `The note wey dem write for am na: "${f.memo}". No trust note, na the address and amount matter.` : `The note on it says: "${f.memo}". Notes can say anything; the address and amount are what count.`);
   return lines.join(' ');
 }
@@ -557,7 +558,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283 || f.chainId === 5757) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

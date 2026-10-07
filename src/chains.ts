@@ -80,6 +80,8 @@ export const CHAINS: Record<number, Chain> = {
   1337: { id: 1337, name: "Hyperliquid", nativeSymbol: "USDC", nativeDecimals: 6, rpcs: [], explorer: "https://app.hyperliquid.xyz/explorer" },
   // Algorand is not EVM; src/algorand.ts reads it. 283 is ALGO's SLIP-44 coin type.
   283: { id: 283, name: "Algorand", nativeSymbol: "ALGO", nativeDecimals: 6, rpcs: ["https://mainnet-idx.algonode.cloud/v2"], explorer: "https://allo.info" },
+  // Stacks is not EVM; src/stacks.ts reads it. 5757 is STX's SLIP-44 coin type.
+  5757: { id: 5757, name: "Stacks", nativeSymbol: "STX", nativeDecimals: 6, rpcs: ["https://api.hiro.so"], explorer: "https://explorer.hiro.so" },
   144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };
 

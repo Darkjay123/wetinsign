@@ -18,6 +18,7 @@ import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLook
 import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_NET, fetchAptosTx, type AptosLookup } from './aptos.js';
 import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
 import { HL_ID } from './hyperliquid.js';
+import { fetchStxTx, looksLikeStxHex, parseStx, STX_ID, stxFacts, type StxLookup } from './stacks.js';
 import { algoFacts, ALGO_ID, ALGO_TXID_RE, fetchAlgoTx, parseAlgo, type AlgoLookup } from './algorand.js';
 import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
 import { fetchNearTx, isNearRequest, NEAR_ID, nearFacts, nearFromJson, parseNearText, type NearLookup } from './near.js';
@@ -41,6 +42,7 @@ export interface Deps {
   movementLookup?: AptosLookup;
   mvxLookup?: MvxLookup;
   algoLookup?: AlgoLookup;
+  stxLookup?: StxLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
 }
@@ -51,7 +53,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v29';
+const CACHE_VERSION = 'v30';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -174,6 +176,12 @@ export function createApp(deps: Deps) {
       const sender = [body?.from, pastedJson?.sender].find((v) => typeof v === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(v)) as string | undefined;
       const mv = Number(body?.chainId) === MOVEMENT_ID;
       return cached(key([mv ? 'movement' : 'aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, mv ? deps.movementLookup : deps.aptosLookup, sender, mv ? MOVEMENT_NET : APTOS_NET), l, `We could not read that ${mv ? 'Movement' : 'Aptos'} transaction.`);
+    }
+    // Stacks: serialized transaction hex from Leather/Xverse, or the { contract, functionName, functionArgs } request.
+    const stxTx = (pastedText && looksLikeStxHex(pastedText)) || Number(body?.chainId) === STX_ID || (pastedJson && (pastedJson.functionName || pastedJson.tx_type)) ? parseStx(pastedJson ?? pastedText) : undefined;
+    if (stxTx) {
+      const l = lang(body.lang);
+      return cached(key(['stx', stxTx, l]), () => stxFacts(stxTx, deps.stxLookup), l, 'We could not read that Stacks transaction.');
     }
     // Algorand: base64 msgpack (Pera/Defly WalletConnect [{ txn }] groups) or indexer JSON.
     const algoTxs = Number(body?.chainId) === ALGO_ID || (pastedText && !pastedText.trim().startsWith('{')) || (pastedJson && (Array.isArray(pastedJson) || pastedJson.txns || pastedJson.txn || pastedJson['tx-type'])) ? parseAlgo(pastedJson ?? pastedText) : undefined;
@@ -332,6 +340,16 @@ export function createApp(deps: Deps) {
       return c.json(await respond(facts, l, k));
     }
     if (chainId === HL_ID) return c.json({ error: 'Hyperliquid trades and transfers are signed messages, not transactions with a hash. Paste the signature request your wallet shows instead.' }, 400);
+    if (chainId === STX_ID && deps.stxLookup) {
+      if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
+      const l = lang(body.lang);
+      const k = key(['stxtx', rawHash.toLowerCase(), l]);
+      const hit = await fromCache(k);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchStxTx(rawHash, deps.stxLookup); } catch { return c.json({ error: 'We could not find that transaction on Stacks.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if ((chainId === APTOS_ID && deps.aptosLookup) || (chainId === XRPL_ID && deps.xrplLookup) || (chainId === MOVEMENT_ID && deps.movementLookup) || (chainId === MVX_ID && deps.mvxLookup)) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
       const l = lang(body.lang);
@@ -365,7 +383,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID, STX_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
@@ -374,6 +392,7 @@ export function createApp(deps: Deps) {
           ...(deps.xrplLookup ? [wrap(XRPL_ID, fetchXrplTx(hash, deps.xrplLookup))] : []),
           ...(deps.movementLookup ? [wrap(MOVEMENT_ID, fetchAptosTx(hash, deps.movementLookup, MOVEMENT_NET))] : []),
           ...(deps.mvxLookup ? [wrap(MVX_ID, fetchMvxTx(hash, deps.mvxLookup))] : []),
+          ...(deps.stxLookup ? [wrap(STX_ID, fetchStxTx(hash, deps.stxLookup))] : []),
         ];
         const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...others]);
         chainId = found.id;
@@ -417,6 +436,7 @@ if (isMain) {
   const { aptosLookup, movementLookup } = await import('./aptos.js');
   const { mvxLookup } = await import('./multiversx.js');
   const { algoLookup } = await import('./algorand.js');
+  const { stxLookup } = await import('./stacks.js');
   const { xrplLookup } = await import('./xrpl.js');
   const { nearLookup } = await import('./near.js');
   const app = createApp({
@@ -433,6 +453,7 @@ if (isMain) {
     movementLookup,
     mvxLookup,
     algoLookup,
+    stxLookup,
     xrplLookup,
     nearLookup,
   });

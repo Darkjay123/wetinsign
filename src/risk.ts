@@ -51,7 +51,8 @@ export interface Flag {
     | 'GUARDIAN_SET'
     | 'TRADING_AGENT'
     | 'HIGH_FEE'
-    | 'SENDS_ALL';
+    | 'SENDS_ALL'
+    | 'NO_LIMITS';
   severity: Severity;
 }
 
@@ -77,7 +78,9 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
   if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
-  else if ([607, 784, 637, 144, 397, 126, 508, 283].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  // Stacks "allow" mode: nothing limits what the contract takes from you. DEXes use it too, so a warning.
+  if (f.noLimits) flags.push({ code: 'NO_LIMITS', severity: 'warning' });
+  else if ([607, 784, 637, 144, 397, 126, 508, 283, 5757].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
