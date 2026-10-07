@@ -166,7 +166,7 @@ const rpc = async (u: string, method: string, params: unknown[] = []) => {
 const assetCache = new Map<string, { symbol?: string; decimals?: number } | undefined>();
 export const dotLookup: DotLookup = {
   metadata: (net) => rpc(RPC[net], 'state_getMetadata'),
-  scan: async (net, hash) => { const r = await fetch(`${SCAN[net]}/extrinsics/${hash}`, { signal: AbortSignal.timeout(25000) }); return r.ok ? r.json() : undefined; },
+  scan: async (net, hash) => { const r = await fetch(`${SCAN[net]}/extrinsics/${hash}`, { signal: AbortSignal.timeout(45000) }); return r.ok ? r.json() : undefined; },
   block: async (net, bh) => (await rpc(RPC[net], 'chain_getBlock', [bh]))?.block?.extrinsics,
   asset: async (id) => {
     if (assetCache.has(id)) return assetCache.get(id);
