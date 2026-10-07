@@ -1,0 +1,276 @@
+{
+ "source": "Cardano mainnet via api.koios.rest tx_info + tx_cbor, read 7 Oct 2026",
+ "txs": {
+  "ada": {
+   "hash": "e35fb980458eddc907d0a38c5cb008b13cf56d17ec51d17e24b94200e8424818",
+   "cbor": "84a400d9010281825820113adfd742cfb90d74da432cf6e4e3508caa476b1e9cd8b5208806beebae047002018282581d613d578fd1329d16f14632fdac42b76eff513958a5fcb6b7044c65de121a001e848082583901c0837c1edc360724bd35baed81846fd88f3ee8418e610a60b186d1e87c62094994aedf6035b0975ae48960ebb1800c68dcc7997181e9affe1a0077844b021a00028db5031a0be83922a100d901028182582038070ca378a8c736af23120ac7024591776766d7368675a42b7678cb067c4c205840384ae69c37abec46ab727f41693833b52cdc7b0ec6a7b989a7b589a9ee18847b20581820920baac56fb41a8755ffd223560cbd4d9cdb3a88ce4ca7669ce2ca08f5f6",
+   "koios": {
+    "tx_hash": "e35fb980458eddc907d0a38c5cb008b13cf56d17ec51d17e24b94200e8424818",
+    "block_hash": "db1bc4cceca6f275b25bca939665aba5f921a98e6a942c8f400cc4778a3ad3aa",
+    "block_height": 14035344,
+    "epoch_no": 660,
+    "epoch_slot": 10994,
+    "absolute_slot": 199767794,
+    "tx_timestamp": 1791334085,
+    "tx_block_index": 0,
+    "tx_size": 267,
+    "total_output": "9832651",
+    "fee": "167349",
+    "treasury_donation": "0",
+    "deposit": "0",
+    "invalid_before": null,
+    "invalid_after": "199768354",
+    "collateral_inputs": [],
+    "collateral_output": null,
+    "reference_inputs": [],
+    "inputs": [
+     {
+      "value": "10000000",
+      "tx_hash": "113adfd742cfb90d74da432cf6e4e3508caa476b1e9cd8b5208806beebae0470",
+      "tx_index": 2,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": "stake1u97xyz2fjjhd7cp4kzt44eyfvr4mrqqvdrwv0xt3s856llssh86zc",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "c0837c1edc360724bd35baed81846fd88f3ee8418e610a60b186d1e8",
+       "bech32": "addr1q8qgxlq7msmqwf9axkawmqvydlvg70hggx8xzznqkxrdr6ruvgy5n99wmasrtvyhttjgjc8tkxqqc6xuc7vhrq0f4llqqx9dv9"
+      },
+      "reference_script": null
+     }
+    ],
+    "outputs": [
+     {
+      "value": "7832651",
+      "tx_hash": "e35fb980458eddc907d0a38c5cb008b13cf56d17ec51d17e24b94200e8424818",
+      "tx_index": 1,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": "stake1u97xyz2fjjhd7cp4kzt44eyfvr4mrqqvdrwv0xt3s856llssh86zc",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "c0837c1edc360724bd35baed81846fd88f3ee8418e610a60b186d1e8",
+       "bech32": "addr1q8qgxlq7msmqwf9axkawmqvydlvg70hggx8xzznqkxrdr6ruvgy5n99wmasrtvyhttjgjc8tkxqqc6xuc7vhrq0f4llqqx9dv9"
+      },
+      "reference_script": null
+     },
+     {
+      "value": "2000000",
+      "tx_hash": "e35fb980458eddc907d0a38c5cb008b13cf56d17ec51d17e24b94200e8424818",
+      "tx_index": 0,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": null,
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "3d578fd1329d16f14632fdac42b76eff513958a5fcb6b7044c65de12",
+       "bech32": "addr1vy740r73x2w3du2xxt76cs4hdml4zw2c5h7tddcyf3jauys9tyns4"
+      },
+      "reference_script": null
+     }
+    ],
+    "withdrawals": [],
+    "assets_minted": [],
+    "metadata": null,
+    "certificates": [],
+    "native_scripts": [],
+    "plutus_contracts": [],
+    "voting_procedures": [],
+    "proposal_procedures": []
+   }
+  },
+  "tokens": {
+   "hash": "1b6c5c3361925c4b85b0fd63c3ecda15e48083be77540aa3e57625b1c6e5da9d",
+   "cbor": "84a400828258208d65807daffac95e4f4daa90906353ea16ba57876710d40b1b36c7e1fc58a609008258208d65807daffac95e4f4daa90906353ea16ba57876710d40b1b36c7e1fc58a609185d018282581d613d578fd1329d16f14632fdac42b76eff513958a5fcb6b7044c65de121a001e8480825839019e9e7a87d90370fcea3efa4f84d305152737b948007a539e05ae01c11f99444ccfe8b9034260e704fd045fdbe798025bdf5ba32d513e25ac821a00187a63a1581ca0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235a145484f534b591a021caf46021a00029a99031a0be8530da10081825820bc420a4ec32fc09ff0eacb96b8db5be35141896ef3f26b9082e5cf6efc37fee958408ce33b8014265b8c7841445d2fbcaf09a3b0249c7de1793694a6adc1dd6dbc86b9c8212e8ae3687a019c3bb958b9a6f7c1fcf0ef9e0b13ff765d843f38c9c30ef5f6",
+   "koios": {
+    "tx_hash": "1b6c5c3361925c4b85b0fd63c3ecda15e48083be77540aa3e57625b1c6e5da9d",
+    "block_hash": "db1bc4cceca6f275b25bca939665aba5f921a98e6a942c8f400cc4778a3ad3aa",
+    "block_height": 14035344,
+    "epoch_no": 660,
+    "epoch_slot": 10994,
+    "absolute_slot": 199767794,
+    "tx_timestamp": 1791334085,
+    "tx_block_index": 1,
+    "tx_size": 342,
+    "total_output": "3604195",
+    "fee": "170649",
+    "treasury_donation": "0",
+    "deposit": "0",
+    "invalid_before": null,
+    "invalid_after": "199774989",
+    "collateral_inputs": [],
+    "collateral_output": null,
+    "reference_inputs": [],
+    "inputs": [
+     {
+      "value": "1887422",
+      "tx_hash": "8d65807daffac95e4f4daa90906353ea16ba57876710d40b1b36c7e1fc58a609",
+      "tx_index": 0,
+      "asset_list": [
+       {
+        "decimals": 0,
+        "quantity": "5427984",
+        "policy_id": "a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235",
+        "asset_name": "484f534b59",
+        "fingerprint": "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9"
+       }
+      ],
+      "datum_hash": null,
+      "stake_addr": "stake1uy0ej3zvel5tjq6zvrnsflgytld70xqzt004hged2ylzttqyfq0s0",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "9e9e7a87d90370fcea3efa4f84d305152737b948007a539e05ae01c1",
+       "bech32": "addr1qx0fu758myphpl828maylpxnq52jwdaefqq855u7qkhqrsgln9zyenlghyp5yc88qn7sgh7mu7vqyk7ltw3j65f7ykkqnkc89t"
+      },
+      "reference_script": null
+     },
+     {
+      "value": "1887422",
+      "tx_hash": "8d65807daffac95e4f4daa90906353ea16ba57876710d40b1b36c7e1fc58a609",
+      "tx_index": 93,
+      "asset_list": [
+       {
+        "decimals": 0,
+        "quantity": "30006326",
+        "policy_id": "a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235",
+        "asset_name": "484f534b59",
+        "fingerprint": "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9"
+       }
+      ],
+      "datum_hash": null,
+      "stake_addr": "stake1uy0ej3zvel5tjq6zvrnsflgytld70xqzt004hged2ylzttqyfq0s0",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "9e9e7a87d90370fcea3efa4f84d305152737b948007a539e05ae01c1",
+       "bech32": "addr1qx0fu758myphpl828maylpxnq52jwdaefqq855u7qkhqrsgln9zyenlghyp5yc88qn7sgh7mu7vqyk7ltw3j65f7ykkqnkc89t"
+      },
+      "reference_script": null
+     }
+    ],
+    "outputs": [
+     {
+      "value": "1604195",
+      "tx_hash": "1b6c5c3361925c4b85b0fd63c3ecda15e48083be77540aa3e57625b1c6e5da9d",
+      "tx_index": 1,
+      "asset_list": [
+       {
+        "decimals": 0,
+        "quantity": "35434310",
+        "policy_id": "a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235",
+        "asset_name": "484f534b59",
+        "fingerprint": "asset17q7r59zlc3dgw0venc80pdv566q6yguw03f0d9"
+       }
+      ],
+      "datum_hash": null,
+      "stake_addr": "stake1uy0ej3zvel5tjq6zvrnsflgytld70xqzt004hged2ylzttqyfq0s0",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "9e9e7a87d90370fcea3efa4f84d305152737b948007a539e05ae01c1",
+       "bech32": "addr1qx0fu758myphpl828maylpxnq52jwdaefqq855u7qkhqrsgln9zyenlghyp5yc88qn7sgh7mu7vqyk7ltw3j65f7ykkqnkc89t"
+      },
+      "reference_script": null
+     },
+     {
+      "value": "2000000",
+      "tx_hash": "1b6c5c3361925c4b85b0fd63c3ecda15e48083be77540aa3e57625b1c6e5da9d",
+      "tx_index": 0,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": null,
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "3d578fd1329d16f14632fdac42b76eff513958a5fcb6b7044c65de12",
+       "bech32": "addr1vy740r73x2w3du2xxt76cs4hdml4zw2c5h7tddcyf3jauys9tyns4"
+      },
+      "reference_script": null
+     }
+    ],
+    "withdrawals": [],
+    "assets_minted": [],
+    "metadata": null,
+    "certificates": [],
+    "native_scripts": [],
+    "plutus_contracts": [],
+    "voting_procedures": [],
+    "proposal_procedures": []
+   }
+  },
+  "cert": {
+   "hash": "cf90de7140126eb6ddfa89aeb967ae90dfa61931d9cc14ea035dfcfa6e6bf2cb",
+   "cbor": "84a600d90102818258201b4a8cbd140f6813fb83c2ae681e556eb5ca9145d6dafe2681dfdb831fa7fb7900018182583901d071c0df5e8d165a8a601871b069a1f769ac51cfb06ad92d4897fbd7e8a0119101a9e3fda3a7f6a9efbe28095a1c68272794c44adb5ee8d31a00921ad2021a0002a5f1031a0be8531104d901028183088200581ce8a0119101a9e3fda3a7f6a9efbe28095a1c68272794c44adb5ee8d31a001e848005a1581de1e8a0119101a9e3fda3a7f6a9efbe28095a1c68272794c44adb5ee8d31a00352d03a100d9010282825820208f3d3824edbee91c1f39abc939bd934883f91e64512401d09d85c0088f5ff558402202490ff7913896f684e56a8567b2ca8d983692d56191bd919be6d6a03b5fd0b9deaecd324a1facc4e6c20e0010f037aa0518d50fc4806ac728f8ca75a662018258204e8eabfa7ee0a19af32321f99eb62cdd2de25a897fe7cbc2179ab59ec737b32758402257ac6635f9cc98d2378c665beff9d0c384426352df4f9eb45e7fbdb4b18dc50839b4cbd414486e0556d4c37027d41c65f1f96b057cde456315ac0d9f6c7402f5f6",
+   "koios": {
+    "tx_hash": "cf90de7140126eb6ddfa89aeb967ae90dfa61931d9cc14ea035dfcfa6e6bf2cb",
+    "block_hash": "4e7d9f9104d3ba92afdcccda509a65763c71b10b83b71aeeb4f8c7cbf2a76fbb",
+    "block_height": 14035345,
+    "epoch_no": 660,
+    "epoch_slot": 11002,
+    "absolute_slot": 199767802,
+    "tx_timestamp": 1791334093,
+    "tx_block_index": 6,
+    "tx_size": 413,
+    "total_output": "9575122",
+    "fee": "173553",
+    "treasury_donation": "0",
+    "deposit": "-2000000",
+    "invalid_before": null,
+    "invalid_after": "199774993",
+    "collateral_inputs": [],
+    "collateral_output": null,
+    "reference_inputs": [],
+    "inputs": [
+     {
+      "value": "4263744",
+      "tx_hash": "1b4a8cbd140f6813fb83c2ae681e556eb5ca9145d6dafe2681dfdb831fa7fb79",
+      "tx_index": 0,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": "stake1u852qyv3qx578ldr5lm2nma79qy458rgyunef3z2md0w35cavtkmt",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "d071c0df5e8d165a8a601871b069a1f769ac51cfb06ad92d4897fbd7",
+       "bech32": "addr1q8g8rsxlt6x3vk52vqv8rvrf58mkntz3e7cx4kfdfztlh4lg5qgezqdfu0768flk48hmu2qftgwxsfe8jnzy4k67arfs3mtahl"
+      },
+      "reference_script": null
+     }
+    ],
+    "outputs": [
+     {
+      "value": "9575122",
+      "tx_hash": "cf90de7140126eb6ddfa89aeb967ae90dfa61931d9cc14ea035dfcfa6e6bf2cb",
+      "tx_index": 0,
+      "asset_list": [],
+      "datum_hash": null,
+      "stake_addr": "stake1u852qyv3qx578ldr5lm2nma79qy458rgyunef3z2md0w35cavtkmt",
+      "inline_datum": null,
+      "payment_addr": {
+       "cred": "d071c0df5e8d165a8a601871b069a1f769ac51cfb06ad92d4897fbd7",
+       "bech32": "addr1q8g8rsxlt6x3vk52vqv8rvrf58mkntz3e7cx4kfdfztlh4lg5qgezqdfu0768flk48hmu2qftgwxsfe8jnzy4k67arfs3mtahl"
+      },
+      "reference_script": null
+     }
+    ],
+    "withdrawals": [
+     {
+      "amount": "3484931",
+      "stake_addr": "stake1u852qyv3qx578ldr5lm2nma79qy458rgyunef3z2md0w35cavtkmt"
+     }
+    ],
+    "assets_minted": [],
+    "metadata": null,
+    "certificates": [
+     {
+      "info": {
+       "stake_address": "stake1u852qyv3qx578ldr5lm2nma79qy458rgyunef3z2md0w35cavtkmt"
+      },
+      "type": "stake_deregistration",
+      "index": 0
+     }
+    ],
+    "native_scripts": [],
+    "plutus_contracts": [],
+    "voting_procedures": [],
+    "proposal_procedures": []
+   }
+  }
+ }
+}

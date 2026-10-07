@@ -83,6 +83,8 @@ export const CHAINS: Record<number, Chain> = {
   // Stacks is not EVM; src/stacks.ts reads it. 5757 is STX's SLIP-44 coin type.
   5757: { id: 5757, name: "Stacks", nativeSymbol: "STX", nativeDecimals: 6, rpcs: ["https://api.hiro.so"], explorer: "https://explorer.hiro.so" },
   // Starknet is not EVM; src/starknet.ts reads it. 9004 is STRK's SLIP-44 coin type.
+  // Cardano is not EVM; src/cardano.ts reads it (UTxO, CBOR via CIP-30). 1815 is ADA's SLIP-44 coin type.
+  1815: { id: 1815, name: "Cardano", nativeSymbol: "ADA", nativeDecimals: 6, rpcs: ["https://api.koios.rest/api/v1"], explorer: "https://cardanoscan.io" },
   9004: { id: 9004, name: "Starknet", nativeSymbol: "STRK", nativeDecimals: 18, rpcs: ["https://starknet-rpc.publicnode.com"], explorer: "https://voyager.online" },
   144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };

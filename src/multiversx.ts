@@ -15,8 +15,8 @@ const API = process.env.MVX_API ?? 'https://api.multiversx.com';
 const EGLD: TokenRef = { address: 'native', symbol: 'EGLD', decimals: 18 };
 
 // --- bech32 (erd1...) ---
-const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
-function polymod(values: number[]): number {
+export const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+export function polymod(values: number[]): number {
   const G = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
   let chk = 1;
   for (const v of values) {
@@ -26,8 +26,8 @@ function polymod(values: number[]): number {
   }
   return chk >>> 0;
 }
-const hrpExpand = (h: string) => [...[...h].map((c) => c.charCodeAt(0) >> 5), 0, ...[...h].map((c) => c.charCodeAt(0) & 31)];
-function convertBits(data: number[], from: number, to: number, pad: boolean): number[] | undefined {
+export const hrpExpand = (h: string) => [...[...h].map((c) => c.charCodeAt(0) >> 5), 0, ...[...h].map((c) => c.charCodeAt(0) & 31)];
+export function convertBits(data: number[], from: number, to: number, pad: boolean): number[] | undefined {
   let acc = 0, bits = 0; const out: number[] = []; const maxv = (1 << to) - 1;
   for (const v of data) { acc = (acc << from) | v; bits += from; while (bits >= to) { bits -= to; out.push((acc >> bits) & maxv); } }
   if (pad) { if (bits > 0) out.push((acc << (to - bits)) & maxv); } else if (bits >= from || ((acc << (to - bits)) & maxv)) return undefined;

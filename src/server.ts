@@ -19,6 +19,7 @@ import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_
 import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
 import { HL_ID } from './hyperliquid.js';
 import { fetchStxTx, looksLikeStxHex, parseStx, STX_ID, stxFacts, type StxLookup } from './stacks.js';
+import { cardanoFromCbor, CARDANO_ID, fetchCardanoTx, parseCardanoCbor, type AdaLookup } from './cardano.js';
 import { callsFromRequest, fetchStarknetTx, STARKNET_HASH_RE, STARKNET_ID, starknetFacts, type SnLookup } from './starknet.js';
 import { algoFacts, ALGO_ID, ALGO_TXID_RE, fetchAlgoTx, parseAlgo, type AlgoLookup } from './algorand.js';
 import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
@@ -45,6 +46,7 @@ export interface Deps {
   algoLookup?: AlgoLookup;
   stxLookup?: StxLookup;
   snLookup?: SnLookup;
+  adaLookup?: AdaLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
 }
@@ -55,7 +57,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v31';
+const CACHE_VERSION = 'v32';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -185,6 +187,12 @@ export function createApp(deps: Deps) {
       const l = lang(body.lang);
       const sender = typeof body?.from === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(body.from) ? body.from : undefined;
       return cached(key(['starknet', snCalls, sender ?? '', l]), () => starknetFacts(snCalls, deps.snLookup, sender), l, 'We could not read that Starknet transaction.');
+    }
+    // Cardano: the CBOR transaction hex a dapp hands Eternl/Lace/Yoroi through CIP-30 signTx.
+    const adaHex = pastedText && (Number(body?.chainId) === CARDANO_ID || !/^0x/i.test(pastedText.trim())) && parseCardanoCbor(pastedText) ? pastedText.trim() : undefined;
+    if (adaHex) {
+      const l = lang(body.lang);
+      return cached(key(['ada', adaHex, l]), async () => { const f = await cardanoFromCbor(adaHex, deps.adaLookup); if (!f) throw new Error('bad cbor'); return f; }, l, 'We could not read that Cardano transaction.');
     }
     // Stacks: serialized transaction hex from Leather/Xverse, or the { contract, functionName, functionArgs } request.
     const stxTx = (pastedText && looksLikeStxHex(pastedText)) || Number(body?.chainId) === STX_ID || (pastedJson && (pastedJson.functionName || pastedJson.tx_type)) ? parseStx(pastedJson ?? pastedText) : undefined;
@@ -359,6 +367,16 @@ export function createApp(deps: Deps) {
       try { facts = await fetchStarknetTx(rawHash, deps.snLookup); } catch { return c.json({ error: 'We could not find that transaction on Starknet.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    if (chainId === CARDANO_ID && deps.adaLookup) {
+      if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A Cardano transaction hash is 64 characters (copy it from Cardanoscan or your wallet).' }, 400);
+      const l = lang(body.lang);
+      const k = key(['adatx', rawHash.toLowerCase(), l]);
+      const hit = await fromCache(k);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchCardanoTx(rawHash, deps.adaLookup); } catch { return c.json({ error: 'We could not find that transaction on Cardano.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if (chainId === STX_ID && deps.stxLookup) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
       const l = lang(body.lang);
@@ -402,7 +420,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID, STX_ID, STARKNET_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID, STX_ID, STARKNET_ID, CARDANO_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
@@ -412,6 +430,7 @@ export function createApp(deps: Deps) {
           ...(deps.movementLookup ? [wrap(MOVEMENT_ID, fetchAptosTx(hash, deps.movementLookup, MOVEMENT_NET))] : []),
           ...(deps.mvxLookup ? [wrap(MVX_ID, fetchMvxTx(hash, deps.mvxLookup))] : []),
           ...(deps.stxLookup ? [wrap(STX_ID, fetchStxTx(hash, deps.stxLookup))] : []),
+          ...(deps.adaLookup ? [wrap(CARDANO_ID, fetchCardanoTx(hash, deps.adaLookup))] : []),
           ...(deps.snLookup ? [wrap(STARKNET_ID, fetchStarknetTx(hash, deps.snLookup))] : []),
         ];
         const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...others]);
@@ -458,6 +477,7 @@ if (isMain) {
   const { algoLookup } = await import('./algorand.js');
   const { stxLookup } = await import('./stacks.js');
   const { snLookup } = await import('./starknet.js');
+  const { cardanoLookup: adaLookup } = await import('./cardano.js');
   const { xrplLookup } = await import('./xrpl.js');
   const { nearLookup } = await import('./near.js');
   const app = createApp({
@@ -476,6 +496,7 @@ if (isMain) {
     algoLookup,
     stxLookup,
     snLookup,
+    adaLookup,
     xrplLookup,
     nearLookup,
   });
