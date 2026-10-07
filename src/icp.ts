@@ -35,6 +35,8 @@ export const LegacyTransfer = IDL.Record({ memo: IDL.Nat64, amount: Tokens, fee:
 
 export interface IcpCall { canisterId: string; method: string; arg: Uint8Array; sender?: string }
 export interface IcpLookup {
+  /** One ICRC ledger transaction by its block index (icrc-api). */
+  icrcTx?: (ledger: string, index: string) => Promise<any>;
   ledger?: (canisterId: string) => Promise<{ symbol?: string; decimals?: number; totalSupply?: string } | undefined>;
   tx?: (hash: string) => Promise<any>;
 }
@@ -113,6 +115,37 @@ export async function fetchIcpTx(hash: string, lookup: IcpLookup = icpLookup): P
   return { ...base, kind: 'ledger_action', ledgerAction: 'settings', appName: String(r.transfer_type ?? 'ledger') };
 }
 
+/**
+ * ckBTC, ckUSDC and other ICRC token transactions have no hash search anywhere public (icrc-api's hash filter
+ * times out), but every explorer shows the ledger and the transaction number. Accepts "ledger-id 4701469",
+ * "ckBTC 4701469", or any explorer link holding both.
+ */
+const SYMBOL_TO_LEDGER = Object.fromEntries(Object.entries(KNOWN).map(([id, k]) => [k.symbol.toLowerCase(), id]));
+export function parseIcrcRef(text: string): { ledger: string; index: string } | undefined {
+  const t = text.trim();
+  const id = t.match(/[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}-cai/)?.[0];
+  const sym = t.match(/\b(ck(?:btc|eth|usdc|usdt)|icp)\b/i)?.[1]?.toLowerCase();
+  const ledger = id ?? (sym ? SYMBOL_TO_LEDGER[sym] : undefined);
+  const index = (id ? t.replace(id, ' ') : t).match(/(?:^|[^0-9a-z])(\d{1,12})(?:[^0-9a-z]|$)/i)?.[1];
+  return ledger && index && validPrincipal(ledger) ? { ledger, index } : undefined;
+}
+export async function fetchIcrcTx(ledger: string, index: string, lookup: IcpLookup = icpLookup): Promise<Facts> {
+  const r = await lookup.icrcTx?.(ledger, index);
+  if (!r || String(r.index) !== index || r.ledger_canister_id !== ledger) throw new Error('not found');
+  const t = await ledgerToken(ledger, lookup);
+  const who = (o?: string | null, a?: string | null) => a ?? o ?? undefined;
+  const from = who(r.from_owner, r.from_account);
+  const base: Facts = { kind: 'unknown_call', chainId: ICP_ID, chain: CHAIN, contract: ledger, ...(from ? { from, owner: from } : {}) };
+  const amt = (v: any) => { const raw = BigInt(v ?? 0); return raw >= 2n ** 128n ? { raw: raw.toString(), display: 'unlimited', unlimited: true } : formatAmount(raw, t); };
+  if (r.kind === 'approve') {
+    const exp = r.expires_at ? BigInt(r.expires_at) : undefined;
+    return { ...base, kind: 'erc20_approve', token: t, spender: who(r.spender_owner, r.spender_account), amount: amt(r.amount), deadline: exp ? { never: false, timestamp: Number(exp / 1_000_000_000n) } as any : { never: true } as any };
+  }
+  if (r.kind === 'transfer' && r.spender_owner) return { ...base, kind: 'transfer_from', token: t, amount: amt(r.amount), recipient: who(r.to_owner, r.to_account) };
+  if (r.kind === 'transfer') return { ...base, kind: 'transfer', token: t, amount: amt(r.amount), recipient: who(r.to_owner, r.to_account) };
+  return { ...base, kind: 'ledger_action', ledgerAction: 'settings', appName: String(r.kind ?? 'ledger') };
+}
+
 const cache = new Map<string, { symbol?: string; decimals?: number; totalSupply?: string } | undefined>();
 export const icpLookup: IcpLookup = {
   ledger: async (id) => {
@@ -124,5 +157,6 @@ export const icpLookup: IcpLookup = {
     cache.set(id, v);
     return v;
   },
+  icrcTx: async (ledger, index) => { const r = await fetch(`${ICRC_API}/ledgers/${encodeURIComponent(ledger)}/transactions/${encodeURIComponent(index)}`, { signal: AbortSignal.timeout(15000) }); return r.ok ? r.json() : undefined; },
   tx: async (hash) => { const r = await fetch(`${LEDGER_API}/transactions/${hash}`, { signal: AbortSignal.timeout(10000) }); return r.ok ? r.json() : undefined; },
 };

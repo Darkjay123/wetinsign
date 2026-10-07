@@ -19,8 +19,8 @@ import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_
 import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
 import { HL_ID } from './hyperliquid.js';
 import { fetchStxTx, looksLikeStxHex, parseStx, STX_ID, stxFacts, type StxLookup } from './stacks.js';
-import { dotFacts, DOT_ID, parseDot, type DotLookup } from './polkadot.js';
-import { fetchIcpTx, ICP_ID, icpFacts, isCanister, parseIcp, type IcpLookup } from './icp.js';
+import { dotFacts, DOT_ID, DOT_HASH_RE, fetchDotTx, parseDot, type DotLookup } from './polkadot.js';
+import { fetchIcpTx, fetchIcrcTx, ICP_ID, icpFacts, isCanister, parseIcp, parseIcrcRef, type IcpLookup } from './icp.js';
 import { cardanoFromCbor, CARDANO_ID, fetchCardanoTx, parseCardanoCbor, type AdaLookup } from './cardano.js';
 import { callsFromRequest, fetchStarknetTx, STARKNET_HASH_RE, STARKNET_ID, starknetFacts, type SnLookup } from './starknet.js';
 import { algoFacts, ALGO_ID, ALGO_TXID_RE, fetchAlgoTx, parseAlgo, type AlgoLookup } from './algorand.js';
@@ -61,7 +61,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v34';
+const CACHE_VERSION = 'v35';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -383,9 +383,28 @@ export function createApp(deps: Deps) {
       try { facts = await fetchStarknetTx(rawHash, deps.snLookup); } catch { return c.json({ error: 'We could not find that transaction on Starknet.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
-    if (chainId === DOT_ID) return c.json({ error: 'For Polkadot, paste the request your wallet shows (the JSON with "method"), not a hash.' }, 400);
+    if (chainId === DOT_ID && deps.dotLookup) {
+      if (!DOT_HASH_RE.test(rawHash)) return c.json({ error: 'A Polkadot transaction hash is 0x and 64 characters (copy it from Subscan, Statescan or your wallet). To check before you sign, paste the request your wallet shows.' }, 400);
+      const l = lang(body.lang);
+      const k = key(['dottx', rawHash.toLowerCase(), l]);
+      const hit = await fromCache(k);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchDotTx(rawHash, deps.dotLookup); } catch { return c.json({ error: 'We could not find that transaction on Polkadot or Polkadot Asset Hub.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if (chainId === ICP_ID && deps.icpLookup) {
-      if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'An ICP transaction hash is 64 characters. For ckBTC, ckUSDC and other tokens, paste the request your wallet shows instead.' }, 400);
+      const ref = parseIcrcRef(rawHash);
+      if (ref && !/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) {
+        const l = lang(body.lang);
+        const k = key(['icrctx', ref.ledger, ref.index, l]);
+        const hit = await fromCache(k);
+        if (hit) return c.json({ ...(hit as object), cached: true });
+        let facts: Facts;
+        try { facts = await fetchIcrcTx(ref.ledger, ref.index, deps.icpLookup); } catch { return c.json({ error: 'We could not find that token transaction. Check the token and the transaction number on the ICP dashboard.' }, 404); }
+        return c.json(await respond(facts, l, k));
+      }
+      if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'An ICP transaction hash is 64 characters. For ckBTC, ckUSDC and other tokens, type the token and the transaction number (like ckBTC 4701469) or paste the explorer link.' }, 400);
       const l = lang(body.lang);
       const k = key(['icptx', rawHash.toLowerCase(), l]);
       const hit = await fromCache(k);

@@ -1,0 +1,29 @@
+{
+ "source": "statescan.io (polkadot-api, ahp-api) + public Polkadot RPC chain_getBlock, read 7 Oct 2026",
+ "ah": {
+  "statescan": {
+   "indexer": {
+    "blockHeight": 21550156,
+    "blockHash": "0x69472849a62a8ac305cc8469dffd7b5e07a045b332c58c943def2fb5f98d0a6a",
+    "blockTime": 1791396480000,
+    "extrinsicIndex": 2
+   },
+   "hash": "0xc563d047a5e41ef2b80b624c532de8a6cb48740c0f9a0cdb756e7c3e73d2d199"
+  },
+  "blockHash": "0x69472849a62a8ac305cc8469dffd7b5e07a045b332c58c943def2fb5f98d0a6a",
+  "extrinsic": "0x5d028400b1a72b390594ab5463274af29a2b3971c20dc26b29124da101b23a4ef49660d000ea1252e98c28d49444dcee2bc403ddbed0012658ec04d0eca235a9551743dfe9b5ecf7d7c02c92c7db7193a5038875f148641c3b419d4da8dc8d45916eef500fa9037918025a620200000a00000b05d87e27357adfc0efa3e4f14dc3255a858652674aec36ab7c57d6355334af0b8032aa053301"
+ },
+ "relay": {
+  "statescan": {
+   "indexer": {
+    "blockHeight": 33330230,
+    "blockHash": "0xb5fa58cd813885dc6450f3aad815cd91f278fa335b3300830e5b0f11e3ca6d52",
+    "blockTime": 1791395988000,
+    "extrinsicIndex": 2
+   },
+   "hash": "0x58c16160a493a7a7a09df6ae9ae3ae0aeeb5f53a6fe860010d3251167604c15b"
+  },
+  "blockHash": "0xb5fa58cd813885dc6450f3aad815cd91f278fa335b3300830e5b0f11e3ca6d52",
+  "extrinsic": "0x0502840032656b2a98ee899cbe0d8eb003e82b833a9a490aace4c24997415b9c5211600e01aa0803b7aa27124f6404b3ce248b11ad9dfdb66236f82f32b74e41b8f9e17b4ec8c07aa718873fe1503019e1e311741f827766d8973fa51c0491a42f91b954885503225301000000400180b2e60e000000000000000000000000290d0000"
+ }
+}

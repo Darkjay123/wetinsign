@@ -1,5 +1,5 @@
 import { Metadata, TypeRegistry } from '@polkadot/types';
-import { blake2AsU8a, encodeAddress, xxhashAsHex } from '@polkadot/util-crypto';
+import { blake2AsHex, blake2AsU8a, encodeAddress, xxhashAsHex } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
 import type { Facts } from './facts.js';
 import { formatAmount } from './format.js';
@@ -31,7 +31,16 @@ export interface DotRequest { net?: Net; call: string; signer?: string }
 export interface DotLookup {
   metadata?: (net: Net) => Promise<string>;
   asset?: (id: string) => Promise<{ symbol?: string; decimals?: number } | undefined>;
+  /** Explorer index: extrinsic hash -> block hash + position. */
+  scan?: (net: Net, hash: string) => Promise<{ indexer?: { blockHash?: string; extrinsicIndex?: number } } | undefined>;
+  /** Raw signed extrinsics of a block. */
+  block?: (net: Net, blockHash: string) => Promise<string[] | undefined>;
 }
+const SCAN: Record<Net, string> = {
+  relay: process.env.DOT_RELAY_SCAN ?? 'https://polkadot-api.statescan.io',
+  ah: process.env.DOT_AH_SCAN ?? 'https://ahp-api.statescan.io',
+};
+export const DOT_HASH_RE = /^0x[0-9a-fA-F]{64}$/;
 
 /** Polkadot.js signPayload ({ address, genesisHash, method }), { callData }, or a bare 0x call hex. */
 export function parseDot(v: any, chainIsDot = false): DotRequest | undefined {
@@ -129,6 +138,26 @@ export async function dotFacts(req: DotRequest, lookup: DotLookup = dotLookup): 
   throw new Error('could not decode call');
 }
 
+/**
+ * Polkadot extrinsic by hash. Statescan says which block and position it sits at (Asset Hub and relay are
+ * asked together); the raw bytes then come from a public node, are checked against the hash, and go through
+ * the same decoder as a pasted request. The explorer is only trusted for where to look, never for what it says.
+ */
+export async function fetchDotTx(hash: string, lookup: DotLookup = dotLookup): Promise<Facts> {
+  const h = hash.toLowerCase();
+  if (!DOT_HASH_RE.test(h)) throw new Error('bad hash');
+  const hits = await Promise.all((['ah', 'relay'] as Net[]).map(async (net) => ({ net, s: await lookup.scan?.(net, h).catch(() => undefined) })));
+  for (const { net, s } of hits) {
+    const at = s?.indexer;
+    if (!at?.blockHash || !Number.isInteger(at.extrinsicIndex)) continue;
+    const xt = (await lookup.block?.(net, at.blockHash).catch(() => undefined))?.[at.extrinsicIndex!];
+    if (!xt || blake2AsHex(xt) !== h) continue;
+    const e: any = (await registry(net, lookup)).createType('Extrinsic', xt);
+    return dotFacts({ net, call: e.method.toHex(), ...(e.isSigned ? { signer: e.signer.toString() } : {}) }, lookup);
+  }
+  throw new Error('not found');
+}
+
 const rpc = async (u: string, method: string, params: unknown[] = []) => {
   const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: 1, jsonrpc: '2.0', method, params }), signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error('rpc ' + r.status);
@@ -137,6 +166,8 @@ const rpc = async (u: string, method: string, params: unknown[] = []) => {
 const assetCache = new Map<string, { symbol?: string; decimals?: number } | undefined>();
 export const dotLookup: DotLookup = {
   metadata: (net) => rpc(RPC[net], 'state_getMetadata'),
+  scan: async (net, hash) => { const r = await fetch(`${SCAN[net]}/extrinsics/${hash}`, { signal: AbortSignal.timeout(25000) }); return r.ok ? r.json() : undefined; },
+  block: async (net, bh) => (await rpc(RPC[net], 'chain_getBlock', [bh]))?.block?.extrinsics,
   asset: async (id) => {
     if (assetCache.has(id)) return assetCache.get(id);
     if (!/^\d{1,10}$/.test(id)) return undefined;

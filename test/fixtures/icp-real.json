@@ -158,5 +158,44 @@
     "timestamp": 1791334260
    }
   }
+ },
+ "icrc_by_index": {
+  "mxzaz-hqaaa-aaaar-qaada-cai:4701469": {
+   "index": 4701469,
+   "ledger_canister_id": "mxzaz-hqaaa-aaaar-qaada-cai",
+   "kind": "transfer",
+   "block_hash": "2bfec214231269dbeeeda93e002c9ec0788a8553a327b8ad5281487ed1be4225",
+   "block_phash": "6f6df6ebd7da1ff855f58af7be7b1d382aaf12acf96de9518803de03ca7b13be",
+   "transaction_hash": "2a699c946e841d65f92bef1bd9e7886bc563321353eef279ff9929b1d428c053",
+   "amount": "225",
+   "from_owner": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+   "from_subaccount": "",
+   "from_account": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+   "to_owner": "q4x4g-csjny-vihlr-hxjbp-tsklc-weu3x-3kbqq-uls7f-eg233-7geqn-eae",
+   "to_subaccount": "",
+   "to_account": "q4x4g-csjny-vihlr-hxjbp-tsklc-weu3x-3kbqq-uls7f-eg233-7geqn-eae",
+   "spender_owner": null,
+   "spender_subaccount": null,
+   "spender_account": null,
+   "memo": "000000000009e077",
+   "icrc1_memo": "",
+   "fee": "10",
+   "expected_allowance": null,
+   "expires_at": null,
+   "created_at_time": null,
+   "timestamp": "1791344515688854759",
+   "fee_collector_account": "mqygn-kiaaa-aaaar-qaadq-cai-knme65y.fee",
+   "fee_collector_block": 39493,
+   "updated_at": "2026-10-07T03:42:01.394657",
+   "token_value": {
+    "price": "82900",
+    "volume_24h": "48389.99250166999991051852703094482421875",
+    "price_usd": "82900",
+    "volume_24h_usd": "48389.99250166999991051852703094482421875",
+    "source": "CoinMarketCap-API",
+    "source_url": "https://coinmarketcap.com/currencies/chain-key-bitcoin/",
+    "timestamp": 1791344400
+   }
+  }
  }
 }

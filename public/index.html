@@ -100,7 +100,16 @@ document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang =
 
 // Networks most Nigerians use first, then everything else A to Z.
 const POPULAR = [56, 728126428, 501, 607, 784, 397, 144, 637, 1, 8453, 137, 42161, 10, 43114];
-fetch('/api/chains').then(r => r.json()).then(cs => {
+// The host puts the app to sleep when nobody is using it and answers 503 while it wakes (a few seconds).
+async function wakeFetch(u, opt, onWait) {
+  for (let i = 0; ; i++) {
+    const r = await fetch(u, opt);
+    if (r.status !== 503 || i >= 8) return r;
+    if (onWait) onWait();
+    await new Promise(ok => setTimeout(ok, 3000));
+  }
+}
+wakeFetch('/api/chains').then(r => r.json()).then(cs => {
   const opt = (c) => `<option value="${c.id}">${esc(c.name)}</option>`;
   const top = POPULAR.map(id => cs.find(c => c.id === id)).filter(Boolean);
   const rest = cs.filter(c => !POPULAR.includes(c.id)).sort((a, b) => a.name.localeCompare(b.name));
@@ -152,7 +161,7 @@ $('#go').onclick = async () => {
   } catch { $('#err').textContent = 'That signature request is not valid JSON.'; return; }
   $('#go').disabled = true; $('#go').textContent = 'Reading…';
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await wakeFetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, () => { $('#go').textContent = lang === 'pcm' ? 'E dey wake up…' : 'Waking up…'; });
     const j = await res.json();
     if (!res.ok) $('#err').textContent = j.error || 'Something went wrong.'; else render(j);
   } catch { $('#err').textContent = 'Could not reach the server.'; }
