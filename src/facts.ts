@@ -94,5 +94,7 @@ export interface Facts {
   noLimits?: boolean;
   /** XRP Ledger: the destination tag exchanges use to credit your account. */
   destinationTag?: string;
+  /** Cross-chain send (Polkadot XCM): the network the money lands on. */
+  toChain?: string;
   authority?: 'wallet_owner' | 'token_owner' | 'close' | 'mint' | 'freeze' | 'remove' | 'other' | 'setup';
 }

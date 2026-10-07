@@ -61,7 +61,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v35';
+const CACHE_VERSION = 'v36';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */

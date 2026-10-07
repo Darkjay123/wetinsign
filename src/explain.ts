@@ -462,6 +462,9 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
   if (f.chainId === 607 && f.protocol === 'STON.fi') lines.push(pcm
     ? 'That address na official STON.fi router (from STON.fi own list), so na swap or liquidity deposit for STON.fi be this. Only sign am if na you start am for the real STON.fi site.'
     : "That address is an official STON.fi router (from STON.fi's own list), so this is a swap or liquidity deposit on STON.fi. Only sign if you started it on the real STON.fi site.");
+  if (f.toChain) lines.push(pcm
+    ? `E go land for ${f.toChain}, no be for this network. Make sure say the address for ${f.toChain} na your own or the person wey you mean.`
+    : `It lands on ${f.toChain}, not on this network. Make sure the address on ${f.toChain} is yours or the person you mean.`);
   if (f.destinationTag) lines.push(pcm
     ? `Destination tag na ${f.destinationTag}. Exchange dey use am know whose account to credit, so make sure e correct.`
     : `Destination tag: ${f.destinationTag}. Exchanges use it to know whose account to credit, so make sure it is right.`);

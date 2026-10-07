@@ -80,6 +80,65 @@ async function assetToken(id: string, lookup: DotLookup): Promise<TokenRef> {
 }
 const big = (x: any) => { try { return BigInt(x.toString()); } catch { return 0n; } };
 
+// Polkadot system chains and the parachains people send to most. Anything else is named by its number.
+const PARAS: Record<number, string> = { 1000: 'Polkadot Asset Hub', 1001: 'Polkadot Collectives', 1002: 'Polkadot Bridge Hub', 1004: 'Polkadot People', 1005: 'Polkadot Coretime', 2000: 'Acala', 2004: 'Moonbeam', 2006: 'Astar', 2030: 'Bifrost', 2034: 'Hydration' };
+const ETH_TOKENS: Record<string, TokenRef> = {
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', symbol: 'USDC', decimals: 6 },
+  '0xdac17f958d2ee523a2206206994597c13d831ec7': { address: '0xdac17f958d2ee523a2206206994597c13d831ec7', symbol: 'USDT', decimals: 6 },
+  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2': { address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', symbol: 'WETH', decimals: 18 },
+};
+const KSM: TokenRef = { address: 'KSM', symbol: 'KSM', decimals: 12 };
+/** XCM location as plain JSON (any version) -> { parents, junctions[] } with lower-case keys. */
+function xloc(v: any): { parents: number; j: any[] } | undefined {
+  const x = v?.v5 ?? v?.v4 ?? v?.v3 ?? v?.v2 ?? v?.concrete ?? v;
+  if (!x || typeof x !== 'object' || x.parents === undefined) return x?.concrete ? xloc(x.concrete) : undefined;
+  const i = x.interior;
+  if (!i || i === 'here' || i.here !== undefined) return { parents: Number(x.parents), j: [] };
+  const k = Object.keys(i)[0];
+  const j = Array.isArray(i[k]) ? i[k] : [i[k]];
+  return { parents: Number(x.parents), j };
+}
+const jget = (j: any[], k: string) => j.find((o) => o && typeof o === 'object' && k in o)?.[k];
+function xdest(v: any, here: Net): string | undefined {
+  const l = xloc(v);
+  if (!l) return undefined;
+  const g = jget(l.j, 'globalConsensus');
+  if (g) {
+    const net = typeof g === 'string' ? g : Object.keys(g)[0];
+    const p = jget(l.j, 'parachain');
+    const name = net.charAt(0).toUpperCase() + net.slice(1);
+    return p === 1000 && name === 'Kusama' ? 'Kusama Asset Hub' : p !== undefined ? `${name} parachain ${p}` : name;
+  }
+  const p = jget(l.j, 'parachain');
+  if (l.parents === 1 && p !== undefined) return PARAS[p] ?? `Polkadot parachain ${p}`;
+  if (l.parents === 1 && !l.j.length) return 'the Polkadot relay chain';
+  if (l.parents === 0 && p !== undefined && here === 'relay') return PARAS[p] ?? `Polkadot parachain ${p}`;
+  return undefined;
+}
+async function xtoken(v: any, here: Net, lookup: DotLookup): Promise<TokenRef | undefined> {
+  const l = xloc(v?.id ?? v);
+  if (!l) return undefined;
+  const g = jget(l.j, 'globalConsensus');
+  if (g) {
+    const net = typeof g === 'string' ? g : Object.keys(g)[0];
+    if (net === 'kusama' && l.j.length === 1) return KSM;
+    if (net === 'ethereum') { const key = String(jget(l.j, 'accountKey20')?.key ?? '').toLowerCase(); return ETH_TOKENS[key] ?? (key ? { address: key, symbol: 'Ethereum token', decimals: 0 } : { address: 'ETH', symbol: 'ETH', decimals: 18 }); }
+    return undefined;
+  }
+  if ((l.parents === 1 && !l.j.length) || (here === 'relay' && l.parents === 0 && !l.j.length)) return DOT;
+  const pallet = jget(l.j, 'palletInstance'), gi = jget(l.j, 'generalIndex');
+  const onAH = (here === 'ah' && l.parents === 0) || (l.parents === 1 && jget(l.j, 'parachain') === 1000);
+  if (onAH && pallet === 50 && gi !== undefined) return assetToken(String(gi), lookup);
+  return undefined;
+}
+function xwho(j: any[]): string | undefined {
+  const a = jget(j, 'accountId32');
+  if (a?.id) return encodeAddress(a.id, 0);
+  const k = jget(j, 'accountKey20');
+  return k?.key ? String(k.key) : undefined;
+}
+const XCM_SEND = /^(transferAssets|limitedReserveTransferAssets|limitedTeleportAssets|reserveTransferAssets|teleportAssets|transferAssetsUsingTypeAndThen)$/;
+
 async function callFacts(c: any, base: Facts, lookup: DotLookup, depth = 0): Promise<Facts> {
   const s = c.section as string, m = c.method as string;
   const a = c.args as any[];
@@ -98,7 +157,9 @@ async function callFacts(c: any, base: Facts, lookup: DotLookup, depth = 0): Pro
     return { ...base, kind: 'account_control', control: type === 'Any' ? 'proxy' : 'proxy_limited', spender: ss58(a[0]), appName: `${type} proxy` };
   }
   if (s === 'proxy' && (m === 'proxy' || m === 'proxyAnnounced') && depth < 4) {
-    const inner = await callFacts(a[a.length - 1], base, lookup, depth + 1);
+    // The signer acts for `real`, so the money moving is real's.
+    const real = ss58(a[0]);
+    const inner = await callFacts(a[a.length - 1], real ? { ...base, from: real, owner: real } : base, lookup, depth + 1);
     return { ...inner, via: inner.via ?? 'batch' };
   }
   if (s === 'proxy' && /^(removeProxy|removeProxies|killPure|rejectAnnouncement|removeAnnouncement)$/.test(m)) return { ...base, kind: 'ledger_action', ledgerAction: 'settings', appName: name };
@@ -106,6 +167,7 @@ async function callFacts(c: any, base: Facts, lookup: DotLookup, depth = 0): Pro
   if (s === 'utility' && /^(batch|batchAll|forceBatch)$/.test(m) && depth < 4) {
     const inner: Facts[] = [];
     for (const x of a[0] as any[]) inner.push(await callFacts(x, base, lookup, depth + 1));
+    if (inner.length === 1) return inner[0]; // a batch of one is just that call
     const control = inner.find((f) => f.kind === 'account_control');
     if (control) return { ...control, via: 'batch' };
     const approve = inner.find((f) => f.kind === 'erc20_approve');
@@ -120,6 +182,33 @@ async function callFacts(c: any, base: Facts, lookup: DotLookup, depth = 0): Pro
       return { ...moves[0], kind: moves[0].kind === 'ledger_action' ? 'transfer' : moves[0].kind, via: 'batch', bundle };
     }
     return { ...(inner[0] ?? base), via: 'batch' };
+  }
+  if ((s === 'polkadotXcm' || s === 'xcmPallet') && XCM_SEND.test(m)) {
+    const here: Net = base.chain === CHAIN ? 'relay' : 'ah';
+    const j = c.toJSON().args;
+    const toChain = xdest(j.dest, here) ?? 'another network';
+    const assets: any[] = (() => { const v = j.assets; const x = v?.v5 ?? v?.v4 ?? v?.v3 ?? v?.v2 ?? v; return Array.isArray(x) ? x : []; })();
+    const feeIdx = Number(j.fee_asset_item ?? j.feeAssetItem ?? -1);
+    const main = assets.length > 1 && feeIdx >= 0 && feeIdx < assets.length ? assets.filter((_, i) => i !== feeIdx) : assets;
+    // Who receives: the beneficiary, or for transferAssetsUsingTypeAndThen the DepositAsset in the custom instructions.
+    let who: string | undefined;
+    let custom = false;
+    if (j.beneficiary) who = xwho(xloc(j.beneficiary)?.j ?? []);
+    else {
+      const prog: any[] = (() => { const v = j.custom_xcm_on_dest ?? j.customXcmOnDest; const x = v?.v5 ?? v?.v4 ?? v?.v3 ?? v; return Array.isArray(x) ? x : []; })();
+      custom = prog.some((ins) => !('depositAsset' in ins));
+      const dep = prog.find((ins) => 'depositAsset' in ins)?.depositAsset;
+      if (dep) who = xwho(xloc(dep.beneficiary)?.j ?? []);
+    }
+    const legs: Facts[] = [];
+    for (const a of main) {
+      const t = await xtoken(a, here, lookup);
+      const raw = big(a?.fun?.fungible ?? 0);
+      legs.push({ ...base, kind: t === DOT ? 'native_send' : 'transfer', token: t ?? { address: 'unknown', symbol: 'tokens we could not identify', decimals: 0 }, amount: t ? formatAmount(raw, t) : { raw: raw.toString(), display: 'some', unlimited: false }, recipient: who, ...(t ? {} : { contract: 'unknown' }) });
+    }
+    const first = legs[0] ?? { ...base, kind: 'transfer' as const };
+    if (custom || !who) return { ...base, kind: 'ledger_action', ledgerAction: 'app_deposit', token: first.token, amount: first.amount, appName: `cross-chain instructions to ${toChain}`, toChain, ...(legs.length > 1 ? { bundle: legs.map((f) => ({ kind: 'transfer', token: f.token!, spender: f.recipient, amount: f.amount! })) } : {}) };
+    return { ...first, toChain, ...(legs.length > 1 ? { bundle: legs.map((f) => ({ kind: 'transfer', token: f.token!, spender: f.recipient!, amount: f.amount! })) } : {}) };
   }
   if (/^(staking|nominationPools|convictionVoting|delegatedStaking|stakingAhClient)$/.test(s)) return { ...base, kind: 'ledger_action', ledgerAction: 'stake', appName: name };
   if (s === 'system' && /^remark/.test(m)) return { ...base, kind: 'ledger_action', ledgerAction: 'settings', appName: name, memo: Buffer.from(a[0].toU8a(true)).toString('utf8').replace(/[^\x20-\x7e]/g, '').slice(0, 200) };
