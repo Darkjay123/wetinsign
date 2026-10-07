@@ -50,7 +50,8 @@ export interface Flag {
     | 'LEDGER_ACTION'
     | 'GUARDIAN_SET'
     | 'TRADING_AGENT'
-    | 'HIGH_FEE';
+    | 'HIGH_FEE'
+    | 'SENDS_ALL';
   severity: Severity;
 }
 
@@ -76,7 +77,7 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   if (parties.some((a) => bad.has(a)) || f.reportedScam) flags.push({ code: 'KNOWN_DRAINER', severity: 'danger' });
   // TON: several different assets to one address in one request is how TON drainer kits empty a wallet in one signature.
   if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
-  else if ([607, 784, 637, 144, 397, 126, 508].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  else if ([607, 784, 637, 144, 397, 126, 508, 283].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
@@ -227,6 +228,9 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       const a = f.ledgerAction;
       if (a === 'nft_sell_free') flags.push({ code: 'FREE_LISTING', severity: 'danger' });
       else if (a === 'check') flags.push({ code: 'PULL_PERMISSION', severity: 'warning' });
+      // Algorand asset close-to: sends every unit of that token and removes it from the account. Normal when
+      // opting out of an empty token, so a warning that names where it all goes, not a danger.
+      else if (a === 'close_out') flags.push({ code: 'SENDS_ALL', severity: 'warning' });
       else if (a === 'builder_fee') {
         // Hyperliquid caps builder fees at 0.1% on perps and 1% on spot. Anything above 0.1% is worth a second look.
         const pct = Number(String(f.feeRate ?? '').replace('%', ''));

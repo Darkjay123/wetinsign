@@ -18,6 +18,7 @@ import { badTonAddress, fetchTonTx, isTonRequest, TON_ID, tonFacts, type TonLook
 import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_NET, fetchAptosTx, type AptosLookup } from './aptos.js';
 import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
 import { HL_ID } from './hyperliquid.js';
+import { algoFacts, ALGO_ID, ALGO_TXID_RE, fetchAlgoTx, parseAlgo, type AlgoLookup } from './algorand.js';
 import { explainSuiText, fetchSuiTx, isSuiDigest, looksLikeSuiTx, SUI_ID, type SuiLookup } from './sui.js';
 import { fetchNearTx, isNearRequest, NEAR_ID, nearFacts, nearFromJson, parseNearText, type NearLookup } from './near.js';
 import { fetchXrplTx, isXrplTx, parseXrplText, XRPL_ID, xrplFacts, type XrplLookup } from './xrpl.js';
@@ -39,6 +40,7 @@ export interface Deps {
   aptosLookup?: AptosLookup;
   movementLookup?: AptosLookup;
   mvxLookup?: MvxLookup;
+  algoLookup?: AlgoLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
 }
@@ -49,7 +51,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v28';
+const CACHE_VERSION = 'v29';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -172,6 +174,12 @@ export function createApp(deps: Deps) {
       const sender = [body?.from, pastedJson?.sender].find((v) => typeof v === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(v)) as string | undefined;
       const mv = Number(body?.chainId) === MOVEMENT_ID;
       return cached(key([mv ? 'movement' : 'aptos', aptosP, sender ?? '', l]), () => aptosFacts(aptosP, mv ? deps.movementLookup : deps.aptosLookup, sender, mv ? MOVEMENT_NET : APTOS_NET), l, `We could not read that ${mv ? 'Movement' : 'Aptos'} transaction.`);
+    }
+    // Algorand: base64 msgpack (Pera/Defly WalletConnect [{ txn }] groups) or indexer JSON.
+    const algoTxs = Number(body?.chainId) === ALGO_ID || (pastedText && !pastedText.trim().startsWith('{')) || (pastedJson && (Array.isArray(pastedJson) || pastedJson.txns || pastedJson.txn || pastedJson['tx-type'])) ? parseAlgo(pastedJson ?? pastedText) : undefined;
+    if (algoTxs?.length) {
+      const l = lang(body.lang);
+      return cached(key(['algo', algoTxs, l]), () => algoFacts(algoTxs, deps.algoLookup), l, 'We could not read that Algorand transaction.');
     }
     // MultiversX: the { receiver, sender, value, data } transaction xPortal or the web wallet is asked to sign.
     const mvxTxs = asMvxTxs(pastedJson) ?? (body?.receiver ? asMvxTxs(body) : undefined);
@@ -313,6 +321,16 @@ export function createApp(deps: Deps) {
       try { facts = await fetchSuiTx(rawHash, deps.suiLookup); } catch { return c.json({ error: 'We could not find that transaction on Sui.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    if ((ALGO_TXID_RE.test(rawHash) || chainId === ALGO_ID) && deps.algoLookup) {
+      if (!ALGO_TXID_RE.test(rawHash)) return c.json({ error: 'An Algorand transaction ID is 52 capital letters and numbers (copy it from Pera or allo.info).' }, 400);
+      const l = lang(body.lang);
+      const k = key(['algotx', rawHash, l]);
+      const hit = await fromCache(k);
+      if (hit) return c.json({ ...(hit as object), cached: true });
+      let facts: Facts;
+      try { facts = await fetchAlgoTx(rawHash, deps.algoLookup); } catch { return c.json({ error: 'We could not find that transaction on Algorand.' }, 404); }
+      return c.json(await respond(facts, l, k));
+    }
     if (chainId === HL_ID) return c.json({ error: 'Hyperliquid trades and transfers are signed messages, not transactions with a hash. Paste the signature request your wallet shows instead.' }, 400);
     if ((chainId === APTOS_ID && deps.aptosLookup) || (chainId === XRPL_ID && deps.xrplLookup) || (chainId === MOVEMENT_ID && deps.movementLookup) || (chainId === MVX_ID && deps.mvxLookup)) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'A transaction hash is 64 characters (0x in front is optional).' }, 400);
@@ -347,7 +365,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
@@ -398,6 +416,7 @@ if (isMain) {
   const { suiLookup } = await import('./sui.js');
   const { aptosLookup, movementLookup } = await import('./aptos.js');
   const { mvxLookup } = await import('./multiversx.js');
+  const { algoLookup } = await import('./algorand.js');
   const { xrplLookup } = await import('./xrpl.js');
   const { nearLookup } = await import('./near.js');
   const app = createApp({
@@ -413,6 +432,7 @@ if (isMain) {
     aptosLookup,
     movementLookup,
     mvxLookup,
+    algoLookup,
     xrplLookup,
     nearLookup,
   });

@@ -347,8 +347,11 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'account_control': {
       const c = f.control, ch = f.chain;
-      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
-      if (c === 'guardian') lines.push(pcm
+      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
+      if (c === 'rekey') lines.push(pcm
+        ? `Wahala dey: this one go "rekey" your ${ch} account give ${who}. After you sign, your own key no go fit move anything again: na ${who} go control all your ${coin} and tokens, forever. Na the most common Algorand drain. No sign am unless na your own other wallet.`
+        : `Danger: this "rekeys" your ${ch} account to ${who}. Once signed, your own key stops working: ${who} controls all your ${coin} and tokens from then on. This is the most common Algorand drain. Only sign if ${who} is another wallet of your own.`);
+      else if (c === 'guardian') lines.push(pcm
         ? `Shine your eye: this one go make ${who} the guardian (co-signer) for your ${ch} account. Once guardian don turn on, dem must approve your transactions, so if na stranger, dem fit block you or cooperate with thief. Only sign am if na your own 2FA guardian service (like xPortal) you dey set.`
         : `Careful: this makes ${who} the guardian (co-signer) of your ${ch} account. Once guarding is on, they must approve your transactions, so a stranger here can lock you out or help a thief. Only sign if you are setting up your own 2FA guardian (for example in xPortal).`);
       else if (c === 'trading_agent') lines.push(pcm
@@ -398,7 +401,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         dex_order: `This places an order on the ${ch} exchange: you give up to ${amt} ${tok} for ${buy}.`,
         swap: `This trades ${amt} ${tok} for ${buy}, and you get it back in this same transaction.`,
         app_key: `This is an app sign-in key: it lets ${shortAddr(f.contract)} spend ${f.amount ? `up to ${amt} NEAR` : 'NEAR'} on network fees for actions in that app. It cannot send your NEAR or tokens anywhere.`,
-        app_deposit: (f.chainId === 397 || f.chainId === 508) && f.appName ? `This sends ${amt} ${tok} into the app at ${f.appName} with instructions (usually a swap, deposit or bridge). Check that is the app you meant to use; once it is in, only that app can send it back.` : `This puts ${amt} ${tok} into an app on ${ch} that we cannot name, and you get nothing back in this transaction. Only sign if you started it on a site you trust.`,
+        app_deposit: [397, 508, 283].includes(f.chainId ?? 0) && f.appName ? `This sends ${amt} ${tok} into the app at ${f.appName} with instructions (usually a swap, deposit or bridge). Check that is the app you meant to use; once it is in, only that app can send it back.` : `This puts ${amt} ${tok} into an app on ${ch} that we cannot name, and you get nothing back in this transaction. Only sign if you started it on a site you trust.`,
         nft_sell_free: `Danger: this offers your NFT for sale for nothing${f.recipient ? ` to ${who}` : ' to anyone'}. Whoever accepts takes it free. This is the free-listing NFT scam. Do not sign.`,
         nft_sell: `This offers your NFT for sale for ${price}${f.recipient ? ` to ${who}` : ''}.`,
         nft_buy: `This offers ${price} to buy an NFT. You only pay if the owner accepts.`,
@@ -408,6 +411,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         amm: `This adds to, takes from or votes in a ${ch} liquidity pool.`,
         stake: `This stakes APT with a ${ch} validator pool. Your APT stays yours.`,
         cancel: 'This cancels an earlier offer, cheque or escrow. It does not move your money.',
+        close_out: `This sends ALL your ${tok} to ${who === 'an unknown address' && f.recipient ? f.recipient : shortAddr(f.recipient)} and removes ${tok} from your account. Fine if you are emptying a token you no longer want; check that address first.`,
         builder_fee: `This lets ${who} charge up to ${f.feeRate ?? 'a fee'} on each trade you place through their app. It does not move your money now.`,
         internal_move: `This moves ${amt} ${tok} between your own spot and perps balances on ${ch}. It stays in your account.`,
         setup: 'This is a setup step. It does not move your coins or give anyone control.',
@@ -419,7 +423,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         dex_order: `This one dey put order for the ${ch} exchange: you go give reach ${amt} ${tok} for ${buy}.`,
         swap: `This one dey change ${amt} ${tok} to ${buy}, and you go collect am for this same transaction.`,
         app_key: `Na app sign-in key be this: e go allow ${shortAddr(f.contract)} use ${f.amount ? `reach ${amt} NEAR` : 'NEAR'} pay network fee for things for that app. E no fit send your NEAR or tokens go anywhere.`,
-        app_deposit: (f.chainId === 397 || f.chainId === 508) && f.appName ? `This one go send ${amt} ${tok} enter the app for ${f.appName} with instruction (normally swap, deposit or bridge). Check say na the app wey you mean; once e enter, na only that app fit send am back.` : `This one go put ${amt} ${tok} inside app for ${ch} wey we no fit name, and you no go collect anything back for this transaction. Only sign am if na you start am for site wey you trust.`,
+        app_deposit: [397, 508, 283].includes(f.chainId ?? 0) && f.appName ? `This one go send ${amt} ${tok} enter the app for ${f.appName} with instruction (normally swap, deposit or bridge). Check say na the app wey you mean; once e enter, na only that app fit send am back.` : `This one go put ${amt} ${tok} inside app for ${ch} wey we no fit name, and you no go collect anything back for this transaction. Only sign am if na you start am for site wey you trust.`,
         nft_sell_free: `Wahala dey: this one dey put your NFT for sale for free${f.recipient ? ` give ${who}` : ' give anybody'}. Who accept am go carry am free. Na the free-listing NFT scam be this. No sign am.`,
         nft_sell: `This one dey put your NFT for sale for ${price}${f.recipient ? ` give ${who}` : ''}.`,
         nft_buy: `This one dey offer ${price} to buy NFT. You go pay only if the owner accept.`,
@@ -429,6 +433,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
         amm: `This one dey add, comot or vote for ${ch} liquidity pool.`,
         stake: `This one dey stake APT with ${ch} validator pool. Your APT still be your own.`,
         cancel: 'This one dey cancel offer, cheque or escrow wey you do before. E no dey move your money.',
+        close_out: `This one go send ALL your ${tok} go ${shortAddr(f.recipient)} and comot ${tok} from your account. E fine if na token wey you no want again; check that address well first.`,
         builder_fee: `This one go allow ${who} collect up to ${f.feeRate ?? 'fee'} for every trade wey you do through their app. E no dey move your money now.`,
         internal_move: `This one dey move ${amt} ${tok} between your own spot and perps balance for ${ch}. E still dey your account.`,
         setup: 'This one na only setup. E no dey move your coins or give anybody control.',
@@ -439,7 +444,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'unknown_call':
     case 'unknown_signature':
-      if ([637, 397, 126, 508].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
+      if ([637, 397, 126, 508, 283].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
       if (f.chainId === 501 && f.nativeValue) lines.push(pcm
         ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
         : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
@@ -552,7 +557,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

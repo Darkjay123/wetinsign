@@ -78,6 +78,8 @@ export const CHAINS: Record<number, Chain> = {
   508: { id: 508, name: "MultiversX", nativeSymbol: "EGLD", nativeDecimals: 18, rpcs: ["https://api.multiversx.com"], explorer: "https://explorer.multiversx.com" },
   // Hyperliquid's own exchange (HyperCore). Users sign EIP-712 actions (src/hyperliquid.ts); there is no hash to look up.
   1337: { id: 1337, name: "Hyperliquid", nativeSymbol: "USDC", nativeDecimals: 6, rpcs: [], explorer: "https://app.hyperliquid.xyz/explorer" },
+  // Algorand is not EVM; src/algorand.ts reads it. 283 is ALGO's SLIP-44 coin type.
+  283: { id: 283, name: "Algorand", nativeSymbol: "ALGO", nativeDecimals: 6, rpcs: ["https://mainnet-idx.algonode.cloud/v2"], explorer: "https://allo.info" },
   144: { id: 144, name: "XRP Ledger", nativeSymbol: "XRP", nativeDecimals: 6, rpcs: ["https://xrplcluster.com"], explorer: "https://livenet.xrpl.org" },
 };
 
