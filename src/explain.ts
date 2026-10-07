@@ -347,7 +347,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'account_control': {
       const c = f.control, ch = f.chain;
-      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO', 5757: 'STX', 9004: 'STRK', 1815: 'ADA' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
+      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO', 5757: 'STX', 9004: 'STRK', 1815: 'ADA', 223: 'ICP' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
       if (c === 'rekey') lines.push(pcm
         ? `Wahala dey: this one go "rekey" your ${ch} account give ${who}. After you sign, your own key no go fit move anything again: na ${who} go control all your ${coin} and tokens, forever. Na the most common Algorand drain. No sign am unless na your own other wallet.`
         : `Danger: this "rekeys" your ${ch} account to ${who}. Once signed, your own key stops working: ${who} controls all your ${coin} and tokens from then on. This is the most common Algorand drain. Only sign if ${who} is another wallet of your own.`);
@@ -558,7 +558,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283 || f.chainId === 5757 || f.chainId === 9004 || f.chainId === 1815) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283 || f.chainId === 5757 || f.chainId === 9004 || f.chainId === 1815 || f.chainId === 223) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.
