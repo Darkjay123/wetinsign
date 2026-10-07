@@ -347,13 +347,19 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'account_control': {
       const c = f.control, ch = f.chain;
-      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO', 5757: 'STX', 9004: 'STRK', 1815: 'ADA', 223: 'ICP' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
+      const coin = ({ 144: 'XRP', 637: 'APT', 397: 'NEAR', 126: 'MOVE', 508: 'EGLD', 1337: 'USDC', 283: 'ALGO', 5757: 'STX', 9004: 'STRK', 1815: 'ADA', 223: 'ICP', 354: 'DOT' } as Record<number, string>)[f.chainId ?? 0] ?? 'coins';
       if (c === 'rekey') lines.push(pcm
         ? `Wahala dey: this one go "rekey" your ${ch} account give ${who}. After you sign, your own key no go fit move anything again: na ${who} go control all your ${coin} and tokens, forever. Na the most common Algorand drain. No sign am unless na your own other wallet.`
         : `Danger: this "rekeys" your ${ch} account to ${who}. Once signed, your own key stops working: ${who} controls all your ${coin} and tokens from then on. This is the most common Algorand drain. Only sign if ${who} is another wallet of your own.`);
       else if (c === 'guardian') lines.push(pcm
         ? `Shine your eye: this one go make ${who} the guardian (co-signer) for your ${ch} account. Once guardian don turn on, dem must approve your transactions, so if na stranger, dem fit block you or cooperate with thief. Only sign am if na your own 2FA guardian service (like xPortal) you dey set.`
         : `Careful: this makes ${who} the guardian (co-signer) of your ${ch} account. Once guarding is on, they must approve your transactions, so a stranger here can lock you out or help a thief. Only sign if you are setting up your own 2FA guardian (for example in xPortal).`);
+      else if (c === 'proxy') lines.push(pcm
+        ? `Wahala dey: this one go make ${who} an "Any" proxy for your ${ch} account. Proxy like that fit do ANYTHING wey you fit do: carry all your ${coin} and tokens, unstake, even add another proxy. Na the fake "support" and "verify wallet" scam be this. No sign am unless na your own second wallet.`
+        : `Danger: this makes ${who} an "Any" proxy on your ${ch} account. That proxy can do anything you can: move all your ${coin} and tokens, unstake, even add more proxies. Fake "support" and "wallet verification" scams ask for exactly this. Do not sign unless ${who} is your own other wallet.`);
+      else if (c === 'proxy_limited') lines.push(pcm
+        ? `Shine your eye: this one go make ${who} a ${f.appName ?? 'limited'} for your ${ch} account. E no fit send your money straight, but e fit act for you inside that area (like staking or voting). Only sign if you know who ${who} be.`
+        : `Careful: this makes ${who} a ${f.appName ?? 'limited proxy'} on your ${ch} account. It cannot send your money directly, but it can act for you in that area (like staking or voting). Only sign if you know who ${who} is.`);
       else if (c === 'trading_agent') lines.push(pcm
         ? `Shine your eye: this one go allow ${who} trade with your WHOLE ${ch} account (open and close positions with all your money). E no fit withdraw, but bad trades fit finish your balance. Only approve am for bot or app wey you trust well well.`
         : `Careful: this lets ${who} trade with your WHOLE ${ch} account (open and close positions with all your money). It cannot withdraw, but it can lose your balance through trades. Only approve a bot or app you fully trust.`);
@@ -444,7 +450,7 @@ export function templateText(f: Facts, flags: Flag[], lang: Lang): string {
     }
     case 'unknown_call':
     case 'unknown_signature':
-      if ([637, 397, 126, 508, 283, 5757].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
+      if ([637, 397, 126, 508, 283, 5757, 354, 223].includes(f.chainId ?? 0) && f.appName && f.kind === 'unknown_call') lines.push(pcm ? `E dey call ${f.appName}.` : `It calls ${f.appName}.`);
       if (f.chainId === 501 && f.nativeValue) lines.push(pcm
         ? `This one go send ${f.nativeValue.display} SOL, and e still dey call app program wey we no fit read.`
         : `This sends ${f.nativeValue.display} SOL and also calls an app program we cannot read.`);
@@ -558,7 +564,7 @@ export async function explain(f: Facts, flags: Flag[], lang: Lang, llm?: Llm): P
   if (lang === 'pcm') return fallback;
   // When we could not decode the action there are no facts for the model to restate, and the small model
   // invents scary but false stories (seen live on a real drainer multicall). Say plainly that we could not read it.
-  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283 || f.chainId === 5757 || f.chainId === 9004 || f.chainId === 1815 || f.chainId === 223) return fallback;
+  if (f.kind === 'unknown_call' || f.kind === 'unknown_signature' || f.kind === 'delegation' || f.kind === 'tron_permission' || f.kind === 'tron_action' || f.kind === 'sol_authority' || f.chainId === 501 || f.chainId === 607 || f.kind === 'account_control' || f.kind === 'ledger_action' || f.chainId === 784 || f.chainId === 637 || f.chainId === 144 || f.chainId === 397 || f.chainId === 126 || f.chainId === 508 || f.chainId === 1337 || f.chainId === 283 || f.chainId === 5757 || f.chainId === 9004 || f.chainId === 1815 || f.chainId === 223 || f.chainId === 354) return fallback;
   // A reported drainer must always open with a plain STOP. Seen live on a real USDC drainer permit: the model
   // wrote "if you approve the wrong person or make a mistake with your wallet settings" and never said the
   // address was reported. Our reviewed wording leads with the report every time.

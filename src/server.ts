@@ -19,6 +19,7 @@ import { aptosFacts, asAptosPayload, APTOS_ID, APTOS_NET, MOVEMENT_ID, MOVEMENT_
 import { asMvxTxs, fetchMvxTx, MVX_ID, mvxFacts, type MvxLookup } from './multiversx.js';
 import { HL_ID } from './hyperliquid.js';
 import { fetchStxTx, looksLikeStxHex, parseStx, STX_ID, stxFacts, type StxLookup } from './stacks.js';
+import { dotFacts, DOT_ID, parseDot, type DotLookup } from './polkadot.js';
 import { fetchIcpTx, ICP_ID, icpFacts, isCanister, parseIcp, type IcpLookup } from './icp.js';
 import { cardanoFromCbor, CARDANO_ID, fetchCardanoTx, parseCardanoCbor, type AdaLookup } from './cardano.js';
 import { callsFromRequest, fetchStarknetTx, STARKNET_HASH_RE, STARKNET_ID, starknetFacts, type SnLookup } from './starknet.js';
@@ -49,6 +50,7 @@ export interface Deps {
   snLookup?: SnLookup;
   adaLookup?: AdaLookup;
   icpLookup?: IcpLookup;
+  dotLookup?: DotLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
 }
@@ -59,7 +61,7 @@ export const lang = (v: unknown): Lang => {
   return s === 'pcm' || s === 'pidgin' || s === 'naija' ? 'pcm' : 'en';
 };
 // Bump when decoding or wording changes, so answers cached by older code are never served again.
-const CACHE_VERSION = 'v33';
+const CACHE_VERSION = 'v34';
 const key = (parts: unknown) => createHash('sha256').update(CACHE_VERSION).update(JSON.stringify(parts, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))).digest('hex');
 
 /** Requests per minute per client on the explain endpoints. One hash lookup can fan out to 50 networks. */
@@ -189,6 +191,12 @@ export function createApp(deps: Deps) {
       const l = lang(body.lang);
       const sender = typeof body?.from === 'string' && /^0x[0-9a-fA-F]{1,64}$/.test(body.from) ? body.from : undefined;
       return cached(key(['starknet', snCalls, sender ?? '', l]), () => starknetFacts(snCalls, deps.snLookup, sender), l, 'We could not read that Starknet transaction.');
+    }
+    // Polkadot: Polkadot.js / Talisman / SubWallet signPayload ({ address, genesisHash, method }) or 0x call data.
+    const dotReq = deps.dotLookup ? (pastedJson ? parseDot(pastedJson, Number(body?.chainId) === DOT_ID) : pastedText ? parseDot(pastedText, Number(body?.chainId) === DOT_ID) : undefined) : undefined;
+    if (dotReq) {
+      const l = lang(body.lang);
+      return cached(key(['dot', dotReq.call, dotReq.net ?? '', dotReq.signer ?? '', l]), () => dotFacts(dotReq, deps.dotLookup), l, 'We could not read that Polkadot request.');
     }
     // Internet Computer: an ICRC-49 call_canister request (Plug, NFID, Oisy) with Candid arguments.
     const icpCall = pastedJson ? parseIcp(pastedJson) : body?.canisterId ? parseIcp(body) : undefined;
@@ -375,6 +383,7 @@ export function createApp(deps: Deps) {
       try { facts = await fetchStarknetTx(rawHash, deps.snLookup); } catch { return c.json({ error: 'We could not find that transaction on Starknet.' }, 404); }
       return c.json(await respond(facts, l, k));
     }
+    if (chainId === DOT_ID) return c.json({ error: 'For Polkadot, paste the request your wallet shows (the JSON with "method"), not a hash.' }, 400);
     if (chainId === ICP_ID && deps.icpLookup) {
       if (!/^(0x)?[0-9a-fA-F]{64}$/.test(rawHash)) return c.json({ error: 'An ICP transaction hash is 64 characters. For ckBTC, ckUSDC and other tokens, paste the request your wallet shows instead.' }, 400);
       const l = lang(body.lang);
@@ -438,7 +447,7 @@ export function createApp(deps: Deps) {
     try {
       if (chainId === undefined) {
         // Paste a hash, we find the network: ask every network at once and take the one that has it.
-        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID, STX_ID, STARKNET_ID, CARDANO_ID, ICP_ID].includes(id));
+        const ids = Object.keys(CHAINS).map(Number).filter((id) => ![SOLANA_ID, TON_ID, SUI_ID, APTOS_ID, XRPL_ID, NEAR_ID, MOVEMENT_ID, MVX_ID, HL_ID, ALGO_ID, STX_ID, STARKNET_ID, CARDANO_ID, ICP_ID, DOT_ID].includes(id));
         type In = Awaited<ReturnType<NonNullable<Deps['fetchTx']>>>;
         const wrap = (id: number, p: Promise<Facts>) => p.then((f) => ({ id, r: { to: '', facts: f } as In }));
         const others = [
@@ -498,6 +507,7 @@ if (isMain) {
   const { snLookup } = await import('./starknet.js');
   const { cardanoLookup: adaLookup } = await import('./cardano.js');
   const { icpLookup } = await import('./icp.js');
+  const { dotLookup } = await import('./polkadot.js');
   const { xrplLookup } = await import('./xrpl.js');
   const { nearLookup } = await import('./near.js');
   const app = createApp({
@@ -518,6 +528,7 @@ if (isMain) {
     snLookup,
     adaLookup,
     icpLookup,
+    dotLookup,
     xrplLookup,
     nearLookup,
   });

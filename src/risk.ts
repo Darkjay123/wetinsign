@@ -80,7 +80,7 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
   if (f.sweep) flags.push({ code: 'ASSET_SWEEP', severity: 'danger' });
   // Stacks "allow" mode: nothing limits what the contract takes from you. DEXes use it too, so a warning.
   if (f.noLimits) flags.push({ code: 'NO_LIMITS', severity: 'warning' });
-  else if ([607, 784, 637, 144, 397, 126, 508, 283, 5757, 9004, 1815].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
+  else if ([607, 784, 637, 144, 397, 126, 508, 283, 5757, 9004, 1815, 354].includes(f.chainId ?? 0) && f.via === 'batch' && (f.bundle ?? []).some((b) => b.spender && b.spender !== f.bundle![0].spender)) flags.push({ code: 'MULTI_SEND', severity: 'warning' });
   // Only from STON.fi's own router list (src/ton-trusted.ts).
   if (f.chainId === 607 && f.protocol === 'STON.fi' && !f.reportedScam) flags.push({ code: 'TRUSTED_SPENDER', severity: 'info' });
 
@@ -221,6 +221,8 @@ export function assessRisk(f: Facts, ctx: RiskContext = {}): Flag[] {
       // Hyperliquid API wallet: trades for your whole account but cannot withdraw. Legit bots and front-ends use it,
       // phishing sites use it to trade your margin away. A warning, not a danger.
       else if (c === 'trading_agent') flags.push({ code: 'TRADING_AGENT', severity: 'warning' });
+      // Polkadot proxy limited to staking, governance or similar: real delegation tools use it, but it is still shared control.
+      else if (c === 'proxy_limited') flags.push({ code: 'PERMISSION_SHARED', severity: 'warning' });
       else if (c === 'remove_key') flags.push({ code: 'PERMISSION_CHANGE', severity: 'info' });
       else if (c === 'account_delete') flags.push({ code: 'ACCOUNT_DELETE', severity: 'danger' }, { code: 'IRREVERSIBLE', severity: 'info' });
       else if (c === 'disable_master') flags.push({ code: 'MASTER_DISABLED', severity: 'warning' });

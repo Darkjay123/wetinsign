@@ -85,7 +85,7 @@ export interface Facts {
   /** A text note attached to the transfer (TON comments). Shown verbatim, never trusted. */
   memo?: string;
   /** Sui, Aptos, XRP Ledger: handing someone power over the whole account. */
-  control?: 'regular_key' | 'signer_list' | 'signer_capability' | 'rotation_capability' | 'rotate_key' | 'account_delete' | 'disable_master' | 'remove_key' | 'full_access_key' | 'deploy_code' | 'guardian' | 'trading_agent' | 'rekey';
+  control?: 'regular_key' | 'signer_list' | 'signer_capability' | 'rotation_capability' | 'rotate_key' | 'account_delete' | 'disable_master' | 'remove_key' | 'full_access_key' | 'deploy_code' | 'guardian' | 'trading_agent' | 'rekey' | 'proxy' | 'proxy_limited';
   /** Sui, Aptos, XRP Ledger: everyday ledger actions that are not plain sends. */
   ledgerAction?: 'trustline' | 'trustline_remove' | 'dex_order' | 'swap' | 'app_deposit' | 'nft_sell_free' | 'nft_sell' | 'nft_buy' | 'nft_accept' | 'check' | 'escrow' | 'amm' | 'stake' | 'cancel' | 'setup' | 'settings' | 'app_key' | 'builder_fee' | 'internal_move' | 'close_out';
   /** Hyperliquid ApproveBuilderFee: the most a builder may charge per trade, as signed (e.g. "0.1%"). */
