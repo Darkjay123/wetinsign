@@ -96,9 +96,20 @@ const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 export function summarize(r: { status: 'success' | 'reverted'; moves: Move[] }): string {
   if (r.status === 'reverted') return 'This transaction failed on-chain, so nothing moved (only the network fee was paid).';
   const mine = r.moves.filter((m) => m.fromSender);
-  if (!mine.length) return 'Nothing left the wallet that sent this transaction.';
-  const parts = mine.map((m) => {
+  // Permit drains: the thief sends the transaction, so the victim is the owner in the logs, not the sender.
+  const others = !mine.length;
+  const list = others ? r.moves.slice(0, 6) : mine;
+  if (!list.length) return 'Nothing moved in this transaction apart from the network fee.';
+  const parts = list.map((m) => {
     const who = m.toName ?? short(m.to);
+    if (others) {
+      const owner = short(m.from);
+      if (m.type === 'approval') return `${owner} gave ${who} permission to take ${m.unlimited ? 'all of its' : m.amount} ${m.token?.symbol ?? 'tokens'}`;
+      if (m.type === 'approval_all') return `${owner} gave ${who} permission over every ${m.token?.symbol ?? 'NFT'} it owns`;
+      if (m.type === 'nft') return `${m.token?.symbol ?? 'an NFT'} #${m.tokenId} moved from ${owner} to ${who}`;
+      if (m.type === 'approval_revoked') return `${owner} removed the permission for ${who}`;
+      return `${m.amount} ${m.token?.symbol ?? 'tokens'} moved from ${owner} to ${who}`;
+    }
     const what = m.token?.symbol ?? 'a token';
     if (m.type === 'native' || m.type === 'token') return `${m.amount} ${what} went to ${who}`;
     if (m.type === 'nft') return `${what} #${m.tokenId} went to ${who}`;
@@ -106,8 +117,9 @@ export function summarize(r: { status: 'success' | 'reverted'; moves: Move[] }):
     if (m.type === 'approval_all') return `${who} was allowed to take every ${what} NFT you own`;
     return `the permission for ${who} on ${what} was removed`;
   });
-  const drained = mine.some((m) => m.toDrainer);
-  return `${drained ? 'Warning: some of this went to an address reported as a wallet drainer. ' : ''}What the chain recorded: ${parts.join('; ')}.`;
+  const drained = list.some((m) => m.toDrainer);
+  const lead = others ? 'The sender lost nothing itself, but this is what it did to other wallets: ' : 'What the chain recorded: ';
+  return `${drained ? 'Warning: some of this went to an address reported as a wallet drainer. ' : ''}${lead}${parts.join('; ')}.`;
 }
 
 export async function fetchMoves(chainId: number, hash: string): Promise<Moves> {
