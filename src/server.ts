@@ -361,7 +361,7 @@ export function createApp(deps: Deps) {
   // What the chain recorded for a mined EVM transaction. Fail-soft: the explanation never waits on it to succeed.
   async function movesFor(chainId: number, hash: string) {
     if (!deps.fetchMoves || chainId === TRON_ID || !CHAINS[chainId]) return undefined;
-    const mk = key(['moves', chainId, hash.toLowerCase()]);
+    const mk = key(['moves2', chainId, hash.toLowerCase()]);
     const got = await deps.store.get(mk).catch(() => undefined);
     if (got) return got;
     try {
