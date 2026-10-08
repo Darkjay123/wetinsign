@@ -8,7 +8,7 @@ import { fetchTronTx, TRON_ID, tronIsContract } from './tron.js';
 
 const clients = new Map<number, PublicClient>();
 
-function client(chainId: number): PublicClient {
+export function client(chainId: number): PublicClient {
   let c = clients.get(chainId);
   if (!c) {
     const urls = rpcUrls(chainId);

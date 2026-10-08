@@ -53,7 +53,7 @@ h1{font-size:clamp(36px,6.4vw,64px);line-height:1.02;letter-spacing:-.045em;marg
 /* card */
 .card{position:relative;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025));backdrop-filter:blur(18px);box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);padding:22px}
 .card::before{content:"";position:absolute;inset:-1px;border-radius:24px;padding:1px;background:linear-gradient(140deg,rgba(52,225,161,.5),transparent 35%,transparent 65%,rgba(108,140,255,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-.seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:18px}
+.seg{position:relative;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:18px}
 .seg button{position:relative;z-index:1;background:none;border:0;color:var(--muted);font:inherit;font-size:14px;font-weight:600;padding:10px 6px;border-radius:10px;cursor:pointer;transition:color .25s}
 .seg button[aria-selected="true"]{color:var(--text)}
 .seg button:focus-visible{outline:2px solid var(--mint);outline-offset:-2px}
@@ -175,7 +175,7 @@ footer{margin:48px 0 36px;padding-top:22px;border-top:1px solid var(--line);colo
 .reveal.pre{opacity:0;transform:translateY(18px)}
 @media (max-width:720px){
   .ex,.how{grid-template-columns:1fr 1fr}
-  .seg{grid-template-columns:repeat(2,1fr)}
+  .seg{grid-template-columns:repeat(2,1fr)} .seg button[data-tab="drain"]{grid-column:1/-1}
   .row2{grid-template-columns:1fr}
   .meter{display:none}
   .facts{grid-template-columns:1fr}
@@ -187,6 +187,13 @@ footer{margin:48px 0 36px;padding-top:22px;border-top:1px solid var(--line);colo
 }
 @media (max-width:460px){.ex,.how{grid-template-columns:1fr}.card{padding:16px}.says{font-size:16.5px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal.pre{opacity:1;transform:none}.says .w,.flag{opacity:1}}
+.moved,.appr{margin-top:16px;display:grid;gap:8px}
+.moved h4,.appr h4{margin:0 0 2px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted,#9aa4b2)}
+.mv,.ap{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:14px}
+.mv.out{border-color:rgba(255,170,60,.35)}.mv.bad,.ap.danger{border-color:rgba(255,80,90,.6);background:rgba(255,80,90,.08)}
+.ap.warning{border-color:rgba(255,170,60,.45)}.ap p{margin:4px 0 0;color:var(--muted,#9aa4b2);font-size:13px}
+.ap a,.revoke{color:#34e1a1;font-weight:650;text-decoration:none;white-space:nowrap}
+.mvsum{font-size:15px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -226,6 +233,7 @@ footer{margin:48px 0 36px;padding-top:22px;border-top:1px solid var(--line);colo
       <button role="tab" data-tab="tx" aria-selected="false">Tx hash<span class="ico">already sent</span></button>
       <button role="tab" data-tab="call" aria-selected="false">Raw tx<span class="ico">before sending</span></button>
       <button role="tab" data-tab="deleg" aria-selected="false">Smart account<span class="ico">EIP-7702</span></button>
+      <button role="tab" data-tab="drain" aria-selected="false">Was I drained?<span class="ico">check my wallet</span></button>
     </div>
 
     <div class="panel on" id="p-signature" role="tabpanel">
@@ -260,6 +268,15 @@ footer{margin:48px 0 36px;padding-top:22px;border-top:1px solid var(--line);colo
         <div><label class="lbl" for="dchain-in">Network</label><div class="combo" data-for="dchain"></div></div>
         <div><label class="lbl" for="daddr">Contract address</label><input class="in" id="daddr" spellcheck="false" placeholder="0x…"></div>
       </div>
+    </div>
+
+    <div class="panel" id="p-drain" role="tabpanel">
+      <p class="hint">Lost money, or worried you signed something bad? Paste your wallet address. We list every permission you've given that can still move your tokens or NFTs, who holds it, and how to cancel it.</p>
+      <div class="row2">
+        <div><label class="lbl" for="dnet">Network</label><select class="in" id="dnet"><option value="1">Ethereum</option><option value="10">Optimism</option><option value="100">Gnosis</option></select></div>
+        <div><label class="lbl" for="waddr">Your wallet address</label><input class="in" id="waddr" spellcheck="false" placeholder="0x…"></div>
+      </div>
+      <p class="hint" style="margin-top:8px">Read-only: we only look at public records. We never ask for your seed phrase, and nobody honest ever will.</p>
     </div>
 
     <div class="actions">
@@ -468,6 +485,31 @@ const RISK = { danger: 94, warning: 62, info: 28, safe: 10 };
 const human = (code) => ({ KNOWN_DRAINER: 'Reported drainer', UNLIMITED_APPROVAL: 'Unlimited amount', OFFCHAIN_SIGNATURE: 'Off-chain signature', NEVER_EXPIRES: 'Never expires', ACCOUNT_TAKEOVER: 'Account takeover', IRREVERSIBLE: 'Cannot be undone', SPENDER_NOT_CONTRACT: 'Goes to a plain wallet', ASSET_SWEEP: 'Moves several tokens', FREE_LISTING: 'Free listing' }[code] ?? code.toLowerCase().replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()));
 const short = (a) => a && a.length > 22 ? a.slice(0, 10) + '…' + a.slice(-8) : a;
 let lastText = '';
+function movedHtml(m) {
+  if (!m || !Array.isArray(m.moves)) return '';
+  const rows = m.moves.slice(0, 12).map(x => {
+    const what = x.type === 'nft' ? `${esc(x.token?.symbol ?? 'NFT')} #${esc(x.tokenId ?? '')}` : x.type === 'approval_all' ? `Permission over every ${esc(x.token?.symbol ?? 'NFT')}` : x.type === 'approval' ? `Permission: ${esc(x.unlimited ? 'unlimited' : x.amount ?? '')} ${esc(x.token?.symbol ?? '')}` : x.type === 'approval_revoked' ? `Permission removed (${esc(x.token?.symbol ?? '')})` : `${esc(x.amount ?? '')} ${esc(x.token?.symbol ?? '')}`;
+    const to = x.toName ? esc(x.toName) : `<span class="mono">${esc(short(x.to))}</span>`;
+    return `<div class="mv${x.fromSender ? ' out' : ''}${x.toDrainer ? ' bad' : ''}"><span>${x.fromSender ? 'Out: ' : ''}<b>${what}</b></span><span>to ${to}${x.toDrainer ? ' · reported drainer' : ''}</span></div>`;
+  }).join('');
+  return `<div class="moved"><h4>What the chain recorded</h4><div class="mvsum">${esc(m.summary || '')}</div>${rows}${m.truncated ? '<p class="hint">Showing the first moves only.</p>' : ''}</div>`;
+}
+function renderApprovals(j) {
+  const a = j.active || [];
+  const v = a.some(x => x.level === 'danger') ? 'danger' : a.some(x => x.level === 'warning') ? 'warning' : 'safe';
+  const head = { danger: ['Act now', 'Someone dangerous can still take your money'], warning: ['Check these', 'Some apps you may not know can still move your tokens'], safe: ['Looks clean', a.length ? 'Only apps we recognise hold permissions' : 'No active permissions found'] }[v];
+  document.body.classList.toggle('alert', v === 'danger');
+  const rows = a.map(x => `<div class="ap ${esc(x.level)}"><div><b>${x.kind === 'nft_all' ? 'All your ' + esc(x.token.symbol ?? 'NFTs') : esc(x.unlimited ? 'Unlimited' : x.amount ?? '') + ' ' + esc(x.token.symbol ?? 'tokens')}</b> → ${x.spenderName ? esc(x.spenderName) : `<span class="mono">${esc(short(x.spender))}</span>`}${x.givenAt ? ` <small>since ${esc(x.givenAt)}</small>` : ''}<p>${esc(x.why)}</p></div></div>`).join('');
+  lastText = `${head[0]}: ${head[1]}. ${a.length} active permission(s).`;
+  $('#out').innerHTML = `<article class="res"><div class="vh ${v === 'safe' ? 'safe' : v}"><div class="vi">${ICON[v] ?? ICON.info}</div><div class="vt"><div class="k">${esc(head[0])}</div><div class="h">${esc(head[1])}</div></div>
+    <div class="meter" aria-label="Risk"><div class="bar"><div class="fill"></div></div><small><span>Low</span><span>High</span></small></div></div>
+    <div class="says">${a.length ? `${a.length} permission${a.length > 1 ? 's are' : ' is'} still active on this wallet (we checked ${j.checked}).` : `We checked ${j.checked} past permissions and none of them can still move your tokens.`} ${v !== 'safe' ? 'Cancelling costs a small network fee per permission. Do the red ones first.' : ''}${j.partial ? ' This wallet has a long history, so very old permissions may be missing.' : ''}</div>
+    <div class="appr">${rows}</div>
+    <div class="foot"><span class="src">Read from the chain's own records, checked live just now.</span><span><a class="revoke" href="${esc(j.revokeUrl)}" target="_blank" rel="noopener">Cancel permissions on revoke.cash →</a> <button class="btn" id="again">Check another</button></span></div></article>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { const fl = $('.meter .fill'); if (fl) fl.style.width = (RISK[v] ?? 10) + '%'; }));
+  $('#again').onclick = () => { $('#out').innerHTML = ''; document.body.classList.remove('alert'); $('#checker').scrollIntoView({ behavior: 'smooth' }); };
+  $('#out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 function render(r) {
   const f = r.facts || {}, e = r.explanation || {}, v = e.verdict in HEAD.en ? e.verdict : 'info';
   const [k, h] = Array.isArray(e.heading) ? e.heading : HEAD[e.lang === 'pcm' || lang === 'pcm' ? 'pcm' : 'en'][v];
@@ -490,6 +532,7 @@ function render(r) {
     ${flags ? `<div class="flags">${flags}</div>` : ''}
     ${facts.length ? `<div class="facts">${facts.join('')}</div>` : ''}
     ${bundle}
+    ${movedHtml(r.moved)}
     <div class="foot"><span class="src">${e.source === 'ai' ? 'Explained by an open model, checked against the decoded facts.' : 'Explained straight from the decoded facts.'}${r.cached ? ' Cached.' : ''}</span>
       <span><button class="btn" id="cp">Copy summary</button> <button class="btn" id="again">Check another</button></span></div>
   </article>`;
@@ -508,15 +551,16 @@ async function run() {
   try {
     if (tab === 'signature') { if (!$('#typed').value.trim()) return showErr('Paste the signature request first, or try one of the real cases below.'); url = '/api/explain/signature'; body = { typedData: JSON.parse($('#typed').value), lang }; const fr = $('#from').value.trim(); if (/^0x[0-9a-fA-F]{40}$/.test(fr)) body.from = fr; }
     else if (tab === 'tx') { if (!$('#hash').value.trim()) return showErr('Paste a transaction hash first.'); url = '/api/explain/tx'; const cv = combos.chain.get(); body = { chainId: cv === 'auto' ? 'auto' : Number(cv), hash: $('#hash').value.trim(), lang }; }
+    else if (tab === 'drain') { const w = $('#waddr').value.trim(); if (!/^0x[0-9a-fA-F]{40}$/.test(w)) return showErr('Paste your wallet address (starts with 0x, 42 characters).'); url = `/api/approvals?chainId=${$('#dnet').value}&address=${w}`; body = null; }
     else if (tab === 'deleg') { url = '/api/explain/delegation'; body = { chainId: Number(combos.dchain.get()), address: $('#daddr').value.trim(), lang }; }
     else { url = '/api/explain/call'; body = { chainId: Number(combos.cchain.get()), to: $('#to').value.trim(), data: $('#data').value.trim(), lang }; }
   } catch { return showErr('That signature request is not valid JSON. Copy the whole thing your wallet shows.'); }
   const go = $('#go'); go.disabled = true; go.textContent = 'Checking…'; scanStart();
   try {
-    const res = await wakeFetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, () => { go.textContent = 'Waking up the checker…'; });
+    const res = await wakeFetch(url, body === null ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, () => { go.textContent = 'Waking up the checker…'; });
     const j = await res.json().catch(() => ({}));
     await scanEnd();
-    if (!res.ok) showErr(j.error || 'Something went wrong. Try again.'); else render(j);
+    if (!res.ok) showErr(j.error || 'Something went wrong. Try again.'); else if (tab === 'drain') renderApprovals(j); else render(j);
   } catch { await scanEnd(); showErr('Could not reach the server. Check your connection and try again.'); }
   go.disabled = false; go.textContent = 'Check it';
 }

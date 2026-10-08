@@ -1,3 +1,4 @@
+import { APPROVAL_SCANS } from './approvals.js';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -35,6 +36,8 @@ export interface Deps {
   store: Store;
   resolveToken?: TokenResolver;
   codeInfo?: (chainId: number | undefined, address: string) => Promise<{ size: number; hash: string; code?: string } | undefined>;
+  fetchMoves?: (chainId: number, hash: string) => Promise<unknown>;
+  fetchApprovals?: (chainId: number, owner: string) => Promise<unknown>;
   fetchTx?: (chainId: number, hash: string) => Promise<{ chainId?: number; to: string; data?: string; value?: string | bigint; authorizations?: { address: string; chainId?: number }[]; facts?: Facts }>;
   isContract?: (chainId: number | undefined, address?: string) => Promise<boolean | undefined>;
   /** Solana JSON-RPC. Without it, pasted Solana transactions are read offline and signatures cannot be looked up. */
@@ -355,6 +358,39 @@ export function createApp(deps: Deps) {
     }
   });
 
+  // What the chain recorded for a mined EVM transaction. Fail-soft: the explanation never waits on it to succeed.
+  async function movesFor(chainId: number, hash: string) {
+    if (!deps.fetchMoves || chainId === TRON_ID || !CHAINS[chainId]) return undefined;
+    const mk = key(['moves', chainId, hash.toLowerCase()]);
+    const got = await deps.store.get(mk).catch(() => undefined);
+    if (got) return got;
+    try {
+      const m = await deps.fetchMoves(chainId, hash);
+      await deps.store.put(mk, m).catch(() => undefined);
+      return m;
+    } catch { return undefined; }
+  }
+
+  // "Was I drained?": permissions this wallet has given that are still live.
+  const apprCache = new Map<string, { at: number; v: unknown }>();
+  app.get('/api/approvals', async (c) => {
+    const address = (c.req.query('address') ?? '').trim();
+    const chainId = Number(c.req.query('chainId') ?? 1);
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return c.json({ error: 'Paste a wallet address that starts with 0x (42 characters).' }, 400);
+    if (!deps.fetchApprovals || !APPROVAL_SCANS[chainId]) return c.json({ error: 'Checking old permissions works on Ethereum, Optimism and Gnosis for now. For other networks, open revoke.cash.', revokeUrl: `https://revoke.cash/address/${address}?chainId=${chainId}` }, 400);
+    const ck = `${chainId}:${address.toLowerCase()}`;
+    const hit = apprCache.get(ck);
+    if (hit && Date.now() - hit.at < 10 * 60_000) return c.json(hit.v);
+    try {
+      const v = await deps.fetchApprovals(chainId, address);
+      if (apprCache.size > 500) apprCache.clear();
+      apprCache.set(ck, { at: Date.now(), v });
+      return c.json(v);
+    } catch {
+      return c.json({ error: 'We could not read this wallet\'s permissions right now. Try again in a minute, or open revoke.cash.', revokeUrl: `https://revoke.cash/address/${address}?chainId=${chainId}` }, 503);
+    }
+  });
+
   app.post('/api/explain/tx', async (c) => {
     const body = await c.req.json().catch(() => null);
     const auto = body?.chainId === undefined || body?.chainId === null || body?.chainId === '' || body?.chainId === 'auto' || body?.chainId === 0;
@@ -532,7 +568,7 @@ export function createApp(deps: Deps) {
     }
     const k = key(['tx', chainId, hash, l]);
     const hit = await fromCache(k);
-    if (hit) return c.json({ ...(hit as object), cached: true });
+    if (hit) { const moved = await movesFor(chainId!, hash); return c.json({ ...(hit as object), ...(moved ? { moved } : {}), cached: true }); }
     try {
       // A type-4 transaction can upgrade accounts as well as make a call. An unrecognised upgrade outranks whatever the call does.
       for (const a of input.authorizations ?? []) {
@@ -542,7 +578,8 @@ export function createApp(deps: Deps) {
         if (fl.some((x) => x.severity === 'danger')) return c.json(await respond(df, l, k));
       }
       const facts = input.facts ?? (await decodeCall({ ...input, chainId }, deps.resolveToken));
-      return c.json(await respond(facts, l, k));
+      const [r, moved] = await Promise.all([respond(facts, l, k), movesFor(chainId!, hash)]);
+      return c.json({ ...r, ...(moved ? { moved } : {}) });
     } catch {
       return c.json({ error: 'We found the transaction but could not read it.' }, 422);
     }
@@ -554,6 +591,8 @@ export function createApp(deps: Deps) {
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
   const { onchainResolver, fetchTransaction, isContract, codeInfo } = await import('./rpc.js');
+  const { fetchMoves } = await import('./moves.js');
+  const { fetchApprovals } = await import('./approvals.js');
   const { solanaRpc } = await import('./solana.js');
   const { tonLookup } = await import('./ton.js');
   const { suiLookup } = await import('./sui.js');
@@ -573,6 +612,8 @@ if (isMain) {
     store: createStore(),
     resolveToken: onchainResolver,
     fetchTx: fetchTransaction,
+    fetchMoves,
+    fetchApprovals,
     isContract,
     codeInfo,
     solanaRpc,
