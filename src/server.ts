@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { secureHeaders } from 'hono/secure-headers';
+import { isTranslated, myMemory, TRANSLATED_LANGS, translateSafely, type Translator } from './translate.js';
 import { serve } from '@hono/node-server';
 import { CHAINS } from './chains.js';
 import { decodeCall, decodeDelegation, decodeTypedData, type TokenResolver } from './decode.js';
@@ -53,6 +54,8 @@ export interface Deps {
   dotLookup?: DotLookup;
   xrplLookup?: XrplLookup;
   nearLookup?: NearLookup;
+  /** Machine translator for languages other than English and Pidgin. Absent = English only. */
+  translate?: Translator;
 }
 
 /** Nigerian Pidgin is ISO 639-3 "pcm"; also accept the plain word so a stray "pidgin" does not silently fall back to English. */
@@ -82,6 +85,41 @@ export function createApp(deps: Deps) {
     xFrameOptions: 'DENY',
     referrerPolicy: 'no-referrer',
   }));
+
+  /**
+   * Other languages: every route explains in English (the checked template / guarded AI text), then this layer
+   * machine-translates only the finished sentences. Figures, addresses, tokens and names are locked first, and the
+   * English original always rides along. If the lock cannot be proven, the answer stays in English and says so.
+   */
+  const HEADS: Record<string, [string, string]> = {
+    danger: ['Danger', 'Do not sign this'], warning: ['Be careful', 'Read this before you sign'],
+    info: ['Good to know', 'Here is what it does'], safe: ['Looks fine', 'Nothing alarming found'],
+  };
+  app.use('/api/explain/*', async (c, next) => {
+    await next();
+    if (c.res.status !== 200 || !deps.translate) return;
+    const body = await c.req.json().catch(() => null);
+    const to = body?.lang;
+    if (!isTranslated(to)) return;
+    const j = (await c.res.clone().json().catch(() => null)) as any;
+    const e = j?.explanation;
+    if (!e?.text) return;
+    const f = j.facts ?? {};
+    const names = [f.token?.symbol, f.chain, f.toChain, f.appName, ...(Array.isArray(f.bundle) ? f.bundle.map((b: any) => b?.token?.symbol) : [])].filter((x): x is string => typeof x === 'string');
+    const [k, h] = HEADS[e.verdict] ?? HEADS.info;
+    const [text, hk, hh] = await Promise.all([
+      translateSafely(e.text, to, names, deps.translate),
+      translateSafely(k, to, [], deps.translate),
+      translateSafely(h, to, [], deps.translate),
+    ]);
+    j.explanation = text
+      ? { ...e, text, original: e.text, lang: to, machineTranslated: true, heading: hk && hh ? [hk, hh] : undefined }
+      : { ...e, lang: 'en', translationNote: `Translation to ${TRANSLATED_LANGS[to]} is not available right now, so this is in English.` };
+    const headers = new Headers(c.res.headers);
+    headers.delete('content-length');
+    c.res = new Response(JSON.stringify(j), { status: 200, headers });
+  });
+  app.get('/api/languages', (c) => c.json([{ code: 'en', name: 'English' }, { code: 'pcm', name: 'Naija Pidgin' }, ...Object.entries(TRANSLATED_LANGS).map(([code, name]) => ({ code, name, machine: true }))]));
   app.use('/api/*', bodyLimit({ maxSize: MAX_BODY, onError: (c) => c.json({ error: 'That is too big to be a real wallet request.' }, 413) }));
   // A small per-client limit so nobody can turn us into a free 50-network RPC hammer.
   const hits = new Map<string, { n: number; reset: number }>();
@@ -531,6 +569,7 @@ if (isMain) {
   const { nearLookup } = await import('./near.js');
   const app = createApp({
     llm: rumptyLlm(),
+    translate: myMemory(process.env.MYMEMORY_EMAIL ?? 'f94465c4228e8f683c49@wajo.ai'),
     store: createStore(),
     resolveToken: onchainResolver,
     fetchTx: fetchTransaction,

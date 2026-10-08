@@ -139,6 +139,9 @@ kbd{font:600 11.5px var(--mono);color:var(--dim);border:1px solid var(--line);bo
 .says{padding:20px 22px 6px;font-size:18px;line-height:1.6;letter-spacing:-.005em}
 .says .w{opacity:0;animation:wi .4s forwards}
 @keyframes wi{to{opacity:1}}
+.mt{padding:2px 22px 0;font-size:12.5px;color:var(--dim)}
+.linkb{background:none;border:0;color:var(--mint);font:inherit;font-size:12.5px;cursor:pointer;padding:0;text-decoration:underline}
+.says.orig{font-size:15px;color:var(--muted);padding-top:8px}
 .flags{display:flex;flex-wrap:wrap;gap:8px;padding:10px 22px 4px}
 .flag{--c:var(--info);display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);opacity:0;animation:fade .4s forwards}
 .flag.danger{--c:var(--danger)}.flag.warning{--c:var(--warn)}.flag.info{--c:var(--info)}
@@ -200,7 +203,7 @@ footer{margin:48px 0 36px;padding-top:22px;border-top:1px solid var(--line);colo
       <span class="pill hide-s"><span class="dot"></span><span id="livepill">Live drainer list</span></span>
       <select class="lang" id="lang" aria-label="Language">
         <option value="en">English</option>
-        <option value="pcm">Pidgin</option>
+        <option value="pcm">Naija Pidgin</option>
       </select>
     </div>
   </nav>
@@ -335,7 +338,16 @@ function setTab(t) {
 $$('.seg button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 addEventListener('resize', moveInd);
 requestAnimationFrame(moveInd);
-$('#lang').onchange = (e) => { lang = e.target.value; };
+$('#lang').onchange = (e) => { lang = e.target.value; try { localStorage.setItem('lang', lang); } catch {} };
+fetch('/api/languages').then(r => r.ok ? r.json() : null).then(ls => {
+  if (!Array.isArray(ls)) return;
+  const own = ls.filter(l => !l.machine), mt = ls.filter(l => l.machine);
+  $('#lang').innerHTML = own.map(l => `<option value="${esc(l.code)}">${esc(l.name)}</option>`).join('') + `<optgroup label="Machine translated">${mt.map(l => `<option value="${esc(l.code)}">${esc(l.name)}</option>`).join('')}</optgroup>`;
+  let saved = null; try { saved = localStorage.getItem('lang'); } catch {}
+  const nav = (navigator.language || 'en').toLowerCase();
+  const guess = saved || (ls.find(l => l.code.toLowerCase() === nav) || ls.find(l => l.code.toLowerCase() === nav.split('-')[0]))?.code || 'en';
+  if (ls.some(l => l.code === guess)) { lang = guess; $('#lang').value = guess; }
+}).catch(() => {});
 
 /* searchable network picker */
 const POPULAR = [1, 56, 8453, 501, 728126428, 42161, 137, 10, 607, 784, 397, 144, 637, 43114];
@@ -458,7 +470,8 @@ const short = (a) => a && a.length > 22 ? a.slice(0, 10) + '…' + a.slice(-8) :
 let lastText = '';
 function render(r) {
   const f = r.facts || {}, e = r.explanation || {}, v = e.verdict in HEAD.en ? e.verdict : 'info';
-  const [k, h] = HEAD[lang]?.[v] ?? HEAD.en[v];
+  const [k, h] = Array.isArray(e.heading) ? e.heading : HEAD[e.lang === 'pcm' || lang === 'pcm' ? 'pcm' : 'en'][v];
+  const rtl = ['ar'].includes(e.lang);
   document.body.classList.toggle('alert', v === 'danger');
   const addrRow = (label, val, wide) => val ? `<div class="fact${wide ? ' wide' : ''}"><span>${label}</span><b class="mono" title="${esc(val)}">${esc(short(val))}<button class="copy" data-copy="${esc(val)}">Copy</button></b></div>` : '';
   const row = (label, val) => val ? `<div class="fact"><span>${label}</span><b>${esc(val)}</b></div>` : '';
@@ -471,7 +484,9 @@ function render(r) {
   $('#out').innerHTML = `<article class="res">
     <div class="vh ${v}"><div class="vi">${ICON[v]}</div><div class="vt"><div class="k">${esc(k)}</div><div class="h">${esc(h)}</div></div>
       <div class="meter" aria-label="Risk"><div class="bar"><div class="fill"></div></div><small><span>Low</span><span>High</span></small></div></div>
-    <div class="says">${words}</div>
+    <div class="says"${rtl ? ' dir="rtl"' : ''}>${words}</div>
+    ${e.machineTranslated ? `<div class="mt"><span>Machine translated. Amounts, addresses and names are kept exactly as decoded.</span> <button class="linkb" id="orig">Show English</button></div><div class="says orig" hidden>${esc(e.original)}</div>` : ''}
+    ${e.translationNote ? `<div class="mt"><span>${esc(e.translationNote)}</span></div>` : ''}
     ${flags ? `<div class="flags">${flags}</div>` : ''}
     ${facts.length ? `<div class="facts">${facts.join('')}</div>` : ''}
     ${bundle}
@@ -479,6 +494,7 @@ function render(r) {
       <span><button class="btn" id="cp">Copy summary</button> <button class="btn" id="again">Check another</button></span></div>
   </article>`;
   requestAnimationFrame(() => requestAnimationFrame(() => { const fl = $('.meter .fill'); if (fl) fl.style.width = RISK[v] + '%'; }));
+  const ob = $('#orig'); if (ob) ob.onclick = () => { const o = $('.says.orig'); o.hidden = !o.hidden; ob.textContent = o.hidden ? 'Show English' : 'Hide English'; };
   $('#cp').onclick = () => navigator.clipboard.writeText(lastText).then(() => toast('Summary copied'));
   $('#again').onclick = () => { $('#out').innerHTML = ''; document.body.classList.remove('alert'); $('#checker').scrollIntoView({ behavior: 'smooth' }); };
   $('#out').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
