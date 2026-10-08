@@ -28,13 +28,16 @@ const PROTECT_RE = new RegExp([
   String.raw`\d[\d,]*(?:\.\d+)?%?`, // numbers
 ].join('|'), 'g');
 
+/** Crypto words machine translators get wrong ("gas" became "gasolina"): kept in English, as wallets show them. */
+const GLOSSARY = ['wallet drainers', 'wallet drainer', 'drainers', 'drainer', 'gas fees', 'gas fee', 'gas', 'seed phrase', 'smart account', 'NFTs', 'NFT', 'Permit2', 'multisig', 'airdrop'];
+
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Replace protected spans with [1], [2]… Identical spans share one placeholder. */
 export function protect(text: string, names: string[] = []): { masked: string; spans: string[] } {
   const spans: string[] = [];
   const slot = (s: string) => { let i = spans.indexOf(s); if (i < 0) { spans.push(s); i = spans.length - 1; } return `[${i + 1}]`; };
-  const extra = [...new Set(names.filter((n) => n && n.trim().length >= 2))].sort((a, b) => b.length - a.length);
+  const extra = [...new Set([...names, ...GLOSSARY].filter((n) => n && n.trim().length >= 2))].sort((a, b) => b.length - a.length);
   const nameRe = extra.length ? new RegExp(`(?<![\\w\\[])(?:${extra.map(escapeRe).join('|')})(?![\\w\\]])`, 'g') : null;
   // Names first (token symbols like USDt, chains like "Polkadot Asset Hub"), then the generic patterns on what is left.
   let rest = text;
