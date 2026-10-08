@@ -4,7 +4,7 @@ import { decodeCall, decodeTypedData } from '../src/decode.js';
 import { assessRisk, verdict } from '../src/risk.js';
 
 // Real drainer attacks with published losses. Run with an empty drainer list on purpose:
-// WetinSign has to catch these from what the request does, not just because the address is already blacklisted.
+// SignLens has to catch these from what the request does, not just because the address is already blacklisted.
 const cases = JSON.parse(readFileSync(new URL('./fixtures/real-attacks.json', import.meta.url), 'utf8'));
 const none = { drainers: new Set<string>() };
 

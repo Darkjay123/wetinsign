@@ -11,7 +11,7 @@ export interface Chain {
   defaultRpc?: string;
 }
 
-// Every EVM network WetinSign reads. Override the RPC with RPC_<chainId> in the environment.
+// Every EVM network SignLens reads. Override the RPC with RPC_<chainId> in the environment.
 export const CHAINS: Record<number, Chain> = {
   1: { id: 1, name: "Ethereum", nativeSymbol: "ETH", rpcs: ["https://ethereum-rpc.publicnode.com", "https://cloudflare-eth.com", "https://mainnet.gateway.tenderly.co"], explorer: "https://etherscan.io" },
   56: { id: 56, name: "BNB Smart Chain", nativeSymbol: "BNB", rpcs: ["https://bsc-rpc.publicnode.com", "https://bsc-dataseed1.bnbchain.org", "https://bsc-dataseed2.bnbchain.org"], explorer: "https://bscscan.com" },

@@ -1,6 +1,6 @@
 # Drainer list
 
-WetinSign checks every spender, recipient and contract against a list of addresses publicly reported as wallet drainers. The list comes from two places:
+SignLens checks every spender, recipient and contract against a list of addresses publicly reported as wallet drainers. The list comes from two places:
 
 1. **Scam Sniffer's open scam database** (https://github.com/scamsniffer/scam-database, `blacklist/address.json`). The app fetches it at startup and refreshes it every 12 hours (`src/drainers.ts`). It is GPL-3.0 licensed, so we read it live rather than copy it into this MIT repo. Override the URL with `DRAINER_LIST_URL`.
 2. **`drainers.json`** in this folder: our own reviewed additions, a flat JSON array of EVM addresses. It ships empty. Add an address only with a public report you can link to.

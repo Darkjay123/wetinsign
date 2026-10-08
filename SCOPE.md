@@ -1,4 +1,4 @@
-# Scope: WetinSign for Devcenter Hacktober 2026
+# Scope: SignLens for Devcenter Hacktober 2026
 
 **One line:** before you sign, see in plain English or Pidgin what you are giving away, and get stopped when it looks like a drainer.
 

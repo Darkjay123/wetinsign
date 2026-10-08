@@ -1,5 +1,5 @@
 {
-  "name": "wetinsign",
+  "name": "signlens",
   "version": "0.1.0",
   "description": "Know what you are signing. Plain English and Pidgin explanations of crypto approvals, signature requests and transactions, with wallet-drainer flags. Runs on Rumpty Cloud.",
   "type": "module",

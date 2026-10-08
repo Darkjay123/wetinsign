@@ -593,5 +593,5 @@ if (isMain) {
   void startDrainerRefresh().then((s) => console.log(`Drainer list: ${s.count} addresses${s.lastError ? ` (feed error: ${s.lastError})` : ''}`));
   const port = Number(process.env.PORT ?? 8080);
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
-  console.log(`WetinSign listening on :${port} (AI: ${process.env.RUMPTY_API_KEY ? 'Rumpty Cloud' : 'templates only'})`);
+  console.log(`SignLens listening on :${port} (AI: ${process.env.RUMPTY_API_KEY ? 'Rumpty Cloud' : 'templates only'})`);
 }

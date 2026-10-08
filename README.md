@@ -1,4 +1,4 @@
-# WetinSign
+# SignLens
 
 **Know what you are signing.** Paste a crypto signature request, a raw transaction or a transaction hash and get a plain English or Nigerian Pidgin explanation of what you are about to give away, with wallet-drainer warnings.
 

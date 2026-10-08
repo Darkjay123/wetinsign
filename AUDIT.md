@@ -1,4 +1,4 @@
-# WetinSign code audit, 7 Oct 2026
+# SignLens code audit, 7 Oct 2026
 
 Every file in `src/` (4,101 lines), `public/index.html` and the dependency tree was read line by line. Type check (strict, plus unused locals/params): clean. `npm audit --omit=dev`: 0 vulnerabilities. The XSS surface in the page was checked: every value is escaped before it is shown.
 
