@@ -247,15 +247,18 @@ export async function fetchDotTx(hash: string, lookup: DotLookup = dotLookup): P
   throw new Error('not found');
 }
 
+// Statescan and some public nodes started rejecting requests without a browser User-Agent (403 since mid-Oct 2026),
+// so every outbound call here identifies as a normal browser client.
+const UA = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' };
 const rpc = async (u: string, method: string, params: unknown[] = []) => {
-  const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: 1, jsonrpc: '2.0', method, params }), signal: AbortSignal.timeout(20000) });
+  const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json', ...UA }, body: JSON.stringify({ id: 1, jsonrpc: '2.0', method, params }), signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error('rpc ' + r.status);
   return (await r.json()).result;
 };
 const assetCache = new Map<string, { symbol?: string; decimals?: number } | undefined>();
 export const dotLookup: DotLookup = {
   metadata: (net) => rpc(RPC[net], 'state_getMetadata'),
-  scan: async (net, hash) => { const r = await fetch(`${SCAN[net]}/extrinsics/${hash}`, { signal: AbortSignal.timeout(45000) }); return r.ok ? r.json() : undefined; },
+  scan: async (net, hash) => { const r = await fetch(`${SCAN[net]}/extrinsics/${hash}`, { headers: UA, signal: AbortSignal.timeout(45000) }); return r.ok ? r.json() : undefined; },
   block: async (net, bh) => (await rpc(RPC[net], 'chain_getBlock', [bh]))?.block?.extrinsics,
   asset: async (id) => {
     if (assetCache.has(id)) return assetCache.get(id);
