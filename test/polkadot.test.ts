@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { Metadata, TypeRegistry } from '@polkadot/types';
+import { blake2AsHex } from '@polkadot/util-crypto';
 import { decorateExtrinsics } from '@polkadot/types/metadata/decorate';
 import fx from './fixtures/dot-real.json';
-import { dotFacts, GENESIS, parseDot, type DotLookup } from '../src/polkadot.js';
+import { dotFacts, fetchDotTx, GENESIS, parseDot, type DotLookup } from '../src/polkadot.js';
 import { assessRisk, verdict } from '../src/risk.js';
 
 const meta = (n: string) => zlib.gunzipSync(fs.readFileSync(`test/fixtures/dot-meta-${n}.hex.gz`)).toString();
@@ -92,5 +93,67 @@ describe('Polkadot scam shapes (synthetic content, real Asset Hub runtime encodi
   it('ignores hex that is not Polkadot', async () => {
     expect(parseDot('0xa9059cbb', false)).toBeUndefined();
     await expect(dotFacts({ call: '0xffff0000' }, lookup)).rejects.toThrow();
+  });
+});
+
+describe('Polkadot extrinsics by hash (real Asset Hub pulls)', () => {
+  const pull = JSON.parse(fs.readFileSync('test/fixtures/dot-pull.json', 'utf8')) as Record<string, any[]>;
+  const hits = Object.values(pull).flat();
+  const pullLookup: DotLookup = {
+    metadata: async (n) => meta(n === 'ah' ? 'ah' : 'relay'),
+    asset: async (id) => ASSETS[id],
+    scan: async (_n, hash) => {
+      const e = hits.find((x) => x.hash === hash);
+      return e ? { indexer: { blockHash: e.blockHash, extrinsicIndex: e.extrinsicIndex } } : undefined;
+    },
+    block: async (_n, bh) => {
+      const e = hits.find((x) => x.blockHash === bh);
+      if (!e) return undefined;
+      const a: string[] = [];
+      a[e.extrinsicIndex] = e.extrinsic;
+      return a;
+    },
+  };
+  it('reads a real proxy.addProxy (type Any) as an account takeover', async () => {
+    const f = await fetchDotTx(pull['proxy.addProxy'][0].hash, pullLookup);
+    expect(f.kind).toBe('account_control');
+    expect(f.control).toBe('proxy');
+    expect(judge(f).codes).toContain('ACCOUNT_TAKEOVER');
+    expect(judge(f).v).toBe('danger');
+  });
+  it('reads a real proxy.addProxy (limited) as a warning, not danger', async () => {
+    const f = await fetchDotTx(pull['proxy.addProxy'][1].hash, pullLookup);
+    expect(f.control).toBe('proxy_limited');
+    expect(judge(f).v).toBe('warning');
+  });
+  it('reads a real polkadotXcm.transferAssets out to Kusama', async () => {
+    const f = await fetchDotTx(pull['polkadotXcm.transferAssets'][0].hash, pullLookup);
+    expect(f.kind).toBe('transfer');
+    expect(f.token?.symbol).toBe('KSM');
+    expect(judge(f).v).toBe('info');
+  });
+  it('reads a real limitedReserveTransferAssets of USDt', async () => {
+    const f = await fetchDotTx(pull['polkadotXcm.limitedReserveTransferAssets'][0].hash, pullLookup);
+    expect(f.kind).toBe('transfer');
+    expect(f.token?.symbol).toBe('USDt');
+  });
+  it('reads a real limitedTeleportAssets of native DOT', async () => {
+    const f = await fetchDotTx(pull['polkadotXcm.limitedTeleportAssets'][0].hash, pullLookup);
+    expect(f.kind).toBe('native_send');
+    expect(f.token?.symbol).toBe('DOT');
+  });
+  it('reads a real transferAssetsUsingTypeAndThen', async () => {
+    const f = await fetchDotTx(pull['polkadotXcm.transferAssetsUsingTypeAndThen'][0].hash, pullLookup);
+    expect(f.kind).toBe('native_send');
+    expect(f.token?.symbol).toBe('DOT');
+  });
+  it('reads a real proxy.proxy and finds the inner transfer', async () => {
+    const f = await fetchDotTx(pull['proxy.proxy'][0].hash, pullLookup);
+    expect(f.kind).toBe('transfer');
+    expect(f.token?.symbol).toBe('USDt');
+    expect(judge(f).v).toBe('info');
+  });
+  it('the hash on file always matches the extrinsic bytes', () => {
+    for (const e of hits) expect(blake2AsHex(e.extrinsic)).toBe(e.hash);
   });
 });
