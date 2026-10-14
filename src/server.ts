@@ -553,6 +553,7 @@ export function createApp(deps: Deps) {
           ...(deps.icpLookup ? [wrap(ICP_ID, fetchIcpTx(hash, deps.icpLookup))] : []),
           ...(deps.adaLookup ? [wrap(CARDANO_ID, fetchCardanoTx(hash, deps.adaLookup))] : []),
           ...(deps.snLookup ? [wrap(STARKNET_ID, fetchStarknetTx(hash, deps.snLookup))] : []),
+          ...(deps.dotLookup ? [wrap(DOT_ID, fetchDotTx(hash, deps.dotLookup))] : []),
         ];
         const found = await Promise.any([...ids.map((id) => deps.fetchTx!(id, hash).then((r) => ({ id, r }))), ...others]);
         chainId = found.id;
